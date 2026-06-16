@@ -395,6 +395,8 @@ mod tests {
             explanation: grand_edge_domain::RecommendationExplanation {
                 feature_set_version: "features_v1".to_string(),
                 market_rules_version: "rules_v1".to_string(),
+                graph_version: None,
+                graph_context: None,
                 strategy_votes: Vec::new(),
                 score_components: Vec::new(),
                 accuracy_snapshot: None,

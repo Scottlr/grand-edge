@@ -2,8 +2,8 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    Gp, ItemId, ModelAccuracySnapshot, Probability, Rate, RecommendationId, StrategySignal,
-    StructuredRecommendationExplanation, UserId,
+    Gp, GraphRecommendationContext, ItemId, ModelAccuracySnapshot, Probability, Rate,
+    RecommendationId, StrategySignal, StructuredRecommendationExplanation, UserId,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -29,6 +29,10 @@ pub struct ScoreComponent {
 pub struct RecommendationExplanation {
     pub feature_set_version: String,
     pub market_rules_version: String,
+    #[serde(default)]
+    pub graph_version: Option<String>,
+    #[serde(default)]
+    pub graph_context: Option<GraphRecommendationContext>,
     pub strategy_votes: Vec<StrategySignal>,
     pub score_components: Vec<ScoreComponent>,
     pub accuracy_snapshot: Option<ModelAccuracySnapshot>,
@@ -56,7 +60,7 @@ pub struct Recommendation {
 
 #[cfg(test)]
 mod tests {
-    use super::RecommendationAction;
+    use super::{RecommendationAction, RecommendationExplanation};
 
     #[test]
     fn recommendation_action_serde_uses_snake_case() {
@@ -64,5 +68,34 @@ mod tests {
             serde_json::to_string(&RecommendationAction::Cashout).unwrap(),
             "\"cashout\""
         );
+    }
+
+    #[test]
+    fn recommendation_graph_context_defaults_to_none() {
+        let payload = serde_json::json!({
+            "feature_set_version": "features_v1",
+            "market_rules_version": "rules_v1",
+            "strategy_votes": [],
+            "score_components": [],
+            "accuracy_snapshot": null,
+            "structured_explanation": {
+                "summary": "",
+                "reason_atoms": [],
+                "invalidation_rules": [],
+                "confidence": {
+                    "prediction_confidence": 0.0,
+                    "recommendation_confidence": 0.0,
+                    "data_quality_confidence": 0.0,
+                    "model_calibration_confidence": 0.0,
+                    "liquidity_confidence": 0.0,
+                    "explanation_confidence": 0.0
+                }
+            }
+        });
+
+        let explanation: RecommendationExplanation = serde_json::from_value(payload).unwrap();
+        assert_eq!(explanation.graph_version, None);
+        assert_eq!(explanation.graph_context, None);
+        assert_eq!(explanation.structured_explanation.graph_context, None);
     }
 }

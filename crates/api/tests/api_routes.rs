@@ -185,6 +185,8 @@ fn recommendation_fixture() -> Recommendation {
         explanation: RecommendationExplanation {
             feature_set_version: "features_v1".to_string(),
             market_rules_version: MarketRules::default().version,
+            graph_version: None,
+            graph_context: None,
             strategy_votes: vec![StrategySignal {
                 item_id: ItemId(4151),
                 strategy_id: StrategyId("spread_edge_v1".to_string()),

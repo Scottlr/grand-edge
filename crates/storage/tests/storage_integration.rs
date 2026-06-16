@@ -338,6 +338,8 @@ fn sample_recommendation() -> Recommendation {
         explanation: RecommendationExplanation {
             feature_set_version: "features_v1".to_string(),
             market_rules_version: "rules_v1".to_string(),
+            graph_version: None,
+            graph_context: None,
             strategy_votes: vec![StrategySignal {
                 strategy_id: StrategyId::new("spread_edge").unwrap(),
                 model_version: grand_edge_domain::ModelVersion::new("2026-06-16.1").unwrap(),
@@ -398,12 +400,15 @@ fn sample_structured_recommendation() -> Recommendation {
         },
         graph_version: Some("graph_v2".to_string()),
         graph_reason_path_count: Some(2),
+        graph_context: None,
     };
 
     Recommendation {
         explanation: RecommendationExplanation {
             feature_set_version: base.explanation.feature_set_version.clone(),
             market_rules_version: base.explanation.market_rules_version.clone(),
+            graph_version: Some("graph_v2".to_string()),
+            graph_context: None,
             strategy_votes: base.explanation.strategy_votes.clone(),
             score_components: base.explanation.score_components.clone(),
             accuracy_snapshot: base.explanation.accuracy_snapshot.clone(),

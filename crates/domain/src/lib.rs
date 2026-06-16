@@ -1,10 +1,13 @@
 //! Shared domain contracts for Grand Edge.
 
+pub mod corpus;
 pub mod evidence;
 pub mod explanation;
 pub mod feature;
+pub mod graph;
 pub mod ids;
 pub mod item;
+pub mod market_event;
 pub mod market_rules;
 pub mod metrics;
 pub mod model;
@@ -23,11 +26,14 @@ pub mod strategy;
 pub mod time;
 pub mod validation;
 
+pub use corpus::*;
 pub use evidence::*;
 pub use explanation::*;
 pub use feature::*;
+pub use graph::*;
 pub use ids::*;
 pub use item::*;
+pub use market_event::*;
 pub use market_rules::*;
 pub use metrics::*;
 pub use model::*;

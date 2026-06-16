@@ -109,6 +109,8 @@ async fn migrations_and_key_repositories_round_trip_under_testcontainers() {
         explanation: RecommendationExplanation {
             feature_set_version: "features_v1".to_string(),
             market_rules_version: "osrs_rules_v1_review_required".to_string(),
+            graph_version: None,
+            graph_context: None,
             strategy_votes: Vec::new(),
             score_components: Vec::new(),
             accuracy_snapshot: None,
