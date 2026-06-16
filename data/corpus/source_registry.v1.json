@@ -1,0 +1,40 @@
+{
+  "schema_version": "v1",
+  "corpus_version": "market_intelligence_v1",
+  "graph_version": "market_intelligence_v1",
+  "source_ids": [
+    "osrs_update_post_v1",
+    "manual_market_review_v1",
+    "competitor_research_v1"
+  ],
+  "generated_at": "2026-06-16T12:00:00Z",
+  "entries": [
+    {
+      "source_id": "osrs_update_post_v1",
+      "title": "Official Old School RuneScape update post summary",
+      "url": "https://oldschool.runescape.wiki/w/Update:Sample",
+      "retrieved_at": "2026-06-16T12:00:00Z",
+      "license_note": "Short summary only; do not copy article body",
+      "content_hash": "official_update_fixture_hash",
+      "source_type": "official_news"
+    },
+    {
+      "source_id": "manual_market_review_v1",
+      "title": "Grand Edge manual market review note",
+      "url": null,
+      "retrieved_at": "2026-06-16T12:00:00Z",
+      "license_note": "Internal curated note",
+      "content_hash": "manual_market_review_fixture_hash",
+      "source_type": "market_analysis"
+    },
+    {
+      "source_id": "competitor_research_v1",
+      "title": "Competitor capability review summary",
+      "url": null,
+      "retrieved_at": "2026-06-16T12:00:00Z",
+      "license_note": "Internal product-planning note",
+      "content_hash": "competitor_research_fixture_hash",
+      "source_type": "competitor_research"
+    }
+  ]
+}

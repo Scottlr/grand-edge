@@ -1,0 +1,38 @@
+{
+  "schema_version": "v1",
+  "corpus_version": "market_intelligence_v1",
+  "graph_version": "market_intelligence_v1",
+  "source_ids": [
+    "manual_market_review_v1"
+  ],
+  "generated_at": "2026-06-16T12:00:00Z",
+  "entries": [
+    {
+      "entry_id": "analysis_abyssal_whip_boots_rotation",
+      "schema_version": "v1",
+      "title": "Short-term rotation watch across related melee demand items",
+      "source_ids": [
+        "manual_market_review_v1"
+      ],
+      "observed_at": "2026-06-16T12:30:00Z",
+      "entry_type": "market_analysis",
+      "affected_item_ids": [
+        4151,
+        11840
+      ],
+      "affected_categories": [
+        "melee"
+      ],
+      "confidence": 0.63,
+      "requires_review": false,
+      "summary": "Manual note records a reviewable second-order demand hypothesis across a small item basket.",
+      "tags": [
+        "rotation",
+        "linked_demand"
+      ],
+      "metadata": {
+        "horizon": "6h"
+      }
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "schema_version": "v1",
+  "corpus_version": "market_intelligence_v1",
+  "graph_version": "market_intelligence_v1",
+  "source_ids": [
+    "manual_market_review_v1"
+  ],
+  "generated_at": "2026-06-16T12:00:00Z",
+  "entries": [
+    {
+      "entry_id": "review_note_hold_until_provenance",
+      "schema_version": "v1",
+      "title": "Hold ambiguous event wording until provenance is stronger",
+      "source_ids": [
+        "manual_market_review_v1"
+      ],
+      "observed_at": "2026-06-16T13:15:00Z",
+      "entry_type": "manual_review_note",
+      "affected_item_ids": [
+        1516
+      ],
+      "affected_categories": [
+        "logs"
+      ],
+      "confidence": 0.5,
+      "requires_review": true,
+      "summary": "Review note keeps a narrative hypothesis out of product logic until sourcing is stronger.",
+      "tags": [
+        "review",
+        "blocked"
+      ],
+      "metadata": {
+        "reason": "weak sourcing"
+      }
+    }
+  ]
+}

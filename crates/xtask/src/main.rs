@@ -3,7 +3,10 @@ mod commands;
 
 use clap::Parser;
 use cli::{Cli, Command};
-use commands::{config_print, doctor_summary, graph_import_relations, unavailable_message};
+use commands::{
+    config_print, corpus_import, corpus_validate, doctor_summary, graph_import_relations,
+    unavailable_message,
+};
 use grand_edge_configuration::load_config;
 use miette::IntoDiagnostic;
 
@@ -73,6 +76,20 @@ async fn main() -> miette::Result<()> {
         Command::Graph { command } => match command {
             cli::GraphCommand::ImportRelations { root, dry_run } => {
                 let report = graph_import_relations(cli.profile, &root, dry_run)
+                    .await
+                    .map_err(|error| miette::miette!("{error}"))?;
+                println!("{report}");
+            }
+        },
+        Command::Corpus { command } => match command {
+            cli::CorpusCommand::Validate { root } => {
+                let report = corpus_validate(&root)
+                    .await
+                    .map_err(|error| miette::miette!("{error}"))?;
+                println!("{report}");
+            }
+            cli::CorpusCommand::Import { root, dry_run } => {
+                let report = corpus_import(cli.profile, &root, dry_run)
                     .await
                     .map_err(|error| miette::miette!("{error}"))?;
                 println!("{report}");

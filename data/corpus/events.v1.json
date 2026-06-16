@@ -1,0 +1,66 @@
+{
+  "schema_version": "v1",
+  "corpus_version": "market_intelligence_v1",
+  "graph_version": "market_intelligence_v1",
+  "source_ids": [
+    "osrs_update_post_v1",
+    "manual_market_review_v1"
+  ],
+  "generated_at": "2026-06-16T12:00:00Z",
+  "entries": [
+    {
+      "entry_id": "event_2026_balance_patch",
+      "schema_version": "v1",
+      "title": "Balance patch changes drop flow for key PvM items",
+      "source_ids": [
+        "osrs_update_post_v1"
+      ],
+      "observed_at": "2026-06-16T12:00:00Z",
+      "entry_type": "game_update",
+      "affected_item_ids": [
+        4151,
+        11840
+      ],
+      "affected_categories": [
+        "weapons",
+        "boots"
+      ],
+      "confidence": 0.82,
+      "requires_review": false,
+      "summary": "Official update notes suggest a supply-side change for a small linked basket.",
+      "tags": [
+        "update",
+        "supply"
+      ],
+      "metadata": {
+        "eventKind": "drop_table_change"
+      }
+    },
+    {
+      "entry_id": "event_2026_banwave_hypothesis",
+      "schema_version": "v1",
+      "title": "Community bot-ban wave hypothesis for common botted materials",
+      "source_ids": [
+        "manual_market_review_v1"
+      ],
+      "observed_at": "2026-06-16T13:00:00Z",
+      "entry_type": "event_hypothesis",
+      "affected_item_ids": [
+        1516
+      ],
+      "affected_categories": [
+        "logs"
+      ],
+      "confidence": 0.41,
+      "requires_review": true,
+      "summary": "Treat as a hypothesis until reviewed and paired with price evidence.",
+      "tags": [
+        "bot_ban",
+        "hypothesis"
+      ],
+      "metadata": {
+        "note": "kept out of import until reviewed"
+      }
+    }
+  ]
+}
