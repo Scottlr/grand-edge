@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "max_gp_per_item": {
+      "format": "int64",
+      "type": "integer"
+    },
+    "max_portfolio_drawdown": {
+      "format": "double",
+      "type": "number"
+    },
+    "min_confidence": {
+      "format": "double",
+      "type": "number"
+    },
+    "min_expected_roi": {
+      "format": "double",
+      "type": "number"
+    },
+    "overlay_regime_penalty_weight": {
+      "format": "double",
+      "type": "number"
+    },
+    "overlay_spread_penalty_weight": {
+      "format": "double",
+      "type": "number"
+    },
+    "overlay_staleness_penalty_weight": {
+      "format": "double",
+      "type": "number"
+    },
+    "overlay_volatility_penalty_weight": {
+      "format": "double",
+      "type": "number"
+    },
+    "participation_rate": {
+      "format": "double",
+      "type": "number"
+    }
+  },
+  "required": [
+    "max_gp_per_item",
+    "max_portfolio_drawdown",
+    "min_expected_roi",
+    "min_confidence",
+    "participation_rate",
+    "overlay_volatility_penalty_weight",
+    "overlay_spread_penalty_weight",
+    "overlay_staleness_penalty_weight",
+    "overlay_regime_penalty_weight"
+  ],
+  "title": "RiskConfig",
+  "type": "object"
+}

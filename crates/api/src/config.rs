@@ -10,6 +10,7 @@ pub struct ApiConfig {
     pub database_url: String,
     pub cors_origin: Option<String>,
     pub default_user_id: Option<Uuid>,
+    pub swagger_ui_enabled: bool,
 }
 
 impl ApiConfig {
@@ -19,6 +20,7 @@ impl ApiConfig {
             database_url: config.database.url.expose_secret().to_string(),
             cors_origin: config.api.cors_origin.clone(),
             default_user_id: config.api.default_user_id,
+            swagger_ui_enabled: config.api.swagger_ui_enabled,
         }
     }
 }

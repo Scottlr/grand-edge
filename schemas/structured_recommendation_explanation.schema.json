@@ -1,0 +1,334 @@
+{
+  "$defs": {
+    "ConfidenceBreakdown": {
+      "properties": {
+        "data_quality_confidence": {
+          "$ref": "#/$defs/Probability"
+        },
+        "explanation_confidence": {
+          "$ref": "#/$defs/Probability"
+        },
+        "liquidity_confidence": {
+          "$ref": "#/$defs/Probability"
+        },
+        "model_calibration_confidence": {
+          "$ref": "#/$defs/Probability"
+        },
+        "prediction_confidence": {
+          "$ref": "#/$defs/Probability"
+        },
+        "recommendation_confidence": {
+          "$ref": "#/$defs/Probability"
+        }
+      },
+      "required": [
+        "prediction_confidence",
+        "recommendation_confidence",
+        "data_quality_confidence",
+        "model_calibration_confidence",
+        "liquidity_confidence",
+        "explanation_confidence"
+      ],
+      "type": "object"
+    },
+    "GraphEdgeType": {
+      "enum": [
+        "ingredient_of",
+        "component_of_set",
+        "repair_conversion",
+        "dose_conversion",
+        "alch_floor",
+        "death_coffer_value",
+        "charge_conversion",
+        "degrade_conversion",
+        "shop_floor_ceiling",
+        "substitute",
+        "complement",
+        "shared_source",
+        "shared_sink",
+        "same_category",
+        "event_linked",
+        "player_behaviour_link",
+        "correlated_with",
+        "leads",
+        "co_moves_after_events",
+        "shock_transmits_to",
+        "graph_neighbor_predictive",
+        "regime_dependent_link",
+        "candidate_dose_conversion",
+        "candidate_name_pattern"
+      ],
+      "type": "string"
+    },
+    "GraphPath": {
+      "properties": {
+        "expected_impact": {
+          "format": "double",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "path_confidence": {
+          "format": "double",
+          "type": "number"
+        },
+        "source_item_id": {
+          "$ref": "#/$defs/ItemId"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/GraphPathStep"
+          },
+          "type": "array"
+        },
+        "target_item_id": {
+          "$ref": "#/$defs/ItemId"
+        }
+      },
+      "required": [
+        "source_item_id",
+        "target_item_id",
+        "steps",
+        "path_confidence"
+      ],
+      "type": "object"
+    },
+    "GraphPathStep": {
+      "properties": {
+        "confidence": {
+          "format": "double",
+          "type": "number"
+        },
+        "edge_id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "edge_type": {
+          "$ref": "#/$defs/GraphEdgeType"
+        },
+        "from_item_id": {
+          "$ref": "#/$defs/ItemId"
+        },
+        "to_item_id": {
+          "$ref": "#/$defs/ItemId"
+        },
+        "weight": {
+          "format": "double",
+          "type": "number"
+        }
+      },
+      "required": [
+        "from_item_id",
+        "to_item_id",
+        "edge_id",
+        "edge_type",
+        "confidence",
+        "weight"
+      ],
+      "type": "object"
+    },
+    "GraphRecommendationAction": {
+      "enum": [
+        "buy_linked",
+        "pair_trade",
+        "rotate",
+        "hedge",
+        "exploit_conversion",
+        "avoid_blast_radius",
+        "cashout_before_contagion",
+        "watch_second_order"
+      ],
+      "type": "string"
+    },
+    "GraphRecommendationContext": {
+      "properties": {
+        "edge_confidence": {
+          "default": null,
+          "format": "double",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "graph_action": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GraphRecommendationAction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "graph_version": {
+          "type": "string"
+        },
+        "historical_path_performance": {
+          "default": null
+        },
+        "paths": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/GraphPath"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "graph_version"
+      ],
+      "type": "object"
+    },
+    "InvalidationRule": {
+      "properties": {
+        "current_value": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "label": {
+          "type": "string"
+        },
+        "metric": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "rule_key": {
+          "type": "string"
+        },
+        "threshold": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "rule_key",
+        "label",
+        "metric",
+        "operator",
+        "threshold"
+      ],
+      "type": "object"
+    },
+    "ItemId": {
+      "format": "int64",
+      "type": "integer"
+    },
+    "Probability": {
+      "format": "double",
+      "type": "number"
+    },
+    "ReasonAtom": {
+      "properties": {
+        "direction": {
+          "$ref": "#/$defs/ReasonDirection"
+        },
+        "evidence": true,
+        "label": {
+          "type": "string"
+        },
+        "reason_key": {
+          "type": "string"
+        },
+        "reason_type": {
+          "$ref": "#/$defs/ReasonType"
+        },
+        "weight": {
+          "format": "double",
+          "type": "number"
+        }
+      },
+      "required": [
+        "reason_type",
+        "reason_key",
+        "label",
+        "direction",
+        "weight",
+        "evidence"
+      ],
+      "type": "object"
+    },
+    "ReasonDirection": {
+      "enum": [
+        "positive",
+        "negative",
+        "neutral"
+      ],
+      "type": "string"
+    },
+    "ReasonType": {
+      "enum": [
+        "model_signal",
+        "cost_check",
+        "liquidity_check",
+        "risk_check",
+        "calibration_check",
+        "data_quality_check",
+        "user_exposure_check",
+        "rule_check",
+        "graph_relationship"
+      ],
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "confidence": {
+      "$ref": "#/$defs/ConfidenceBreakdown"
+    },
+    "graph_context": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/GraphRecommendationContext"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "graph_reason_path_count": {
+      "default": null,
+      "format": "uint",
+      "minimum": 0,
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "graph_version": {
+      "default": null,
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "invalidation_rules": {
+      "items": {
+        "$ref": "#/$defs/InvalidationRule"
+      },
+      "type": "array"
+    },
+    "reason_atoms": {
+      "items": {
+        "$ref": "#/$defs/ReasonAtom"
+      },
+      "type": "array"
+    },
+    "summary": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "summary",
+    "reason_atoms",
+    "invalidation_rules",
+    "confidence"
+  ],
+  "title": "StructuredRecommendationExplanation",
+  "type": "object"
+}

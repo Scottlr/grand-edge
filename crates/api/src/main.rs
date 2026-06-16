@@ -9,7 +9,11 @@ async fn main() -> anyhow::Result<()> {
     let config = ApiConfig::from_runtime(&runtime);
     let address = config.bind_addr;
     let app_state = AppState::from_config(config.clone()).await?;
-    let app = build_router(app_state, config.cors_origin.clone());
+    let app = build_router(
+        app_state,
+        config.cors_origin.clone(),
+        config.swagger_ui_enabled,
+    );
 
     tracing::info!("grand-edge-api listening on {address}");
     let listener = tokio::net::TcpListener::bind(address).await?;

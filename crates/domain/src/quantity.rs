@@ -1,15 +1,38 @@
 use derive_more::Display;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::DomainValidationError;
 
 #[derive(
-    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, Display,
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    Serialize,
+    Deserialize,
+    Display,
+    JsonSchema,
 )]
 pub struct Quantity(pub i64);
 
 #[derive(
-    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, Display,
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    Serialize,
+    Deserialize,
+    Display,
+    JsonSchema,
 )]
 pub struct HorizonSecs(pub i64);
 

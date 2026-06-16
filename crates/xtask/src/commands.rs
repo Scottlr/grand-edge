@@ -1,3 +1,5 @@
+mod schema;
+
 use std::fmt::Display;
 use std::path::{Path, PathBuf};
 
@@ -11,6 +13,8 @@ use grand_edge_ingest::{
 };
 use grand_edge_storage::{Storage, StoredCorpusSource, StoredMarketEvent};
 use secrecy::ExposeSecret;
+
+pub use schema::schema_export;
 
 #[derive(Debug, thiserror::Error)]
 #[error("command unavailable: {message}")]

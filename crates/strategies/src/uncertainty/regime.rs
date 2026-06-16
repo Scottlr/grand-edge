@@ -1,9 +1,10 @@
 use std::collections::BTreeMap;
 
 use grand_edge_domain::FeatureVector;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum MarketRegime {
     CalmLiquid,
@@ -13,7 +14,7 @@ pub enum MarketRegime {
     Illiquid,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct RegimeEstimate {
     pub regime: MarketRegime,
     pub probability: f64,
@@ -21,14 +22,14 @@ pub struct RegimeEstimate {
     pub strategy_overrides: BTreeMap<String, String>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum RegimeMethod {
     HeuristicV1,
     TrainedHmm,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct RegimeHeuristicConfig {
     pub high_volatility_z: f64,
     pub high_spread_pct: f64,

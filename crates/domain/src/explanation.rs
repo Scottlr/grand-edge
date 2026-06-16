@@ -1,10 +1,11 @@
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::{
     DomainValidationError, GraphRecommendationContext, Probability, RecommendationId, StrategyId,
 };
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum ReasonDirection {
     Positive,
@@ -12,7 +13,7 @@ pub enum ReasonDirection {
     Neutral,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum ReasonType {
     ModelSignal,
@@ -26,7 +27,7 @@ pub enum ReasonType {
     GraphRelationship,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct ReasonAtom {
     pub reason_type: ReasonType,
     pub reason_key: String,
@@ -36,7 +37,7 @@ pub struct ReasonAtom {
     pub evidence: serde_json::Value,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct InvalidationRule {
     pub rule_key: String,
     pub label: String,
@@ -46,7 +47,7 @@ pub struct InvalidationRule {
     pub current_value: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct ConfidenceBreakdown {
     pub prediction_confidence: Probability,
     pub recommendation_confidence: Probability,
@@ -56,7 +57,7 @@ pub struct ConfidenceBreakdown {
     pub explanation_confidence: Probability,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct StructuredRecommendationExplanation {
     pub summary: String,
     pub reason_atoms: Vec<ReasonAtom>,
@@ -97,14 +98,14 @@ impl Default for StructuredRecommendationExplanation {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct RecommendationPredictionLink {
     pub recommendation_id: RecommendationId,
     pub prediction_id: crate::PredictionId,
     pub contribution_weight: f64,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct RecommendationPredictionContribution {
     pub prediction_id: crate::PredictionId,
     pub contribution_weight: f64,

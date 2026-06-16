@@ -164,7 +164,7 @@ impl ApiServices for TestServices {
 }
 
 fn router(services: TestServices, live_events: LiveEventBus) -> Router {
-    build_router(AppState::new(Arc::new(services), live_events), None)
+    build_router(AppState::new(Arc::new(services), live_events), None, true)
 }
 
 fn recommendation_fixture() -> Recommendation {
@@ -260,6 +260,21 @@ async fn health_route_returns_ok() {
         .unwrap();
 
     assert_eq!(response.status(), 200);
+}
+
+#[tokio::test]
+async fn swagger_ui_route_is_available_when_enabled() {
+    let response = router(TestServices::default(), LiveEventBus::default())
+        .oneshot(
+            Request::builder()
+                .uri("/swagger-ui")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), 303);
 }
 
 #[tokio::test]

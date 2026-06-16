@@ -1,9 +1,10 @@
 use chrono::{DateTime, Utc};
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::{Gp, HorizonSecs, ItemId, ModelVersion, Probability, Quantity, Rate, StrategyId};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum SignalSide {
     Buy,
@@ -14,7 +15,7 @@ pub enum SignalSide {
     Watch,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct ObservedLiquidityProxy {
     pub observed_volume: Quantity,
     pub observed_high_side_volume: Quantity,
@@ -25,7 +26,7 @@ pub struct ObservedLiquidityProxy {
     pub note: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct ExecutionEstimate {
     pub observed_liquidity: ObservedLiquidityProxy,
     pub estimated_fill_probability: Option<Probability>,
@@ -38,7 +39,7 @@ pub struct ExecutionEstimate {
     pub volatility: Option<Rate>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct StrategySignal {
     pub item_id: ItemId,
     pub strategy_id: StrategyId,

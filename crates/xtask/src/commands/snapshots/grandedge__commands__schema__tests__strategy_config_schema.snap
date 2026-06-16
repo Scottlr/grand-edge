@@ -1,0 +1,172 @@
+---
+source: crates/xtask/src/commands/schema.rs
+assertion_line: 195
+expression: "schema_value::<StrategyConfig>().unwrap()"
+---
+{
+  "$defs": {
+    "ArBaselineConfig": {
+      "properties": {
+        "confidence_floor": {
+          "format": "double",
+          "type": "number"
+        },
+        "intercept": {
+          "format": "double",
+          "type": "number"
+        },
+        "min_expected_return": {
+          "format": "double",
+          "type": "number"
+        },
+        "phi": {
+          "format": "double",
+          "type": "number"
+        }
+      },
+      "required": [
+        "intercept",
+        "phi",
+        "min_expected_return",
+        "confidence_floor"
+      ],
+      "type": "object"
+    },
+    "KalmanConfig": {
+      "properties": {
+        "buy_mispricing_threshold": {
+          "format": "double",
+          "type": "number"
+        },
+        "cashout_mispricing_threshold": {
+          "format": "double",
+          "type": "number"
+        },
+        "observation_variance": {
+          "format": "double",
+          "type": "number"
+        },
+        "process_variance": {
+          "format": "double",
+          "type": "number"
+        }
+      },
+      "required": [
+        "process_variance",
+        "observation_variance",
+        "buy_mispricing_threshold",
+        "cashout_mispricing_threshold"
+      ],
+      "type": "object"
+    },
+    "RegimeHeuristicConfig": {
+      "properties": {
+        "high_spread_pct": {
+          "format": "double",
+          "type": "number"
+        },
+        "high_volatility_z": {
+          "format": "double",
+          "type": "number"
+        },
+        "low_observed_volume_z": {
+          "format": "double",
+          "type": "number"
+        },
+        "trend_return_threshold": {
+          "format": "double",
+          "type": "number"
+        }
+      },
+      "required": [
+        "high_volatility_z",
+        "high_spread_pct",
+        "low_observed_volume_z",
+        "trend_return_threshold"
+      ],
+      "type": "object"
+    },
+    "RiskConfig": {
+      "properties": {
+        "max_gp_per_item": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "max_portfolio_drawdown": {
+          "format": "double",
+          "type": "number"
+        },
+        "min_confidence": {
+          "format": "double",
+          "type": "number"
+        },
+        "min_expected_roi": {
+          "format": "double",
+          "type": "number"
+        },
+        "overlay_regime_penalty_weight": {
+          "format": "double",
+          "type": "number"
+        },
+        "overlay_spread_penalty_weight": {
+          "format": "double",
+          "type": "number"
+        },
+        "overlay_staleness_penalty_weight": {
+          "format": "double",
+          "type": "number"
+        },
+        "overlay_volatility_penalty_weight": {
+          "format": "double",
+          "type": "number"
+        },
+        "participation_rate": {
+          "format": "double",
+          "type": "number"
+        }
+      },
+      "required": [
+        "max_gp_per_item",
+        "max_portfolio_drawdown",
+        "min_expected_roi",
+        "min_confidence",
+        "participation_rate",
+        "overlay_volatility_penalty_weight",
+        "overlay_spread_penalty_weight",
+        "overlay_staleness_penalty_weight",
+        "overlay_regime_penalty_weight"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "ar_baseline": {
+      "$ref": "#/$defs/ArBaselineConfig"
+    },
+    "enabled_strategies": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "kalman_fair_value": {
+      "$ref": "#/$defs/KalmanConfig"
+    },
+    "regime_heuristic": {
+      "$ref": "#/$defs/RegimeHeuristicConfig"
+    },
+    "risk": {
+      "$ref": "#/$defs/RiskConfig"
+    }
+  },
+  "required": [
+    "enabled_strategies",
+    "risk",
+    "kalman_fair_value",
+    "ar_baseline",
+    "regime_heuristic"
+  ],
+  "title": "StrategyConfig",
+  "type": "object"
+}

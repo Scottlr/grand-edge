@@ -11,13 +11,23 @@ path = "src/main.rs"
 
 [dependencies]
 async-trait.workspace = true
+chrono.workspace = true
 clap.workspace = true
+grand-edge-api = { path = "../api" }
 grand-edge-configuration = { path = "../configuration" }
 grand-edge-domain = { path = "../domain" }
 grand-edge-ingest = { path = "../ingest" }
+grand-edge-model-runtime = { path = "../model_runtime" }
 grand-edge-storage = { path = "../storage" }
+grand-edge-strategies = { path = "../strategies" }
 miette.workspace = true
+schemars.workspace = true
 secrecy.workspace = true
+serde.workspace = true
 serde_json.workspace = true
+sha2 = "0.10"
 thiserror.workspace = true
 tokio.workspace = true
+
+[dev-dependencies]
+insta.workspace = true

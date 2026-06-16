@@ -1,4 +1,5 @@
 use chrono::{DateTime, Utc};
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -6,7 +7,7 @@ use crate::{
     RecommendationId, StrategySignal, StructuredRecommendationExplanation, UserId,
 };
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum RecommendationAction {
     Buy,
@@ -17,7 +18,7 @@ pub enum RecommendationAction {
     Watch,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct ScoreComponent {
     pub key: String,
     pub label: String,
@@ -25,7 +26,7 @@ pub struct ScoreComponent {
     pub weight: Option<Rate>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct RecommendationExplanation {
     pub feature_set_version: String,
     pub market_rules_version: String,
@@ -40,7 +41,7 @@ pub struct RecommendationExplanation {
     pub structured_explanation: StructuredRecommendationExplanation,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct Recommendation {
     pub recommendation_id: RecommendationId,
     pub user_id: Option<UserId>,

@@ -1,10 +1,11 @@
 use chrono::{DateTime, Utc};
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
 use crate::errors::ModelRuntimeError;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub enum TrainingTargetLabel {
     #[serde(rename = "future_return_6h")]
     FutureReturn6h,
@@ -14,7 +15,7 @@ pub enum TrainingTargetLabel {
     FutureActionableReturn6h,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct ArtifactFeatureSchemaDocument {
     pub feature_set_version: String,
     pub feature_names: Vec<String>,
@@ -22,7 +23,7 @@ pub struct ArtifactFeatureSchemaDocument {
     pub feature_schema_hash: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct ModelCardDocument {
     pub strategy_id: String,
     pub model_version: String,
@@ -38,14 +39,14 @@ pub struct ModelCardDocument {
     pub notes: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct CalibrationDocument {
     pub method: String,
     pub fitted_at: DateTime<Utc>,
     pub bins: Vec<serde_json::Map<String, serde_json::Value>>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct CoefficientModelDocument {
     pub model_id: String,
     pub version: String,

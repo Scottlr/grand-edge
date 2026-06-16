@@ -1,12 +1,13 @@
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct KalmanState {
     pub fair_value: f64,
     pub variance: f64,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct KalmanConfig {
     pub process_variance: f64,
     pub observation_variance: f64,
@@ -14,7 +15,7 @@ pub struct KalmanConfig {
     pub cashout_mispricing_threshold: f64,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct KalmanUpdate {
     pub kalman_gain: f64,
     pub posterior: KalmanState,
