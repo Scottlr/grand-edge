@@ -1689,6 +1689,7 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "grand-edge-domain",
+ "grand-edge-simulator",
  "grand-edge-storage",
  "serde",
  "serde_json",
