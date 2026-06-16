@@ -12,8 +12,6 @@ import type {
   Interval,
   Position,
   Recommendation,
-  RecommendationAction,
-  RecommendationExplanation,
   SimulationRun,
   StrategyStatus,
   UpsertPositionRequest,
@@ -22,7 +20,7 @@ import type {
 const apiClient = createApiClient();
 
 export function useRecommendations(params?: {
-  action?: RecommendationAction;
+  action?: Recommendation["action"];
   limit?: number;
   offset?: number;
 }): UseQueryResult<Recommendation[]> {
@@ -34,7 +32,7 @@ export function useRecommendations(params?: {
 
 export function useRecommendationExplanation(
   recommendationId: string | null,
-): UseQueryResult<RecommendationExplanation> {
+): UseQueryResult<Recommendation> {
   return useQuery({
     queryKey: recommendationId
       ? queryKeys.recommendationExplanation(recommendationId)

@@ -1,7 +1,10 @@
 pub mod app;
 pub mod config;
 pub mod errors;
+pub mod market;
+pub mod model_accuracy;
 pub mod openapi;
+pub mod recommendations;
 pub mod routes;
 pub mod state;
 

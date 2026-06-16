@@ -5,15 +5,17 @@ use axum::{Router, body::Body, http::Request};
 use chrono::{TimeZone, Utc};
 use grand_edge_api::{
     app::build_router,
-    routes::{items::ItemDto, live::LiveEvent, recommendations::RecommendationActionDto},
+    recommendations::view::{RecommendationActionDto, RecommendationDto},
+    routes::{items::ItemDto, live::LiveEvent},
     state::{
         ApiServices, AppState, LiveEventBus, PositionUpsert, SimulationRunDraft,
         StrategyStatusRecord,
     },
 };
 use grand_edge_domain::{
-    Gp, Item, ItemIcon, ItemId, MarketRules, ModelAccuracySnapshot, ModelVersion, PositionId,
-    PriceInterval, Probability, Quantity, Rate, Recommendation, RecommendationAction,
+    ConfidenceBreakdown, Gp, InvalidationRule, Item, ItemIcon, ItemId, MarketRules,
+    ModelAccuracySnapshot, ModelVersion, PositionId, PriceInterval, Probability, Quantity, Rate,
+    ReasonAtom, ReasonDirection, ReasonType, Recommendation, RecommendationAction,
     RecommendationExplanation, RecommendationId, SignalSide, StrategyId, StrategySignal,
     StructuredRecommendationExplanation, UserId, UserPosition, WikiImageSource,
 };
@@ -76,12 +78,12 @@ impl ApiServices for TestServices {
     async fn get_recommendation_explanation(
         &self,
         recommendation_id: RecommendationId,
-    ) -> Result<Option<RecommendationExplanation>, grand_edge_api::errors::ApiError> {
+    ) -> Result<Option<Recommendation>, grand_edge_api::errors::ApiError> {
         Ok(self
             .recommendations
             .iter()
             .find(|recommendation| recommendation.recommendation_id == recommendation_id)
-            .map(|recommendation| recommendation.explanation.clone()))
+            .cloned())
     }
 
     async fn list_strategies(
@@ -222,14 +224,48 @@ fn recommendation_fixture() -> Recommendation {
                 max_drawdown: Some(Rate::new(0.1).unwrap()),
                 calibration: serde_json::json!({}),
             }),
-            structured_explanation: StructuredRecommendationExplanation::default(),
+            structured_explanation: StructuredRecommendationExplanation {
+                summary: "Buy because tax-adjusted edge clears threshold.".to_string(),
+                reason_atoms: vec![ReasonAtom {
+                    reason_type: ReasonType::DataQualityCheck,
+                    reason_key: "data_quality:freshness_completeness".to_string(),
+                    label: "Data quality".to_string(),
+                    direction: ReasonDirection::Positive,
+                    weight: 0.95,
+                    evidence: serde_json::json!({
+                        "freshness_confidence": 0.9,
+                        "completeness_confidence": 1.0,
+                        "stale": false,
+                        "missing_inputs": [],
+                    }),
+                }],
+                invalidation_rules: vec![InvalidationRule {
+                    rule_key: "score_threshold".to_string(),
+                    label: "Score threshold".to_string(),
+                    metric: "final_score".to_string(),
+                    operator: "<".to_string(),
+                    threshold: "0.05".to_string(),
+                    current_value: Some("0.9".to_string()),
+                }],
+                confidence: ConfidenceBreakdown {
+                    prediction_confidence: Probability::new(0.8).unwrap(),
+                    recommendation_confidence: Probability::new(0.75).unwrap(),
+                    data_quality_confidence: Probability::new(0.9).unwrap(),
+                    model_calibration_confidence: Probability::new(0.8).unwrap(),
+                    liquidity_confidence: Probability::new(0.7).unwrap(),
+                    explanation_confidence: Probability::new(0.72).unwrap(),
+                },
+                graph_version: None,
+                graph_reason_path_count: None,
+                graph_context: None,
+            },
         },
     }
 }
 
 fn item_fixture(file_name: &str, cdn_url: &str) -> Item {
     Item {
-        item_id: ItemId(1949),
+        item_id: ItemId(4151),
         name: "Chef's hat".to_string(),
         examine: Some("A tall hat for chefs.".to_string()),
         members: false,
@@ -320,7 +356,7 @@ async fn items_route_preserves_apostrophe_icon_encoding() {
     )
     .oneshot(
         Request::builder()
-            .uri("/api/items/1949")
+            .uri("/api/items/4151")
             .body(Body::empty())
             .unwrap(),
     )
@@ -372,6 +408,10 @@ async fn recommendations_route_returns_typed_payload() {
     let recommendation = recommendation_fixture();
     let response = router(
         TestServices {
+            items: vec![item_fixture(
+                "Abyssal whip.png",
+                "https://oldschool.runescape.wiki/images/Abyssal_whip.png",
+            )],
             recommendations: vec![recommendation],
             ..Default::default()
         },
@@ -387,11 +427,16 @@ async fn recommendations_route_returns_typed_payload() {
     .unwrap();
 
     let body = response.into_body().collect().await.unwrap().to_bytes();
-    let payload: serde_json::Value = serde_json::from_slice(&body).unwrap();
-    assert_eq!(payload[0]["action"], "buy");
+    let payload: Vec<RecommendationDto> = serde_json::from_slice(&body).unwrap();
     assert_eq!(
-        payload[0]["explanation"]["strategyVotes"][0]["strategyId"],
-        "spread_edge_v1"
+        payload[0].action,
+        grand_edge_api::recommendations::view::RecommendationActionDto::Buy
+    );
+    assert_eq!(payload[0].item_name, "Chef's hat");
+    assert_eq!(payload[0].strategy_votes[0].strategy_id, "spread_edge_v1");
+    assert_eq!(
+        payload[0].data_state,
+        grand_edge_api::market::status_view::DataStateDto::Live
     );
 }
 

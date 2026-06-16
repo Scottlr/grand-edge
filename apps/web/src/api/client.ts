@@ -6,8 +6,6 @@ import type {
   PatchStrategyRequest,
   Position,
   Recommendation,
-  RecommendationAction,
-  RecommendationExplanation,
   SimulationRun,
   StrategyStatus,
   UpsertPositionRequest,
@@ -51,7 +49,7 @@ export class ApiClient {
   }
 
   async getRecommendations(params?: {
-    action?: RecommendationAction;
+    action?: Recommendation["action"];
     limit?: number;
     offset?: number;
   }): Promise<Recommendation[]> {
@@ -60,8 +58,8 @@ export class ApiClient {
     });
   }
 
-  async getRecommendationExplanation(id: string): Promise<RecommendationExplanation> {
-    return this.request<RecommendationExplanation>(`/api/recommendations/${id}/explanation`);
+  async getRecommendationExplanation(id: string): Promise<Recommendation> {
+    return this.request<Recommendation>(`/api/recommendations/${id}/explanation`);
   }
 
   async getStrategies(): Promise<StrategyStatus[]> {
