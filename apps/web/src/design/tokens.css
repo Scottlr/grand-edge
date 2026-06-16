@@ -1,0 +1,26 @@
+:root {
+  --ge-bg-app: #080d12;
+  --ge-surface-primary: #0e151c;
+  --ge-surface-secondary: #121c25;
+  --ge-surface-raised: #17232e;
+  --ge-border-subtle: #22303c;
+  --ge-border-active: #355064;
+  --ge-text-primary: #e6eef5;
+  --ge-text-secondary: #9aaab8;
+  --ge-text-muted: #637383;
+  --ge-accent-blue: #67b7dc;
+  --ge-accent-confidence: #78dce8;
+  --ge-accent-positive: #7ccb9a;
+  --ge-accent-warning: #d9b66f;
+  --ge-accent-risk: #d97a7a;
+  --ge-accent-model: #a991e6;
+  --ge-action-buy: var(--ge-accent-positive);
+  --ge-action-sell: var(--ge-accent-risk);
+  --ge-action-wait: var(--ge-accent-warning);
+  --ge-action-hold: var(--ge-accent-blue);
+  --ge-action-avoid: #d29372;
+  --ge-focus-ring: var(--ge-accent-confidence);
+  --ge-radius-card: 8px;
+  --ge-radius-control: 6px;
+  --ge-shadow-raised: 0 18px 48px rgba(0, 0, 0, 0.32);
+}
