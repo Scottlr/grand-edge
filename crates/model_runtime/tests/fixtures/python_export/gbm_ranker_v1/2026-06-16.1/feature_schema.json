@@ -1,0 +1,32 @@
+{
+  "feature_set_version": "features_v1",
+  "feature_names": [
+    "mid",
+    "spread_abs",
+    "spread_pct",
+    "return_5m",
+    "return_1h",
+    "return_6h",
+    "return_24h",
+    "rolling_mean_24h",
+    "rolling_std_24h",
+    "z_score_24h",
+    "ewma_volatility_24h",
+    "observed_volume_1h",
+    "observed_high_side_volume_1h",
+    "observed_low_side_volume_1h",
+    "observed_volume_z_24h",
+    "observed_volume_reliability_24h",
+    "high_low_volume_ratio_1h",
+    "spread_stability_24h",
+    "price_staleness_secs",
+    "alch_floor_distance",
+    "buy_limit",
+    "buy_limit_utilization",
+    "liquidity_confidence",
+    "missing_feature_policy",
+    "missing_data_flags"
+  ],
+  "target_label": "future_actionable_return_6h",
+  "feature_schema_hash": "sha256:05268d9b1b7bd88ba6c5cf09f5d7423011a0015478f587e905c0cef83e1386be"
+}

@@ -1,0 +1,19 @@
+{
+  "strategy_id": "gbm_ranker_v1",
+  "model_version": "2026-06-16.1",
+  "feature_set_version": "features_v1",
+  "feature_schema_hash": "sha256:05268d9b1b7bd88ba6c5cf09f5d7423011a0015478f587e905c0cef83e1386be",
+  "training_window_start": "2026-01-01T00:00:00Z",
+  "training_window_end": "2026-05-01T00:00:00Z",
+  "evaluation_window_start": "2026-05-01T00:00:00Z",
+  "evaluation_window_end": "2026-06-01T00:00:00Z",
+  "metrics": {
+    "directional_accuracy": 0.61,
+    "window": "seven_days"
+  },
+  "known_limitations": [
+    "Observed volume and liquidity confidence are proxy inputs, not true order-book depth."
+  ],
+  "target_label": "future_actionable_return_6h",
+  "notes": "Fixture export only. Rust remains the production validation and serving boundary."
+}

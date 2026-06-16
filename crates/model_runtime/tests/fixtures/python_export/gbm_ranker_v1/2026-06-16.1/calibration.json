@@ -1,0 +1,10 @@
+{
+  "method": "identity",
+  "fitted_at": "2026-06-16T12:00:00Z",
+  "bins": [
+    {
+      "predicted": 0.6,
+      "realized": 0.58
+    }
+  ]
+}
