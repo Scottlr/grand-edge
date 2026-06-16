@@ -1,50 +1,14 @@
 ---
 source: crates/recommender/tests/recommendation_snapshots.rs
-expression: recommendation.explanation
+assertion_line: 107
+expression: snapshot
 ---
 {
+  "accuracy_snapshot": null,
   "feature_set_version": "features_v1",
+  "graph_context": null,
+  "graph_version": null,
   "market_rules_version": "osrs_rules_v1_review_required",
-  "strategy_votes": [
-    {
-      "item_id": 4151,
-      "strategy_id": "spread_edge_v1",
-      "model_version": "v1",
-      "as_of": "2026-06-16T12:00:00Z",
-      "side": "buy",
-      "horizon_secs": 3600,
-      "confidence": 0.8,
-      "expected_return": 0.03,
-      "expected_net_gp_per_unit": 1400,
-      "target_entry": 100000,
-      "target_exit": 104000,
-      "stop_loss": 99000,
-      "take_profit": 104000,
-      "max_quantity": 8,
-      "execution_estimate": {
-        "observed_liquidity": {
-          "observed_volume": 400,
-          "observed_high_side_volume": 220,
-          "observed_low_side_volume": 180,
-          "observed_volume_z": 1.2,
-          "observed_volume_reliability": 0.7,
-          "high_low_volume_ratio": 1.22,
-          "note": "proxy"
-        },
-        "estimated_fill_probability": 0.6,
-        "liquidity_confidence": 0.7,
-        "estimated_capacity": 8,
-        "participation_rate": 0.05,
-        "confidence_haircut": 0.5,
-        "spread_pct": 0.02,
-        "price_staleness_seconds": 120,
-        "volatility": 0.03
-      },
-      "explanation": {
-        "reason": "fixture"
-      }
-    }
-  ],
   "score_components": [
     {
       "key": "raw_edge",
@@ -56,6 +20,12 @@ expression: recommendation.explanation
       "key": "liquidity_adjusted_edge",
       "label": "liquidity adjusted edge",
       "value": -0.04500000000000001,
+      "weight": null
+    },
+    {
+      "key": "graph_adjusted_edge",
+      "label": "graph adjusted edge",
+      "value": 0.0,
       "weight": null
     },
     {
@@ -83,6 +53,30 @@ expression: recommendation.explanation
       "weight": null
     },
     {
+      "key": "regime_penalty",
+      "label": "regime penalty",
+      "value": -0.0,
+      "weight": null
+    },
+    {
+      "key": "overlay_volatility_penalty",
+      "label": "overlay volatility penalty",
+      "value": -0.0,
+      "weight": null
+    },
+    {
+      "key": "overlay_spread_penalty",
+      "label": "overlay spread penalty",
+      "value": -0.0,
+      "weight": null
+    },
+    {
+      "key": "overlay_staleness_penalty",
+      "label": "overlay staleness penalty",
+      "value": -0.0,
+      "weight": null
+    },
+    {
       "key": "liquidity_penalty",
       "label": "liquidity penalty",
       "value": -0.07500000000000001,
@@ -107,5 +101,174 @@ expression: recommendation.explanation
       "weight": null
     }
   ],
-  "accuracy_snapshot": null
+  "strategy_votes": [
+    {
+      "as_of": "2026-06-16T12:00:00Z",
+      "confidence": 0.8,
+      "execution_estimate": {
+        "confidence_haircut": 0.5,
+        "estimated_capacity": 8,
+        "estimated_fill_probability": 0.6,
+        "liquidity_confidence": 0.7,
+        "observed_liquidity": {
+          "high_low_volume_ratio": 1.22,
+          "note": "proxy",
+          "observed_high_side_volume": 220,
+          "observed_low_side_volume": 180,
+          "observed_volume": 400,
+          "observed_volume_reliability": 0.7,
+          "observed_volume_z": 1.2
+        },
+        "participation_rate": 0.05,
+        "price_staleness_seconds": 120,
+        "spread_pct": 0.02,
+        "volatility": 0.03
+      },
+      "expected_net_gp_per_unit": 1400,
+      "expected_return": 0.03,
+      "explanation": {
+        "reason": "fixture"
+      },
+      "horizon_secs": 3600,
+      "item_id": 4151,
+      "max_quantity": 8,
+      "model_version": "v1",
+      "side": "buy",
+      "stop_loss": 99000,
+      "strategy_id": "spread_edge_v1",
+      "take_profit": 104000,
+      "target_entry": 100000,
+      "target_exit": 104000
+    }
+  ],
+  "structured_explanation": {
+    "confidence": {
+      "data_quality_confidence": 0.95,
+      "explanation_confidence": 0.2719375,
+      "liquidity_confidence": 0.7,
+      "model_calibration_confidence": 0.8,
+      "prediction_confidence": 0.8,
+      "recommendation_confidence": 0.68
+    },
+    "graph_context": null,
+    "graph_reason_path_count": null,
+    "graph_version": null,
+    "invalidation_rules": [
+      {
+        "current_value": "0.05449999999999998",
+        "label": "Score threshold",
+        "metric": "final_score",
+        "operator": "<",
+        "rule_key": "score_threshold",
+        "threshold": "0.05"
+      },
+      {
+        "current_value": "11200",
+        "label": "Tax cap",
+        "metric": "tax_cap_gp",
+        "operator": ">",
+        "rule_key": "tax_cap",
+        "threshold": "5000000"
+      }
+    ],
+    "reason_atoms": [
+      {
+        "direction": "positive",
+        "evidence": {
+          "confidence": 0.8,
+          "predicted_return": 0.03,
+          "prediction_id": "<prediction-id>"
+        },
+        "label": "spread_edge_v1 predicted Up",
+        "reason_key": "model_signal:spread_edge_v1:3600",
+        "reason_type": "model_signal",
+        "weight": 0.8
+      },
+      {
+        "direction": "negative",
+        "evidence": {
+          "explanation": "Penalty for uncertain execution quality.",
+          "score_component": "liquidity_penalty",
+          "value": -0.07500000000000001
+        },
+        "label": "Liquidity capacity",
+        "reason_key": "liquidity:volume_capacity",
+        "reason_type": "liquidity_check",
+        "weight": 0.07500000000000001
+      },
+      {
+        "direction": "negative",
+        "evidence": {
+          "explanation": "Penalty from volatility, spread, and staleness.",
+          "score_component": "risk_penalty",
+          "value": -0.0205
+        },
+        "label": "Risk profile",
+        "reason_key": "risk:profile_limit",
+        "reason_type": "risk_check",
+        "weight": 0.0205
+      },
+      {
+        "direction": "neutral",
+        "evidence": {
+          "explanation": "Bonus from recent measured model accuracy.",
+          "score_component": "model_confidence_bonus",
+          "value": 0.0
+        },
+        "label": "Calibration",
+        "reason_key": "calibration:model_recent_error",
+        "reason_type": "calibration_check",
+        "weight": 0.0
+      },
+      {
+        "direction": "positive",
+        "evidence": {
+          "expected_net_gp": 11200,
+          "expected_roi": 0.03,
+          "tax_rate": 0.02
+        },
+        "label": "Tax and spread",
+        "reason_key": "cost:tax_and_spread",
+        "reason_type": "cost_check",
+        "weight": 0.03
+      },
+      {
+        "direction": "neutral",
+        "evidence": {
+          "action": "watch",
+          "risk_label": "low"
+        },
+        "label": "User exposure",
+        "reason_key": "user_exposure:item_position",
+        "reason_type": "user_exposure_check",
+        "weight": 0.2
+      },
+      {
+        "direction": "neutral",
+        "evidence": {
+          "buy_limit_window_secs": 14400,
+          "slot_limit": 8,
+          "tax_cap_gp": 5000000
+        },
+        "label": "Market rules",
+        "reason_key": "rule:buy_limit_tax_slot",
+        "reason_type": "rule_check",
+        "weight": 0.1
+      },
+      {
+        "direction": "positive",
+        "evidence": {
+          "completeness_confidence": 1.0,
+          "freshness_confidence": 0.9,
+          "missing_inputs": [],
+          "stale": false
+        },
+        "label": "Data quality",
+        "reason_key": "data_quality:freshness_completeness",
+        "reason_type": "data_quality_check",
+        "weight": 0.95
+      }
+    ],
+    "summary": "Watch because Data quality; recommendation confidence 0.68"
+  }
 }

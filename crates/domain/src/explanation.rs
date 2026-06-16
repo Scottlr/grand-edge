@@ -23,6 +23,7 @@ pub enum ReasonType {
     DataQualityCheck,
     UserExposureCheck,
     RuleCheck,
+    GraphRelationship,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

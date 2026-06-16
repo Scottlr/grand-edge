@@ -14,6 +14,7 @@ pub struct ScoreComponent {
 pub struct RecommendationScore {
     pub raw_edge: f64,
     pub liquidity_adjusted_edge: f64,
+    pub graph_adjusted_edge: Option<f64>,
     pub prediction_confidence: Option<f64>,
     pub execution_confidence: Option<f64>,
     pub recommendation_confidence: f64,
@@ -77,6 +78,7 @@ pub fn score_candidate(
         .unwrap_or(0.0);
     let user_fit_bonus = 0.0;
     let liquidity_adjusted_edge = raw_edge - liquidity_penalty;
+    let graph_adjusted_edge = feature_f64(features, "graph_adjusted_momentum_6h");
     let recommendation_confidence = clamp01(
         prediction_confidence.unwrap_or(0.0) * 0.5
             + execution_confidence.unwrap_or(prediction_confidence.unwrap_or(0.0)) * 0.3
@@ -86,8 +88,13 @@ pub fn score_candidate(
                 .unwrap_or(0.5)
                 * 0.2,
     );
-    let final_score =
-        raw_edge - risk_penalty - liquidity_penalty + model_confidence_bonus + execution_bonus;
+    let graph_bonus = graph_adjusted_edge
+        .map(|value| (value - raw_edge).max(0.0) * 0.35)
+        .unwrap_or(0.0);
+    let final_score = raw_edge - risk_penalty - liquidity_penalty
+        + model_confidence_bonus
+        + execution_bonus
+        + graph_bonus;
 
     let components = vec![
         component("raw_edge", raw_edge, "Expected return before penalties."),
@@ -95,6 +102,11 @@ pub fn score_candidate(
             "liquidity_adjusted_edge",
             liquidity_adjusted_edge,
             "Raw edge after liquidity penalty.",
+        ),
+        component(
+            "graph_adjusted_edge",
+            graph_adjusted_edge.unwrap_or(0.0),
+            "Graph-adjusted expected return from neighbor relationships.",
         ),
         component(
             "prediction_confidence",
@@ -157,6 +169,7 @@ pub fn score_candidate(
     RecommendationScore {
         raw_edge,
         liquidity_adjusted_edge,
+        graph_adjusted_edge,
         prediction_confidence,
         execution_confidence,
         recommendation_confidence,
@@ -271,7 +284,11 @@ mod tests {
             + score.model_confidence_bonus
             + score.execution_confidence.unwrap_or(0.0)
                 * RecommendationConfig::default().execution_confidence_weight
-            + score.user_fit_bonus;
+            + score.user_fit_bonus
+            + score
+                .graph_adjusted_edge
+                .map(|value| (value - score.raw_edge).max(0.0) * 0.35)
+                .unwrap_or(0.0);
         assert!((computed - score.final_score).abs() < 1e-9);
     }
 
@@ -319,6 +336,10 @@ mod tests {
         values.insert("ewma_volatility_24h".to_string(), serde_json::json!(0.03));
         values.insert("spread_pct".to_string(), serde_json::json!(0.02));
         values.insert("price_staleness_secs".to_string(), serde_json::json!(120));
+        values.insert(
+            "graph_adjusted_momentum_6h".to_string(),
+            serde_json::json!(0.06),
+        );
         FeatureVector {
             item_id: ItemId(4151),
             as_of: Utc.with_ymd_and_hms(2026, 6, 16, 12, 0, 0).unwrap(),

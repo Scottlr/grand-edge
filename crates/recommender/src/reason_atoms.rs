@@ -188,6 +188,7 @@ pub fn reason_key(reason_type: ReasonType, stable_name: &str) -> String {
         ReasonType::DataQualityCheck => "data_quality",
         ReasonType::UserExposureCheck => "user_exposure",
         ReasonType::RuleCheck => "rule",
+        ReasonType::GraphRelationship => "graph",
     };
     format!("{prefix}:{stable_name}")
 }

@@ -2,8 +2,8 @@ use std::collections::HashMap;
 
 use chrono::{DateTime, Utc};
 use grand_edge_domain::{
-    FeatureVector, ItemId, LatestPrice, Probability, Rate, Recommendation, RecommendationAction,
-    RecommendationId, StrategySignal, UserId, UserPosition,
+    FeatureVector, ItemGraphEdge, ItemId, LatestPrice, Probability, Rate, Recommendation,
+    RecommendationAction, RecommendationId, StrategySignal, UserId, UserPosition,
 };
 use grand_edge_metrics::{MetricWindow, MetricsEngine};
 use grand_edge_simulator::SimulationEngine;
@@ -14,6 +14,7 @@ use crate::{
     RecommendationConfig, RecommendationError, RecommendationScore,
     actions::map_action,
     explanations::{build_explanation, build_reasons},
+    graph_actions::{GraphRecommendationInput, build_graph_paths, map_graph_action},
     prediction_links::{
         compatibility_feature_snapshot, persist_recommendation_decision, prediction_contributions,
     },
@@ -31,6 +32,7 @@ pub struct RecommendationInput {
     pub strategy_votes: Vec<StrategySignal>,
     pub accuracy_snapshot: Option<grand_edge_domain::ModelAccuracySnapshot>,
     pub existing_position: Option<UserPosition>,
+    pub graph_input: Option<GraphRecommendationInput>,
 }
 
 pub struct RecommendationEngine {
@@ -183,6 +185,14 @@ impl RecommendationEngine {
             &self.config.market_rules,
             &self.config,
         );
+        let graph_input = input.graph_input.as_ref().map(|graph_input| {
+            let mut graph_input = graph_input.clone();
+            graph_input.execution_confidence = score.execution_confidence;
+            graph_input
+        });
+        let graph_decision = graph_input
+            .as_ref()
+            .and_then(|value| map_graph_action(value, &score, &self.config.graph_actions));
         let recommendation_confidence = Probability::new(score.recommendation_confidence)
             .map_err(|_| RecommendationError::InvalidConfidence(score.recommendation_confidence))?;
         let score_rate = Rate::new(score.final_score)
@@ -243,7 +253,10 @@ impl RecommendationEngine {
             explanation: grand_edge_domain::RecommendationExplanation {
                 feature_set_version: input.feature_vector.feature_set_version.clone(),
                 market_rules_version: self.config.market_rules.version.clone(),
-                graph_version: None,
+                graph_version: input
+                    .graph_input
+                    .as_ref()
+                    .map(|graph_input| graph_input.graph_version.clone()),
                 graph_context: None,
                 strategy_votes: Vec::new(),
                 score_components: Vec::new(),
@@ -269,6 +282,8 @@ impl RecommendationEngine {
             input.accuracy_snapshot,
             &recommendation,
             &self.config,
+            graph_input.as_ref(),
+            graph_decision.as_ref(),
         )?;
 
         Ok(recommendation)
@@ -339,6 +354,13 @@ impl RecommendationEngine {
 
         let primary_signal =
             best_signal.ok_or(RecommendationError::MissingFeatures(latest.item_id.0))?;
+        let graph_input = self
+            .build_graph_input(
+                feature_vector.item_id,
+                &feature_vector,
+                existing_position.as_ref(),
+            )
+            .await?;
         let input = RecommendationInput {
             user_id,
             as_of,
@@ -348,6 +370,7 @@ impl RecommendationEngine {
             strategy_votes: votes,
             accuracy_snapshot: best_accuracy,
             existing_position,
+            graph_input,
         };
 
         let recommendation = self.build_recommendation(input.clone())?;
@@ -369,6 +392,94 @@ impl RecommendationEngine {
         .await?;
         let _simulator_reference = &self.simulator;
         Ok(recommendation)
+    }
+
+    async fn build_graph_input(
+        &self,
+        item_id: ItemId,
+        feature_vector: &FeatureVector,
+        existing_position: Option<&UserPosition>,
+    ) -> Result<Option<GraphRecommendationInput>, RecommendationError> {
+        let Some(graph_version) = feature_vector
+            .values
+            .get("graph_version")
+            .and_then(|value| value.as_str())
+            .map(str::to_string)
+        else {
+            return Ok(None);
+        };
+
+        let edges = self.graph_edges_for_item(&graph_version, item_id).await?;
+        if edges.is_empty() {
+            return Ok(None);
+        }
+
+        let paths = build_graph_paths(item_id, &edges);
+        let graph_adjusted_expected_return = feature_vector
+            .values
+            .get("graph_adjusted_momentum_6h")
+            .and_then(|value| value.as_f64());
+        let conversion_gap_pct = feature_vector
+            .values
+            .get("conversion_gap_pct")
+            .and_then(|value| value.as_f64());
+        let link_disagreement = feature_vector
+            .values
+            .get("link_disagreement_6h")
+            .and_then(|value| value.as_f64());
+        let blast_radius_risk = feature_vector
+            .values
+            .get("blast_radius_risk")
+            .and_then(|value| value.as_f64());
+        let strongest_confidence = feature_vector
+            .values
+            .get("strongest_graph_path_confidence")
+            .and_then(|value| value.as_f64());
+
+        Ok(Some(GraphRecommendationInput {
+            item_id,
+            graph_version,
+            graph_paths: paths,
+            graph_edges: edges,
+            graph_adjusted_expected_return,
+            conversion_gap_pct,
+            link_disagreement,
+            blast_radius_risk,
+            execution_confidence: None,
+            historical_path_performance: Some(serde_json::json!({
+                "strongestGraphPathConfidence": strongest_confidence,
+                "graphNeighborCount": feature_vector
+                    .values
+                    .get("graph_neighbor_count")
+                    .and_then(|value| value.as_i64()),
+                "missingNeighborDataCount": feature_vector
+                    .values
+                    .get("graph_missing_neighbor_data_count")
+                    .and_then(|value| value.as_i64()),
+            })),
+            existing_position: existing_position.cloned(),
+        }))
+    }
+
+    async fn graph_edges_for_item(
+        &self,
+        graph_version: &str,
+        item_id: ItemId,
+    ) -> Result<Vec<ItemGraphEdge>, RecommendationError> {
+        let mut edges = self
+            .storage
+            .graph()
+            .active_edges_to(graph_version, item_id)
+            .await?;
+        edges.extend(
+            self.storage
+                .graph()
+                .active_edges_from(graph_version, item_id)
+                .await?,
+        );
+        edges.sort_by_key(|edge| edge.edge_id);
+        edges.dedup_by_key(|edge| edge.edge_id);
+        Ok(edges)
     }
 }
 
@@ -547,6 +658,7 @@ mod tests {
             strategy_votes: vec![signal],
             accuracy_snapshot,
             existing_position,
+            graph_input: None,
         }
     }
 

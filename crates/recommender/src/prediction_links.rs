@@ -2,11 +2,11 @@ use std::collections::HashSet;
 
 use chrono::{DateTime, Utc};
 use grand_edge_domain::{
-    FeatureSnapshot, FeatureVector, ItemId, Prediction, Recommendation, RecommendationAction,
-    RecommendationId, RecommendationPredictionContribution, RecommendationPredictionLink,
-    StrategySignal,
+    FeatureSnapshot, FeatureVector, GraphPath, ItemId, Prediction, Recommendation,
+    RecommendationAction, RecommendationId, RecommendationPredictionContribution,
+    RecommendationPredictionLink, StrategySignal,
 };
-use grand_edge_storage::Storage;
+use grand_edge_storage::{RecommendationGraphLinkRecord, Storage};
 use grand_edge_strategies::strategy_output_to_prediction;
 use uuid::Uuid;
 
@@ -63,6 +63,7 @@ pub async fn persist_recommendation_decision(
     }
 
     let links = build_prediction_links(recommendation.recommendation_id, contributions)?;
+    let graph_links = build_graph_links(recommendation)?;
     let mut transaction = storage.pool().begin().await?;
 
     if let Some(snapshot) = compatibility_feature_snapshot(feature_vector, recommendation.as_of) {
@@ -80,6 +81,12 @@ pub async fn persist_recommendation_decision(
         .recommendations()
         .insert_recommendation_with_links_in_tx(&mut transaction, recommendation, &links)
         .await?;
+    if !graph_links.is_empty() {
+        storage
+            .graph()
+            .insert_recommendation_graph_links_in_tx(&mut transaction, &graph_links)
+            .await?;
+    }
     transaction.commit().await?;
     Ok(())
 }
@@ -97,7 +104,11 @@ pub fn compatibility_feature_snapshot(
         item_id: feature_vector.item_id,
         as_of: feature_vector.as_of,
         feature_set_version: feature_vector.feature_set_version.clone(),
-        graph_version: None,
+        graph_version: feature_vector
+            .values
+            .get("graph_version")
+            .and_then(|value| value.as_str())
+            .map(str::to_string),
         source_window_start: feature_vector.as_of,
         source_window_end: feature_vector.as_of,
         features: feature_vector.values.clone(),
@@ -143,13 +154,67 @@ fn feature_snapshot_id(item_id: ItemId, feature_vector: &FeatureVector) -> Uuid 
     Uuid::new_v4()
 }
 
+fn build_graph_links(
+    recommendation: &Recommendation,
+) -> Result<Vec<RecommendationGraphLinkRecord>, RecommendationError> {
+    let Some(graph_context) = recommendation.explanation.graph_context.as_ref() else {
+        return Ok(Vec::new());
+    };
+
+    let mut links = Vec::new();
+    for path in &graph_context.paths {
+        append_graph_path_links(
+            &mut links,
+            recommendation.recommendation_id,
+            &graph_context.graph_version,
+            path,
+            graph_context.edge_confidence,
+        );
+    }
+
+    Ok(links)
+}
+
+fn append_graph_path_links(
+    links: &mut Vec<RecommendationGraphLinkRecord>,
+    recommendation_id: RecommendationId,
+    graph_version: &str,
+    path: &GraphPath,
+    edge_confidence: Option<f64>,
+) {
+    for step in &path.steps {
+        links.push(RecommendationGraphLinkRecord {
+            link_id: Uuid::new_v4(),
+            recommendation_id,
+            graph_version: graph_version.to_string(),
+            edge_id: Some(step.edge_id),
+            event_id: None,
+            contribution_weight: edge_confidence.or(Some(path.path_confidence)),
+            explanation: serde_json::json!({
+                "source_item_id": path.source_item_id.0,
+                "target_item_id": path.target_item_id.0,
+                "edge_type": step.edge_type,
+                "path_confidence": path.path_confidence,
+                "expected_impact": path.expected_impact,
+            }),
+        });
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use chrono::{TimeZone, Utc};
-    use grand_edge_domain::{FeatureVector, PredictionId, RecommendationPredictionContribution};
+    use grand_edge_domain::{
+        FeatureVector, GraphPath, GraphPathStep, GraphRecommendationAction, PredictionId,
+        Recommendation, RecommendationAction, RecommendationExplanation, RecommendationId,
+        RecommendationPredictionContribution, StructuredRecommendationExplanation,
+    };
     use uuid::Uuid;
 
-    use super::{build_prediction_links, compatibility_feature_snapshot, prediction_contributions};
+    use super::{
+        build_graph_links, build_prediction_links, compatibility_feature_snapshot,
+        prediction_contributions,
+    };
 
     #[test]
     fn build_prediction_links_rejects_duplicate_prediction_id() {
@@ -224,5 +289,59 @@ mod tests {
         assert_eq!(predictions.len(), 1);
         assert_eq!(contributions.len(), 1);
         assert_eq!(contributions[0].contribution_weight, 1.0);
+    }
+
+    #[test]
+    fn graph_links_persist_for_graph_recommendation() {
+        let recommendation_id = RecommendationId(Uuid::new_v4());
+        let links = build_graph_links(&Recommendation {
+            recommendation_id,
+            user_id: None,
+            item_id: grand_edge_domain::ItemId(4151),
+            as_of: Utc.with_ymd_and_hms(2026, 6, 16, 12, 0, 0).unwrap(),
+            action: RecommendationAction::Watch,
+            score: grand_edge_domain::Rate::new(0.2).unwrap(),
+            prediction_confidence: None,
+            execution_confidence: None,
+            recommendation_confidence: grand_edge_domain::Probability::new(0.4).unwrap(),
+            expected_net_gp: None,
+            expected_roi: None,
+            risk_label: None,
+            reasons: Vec::new(),
+            explanation: RecommendationExplanation {
+                feature_set_version: "features_v1".to_string(),
+                market_rules_version: "rules_v1".to_string(),
+                graph_version: Some("graph_v1".to_string()),
+                graph_context: Some(grand_edge_domain::GraphRecommendationContext {
+                    graph_version: "graph_v1".to_string(),
+                    graph_action: Some(GraphRecommendationAction::WatchSecondOrder),
+                    paths: vec![GraphPath {
+                        source_item_id: grand_edge_domain::ItemId(11840),
+                        target_item_id: grand_edge_domain::ItemId(4151),
+                        steps: vec![GraphPathStep {
+                            from_item_id: grand_edge_domain::ItemId(11840),
+                            to_item_id: grand_edge_domain::ItemId(4151),
+                            edge_id: Uuid::new_v4(),
+                            edge_type: grand_edge_domain::GraphEdgeType::IngredientOf,
+                            confidence: 0.9,
+                            weight: 0.8,
+                        }],
+                        path_confidence: 0.9,
+                        expected_impact: Some(0.05),
+                    }],
+                    edge_confidence: Some(0.9),
+                    historical_path_performance: None,
+                }),
+                strategy_votes: Vec::new(),
+                score_components: Vec::new(),
+                accuracy_snapshot: None,
+                structured_explanation: StructuredRecommendationExplanation::default(),
+            },
+        })
+        .unwrap();
+
+        assert_eq!(links.len(), 1);
+        assert_eq!(links[0].graph_version, "graph_v1");
+        assert!(links[0].edge_id.is_some());
     }
 }

@@ -3,7 +3,7 @@ use grand_edge_domain::{
     RecommendationId,
 };
 use serde::{Deserialize, Serialize};
-use sqlx::{PgPool, Row};
+use sqlx::{PgPool, Postgres, Row, Transaction};
 use uuid::Uuid;
 
 use crate::{StorageError, StoredMarketEvent};
@@ -284,6 +284,19 @@ impl GraphRepository {
         &self,
         links: &[RecommendationGraphLinkRecord],
     ) -> Result<u64, StorageError> {
+        let mut transaction = self.pool.begin().await?;
+        let affected = self
+            .insert_recommendation_graph_links_in_tx(&mut transaction, links)
+            .await?;
+        transaction.commit().await?;
+        Ok(affected)
+    }
+
+    pub async fn insert_recommendation_graph_links_in_tx(
+        &self,
+        tx: &mut Transaction<'_, Postgres>,
+        links: &[RecommendationGraphLinkRecord],
+    ) -> Result<u64, StorageError> {
         let mut affected = 0;
         for link in links {
             link.validate()?;
@@ -308,7 +321,7 @@ impl GraphRepository {
             .bind(link.event_id)
             .bind(link.contribution_weight)
             .bind(&link.explanation)
-            .execute(&self.pool)
+            .execute(&mut **tx)
             .await?;
             affected += result.rows_affected();
         }

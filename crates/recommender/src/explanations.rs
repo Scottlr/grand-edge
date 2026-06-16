@@ -1,6 +1,7 @@
 use grand_edge_domain::{
-    FeatureVector, LatestPrice, MarketRules, Prediction, Recommendation, RecommendationAction,
-    RecommendationExplanation, StrategySignal, StructuredRecommendationExplanation, UserPosition,
+    FeatureVector, GraphRecommendationContext, LatestPrice, MarketRules, Prediction,
+    Recommendation, RecommendationAction, RecommendationExplanation, StrategySignal,
+    StructuredRecommendationExplanation, UserPosition,
 };
 
 use crate::{
@@ -8,6 +9,7 @@ use crate::{
     confidence::{
         CalibrationSnapshot, ConfidenceInputs, LiquiditySnapshot, build_confidence_breakdown,
     },
+    graph_actions::{GraphActionDecision, GraphRecommendationInput, build_graph_reason_atoms},
     reason_atoms::{
         DataQualitySnapshot, ReasonAtomInputs, RiskProfile, build_invalidation_rules,
         build_reason_atoms,
@@ -99,6 +101,8 @@ pub struct ExplanationInputs<'a> {
     pub score_components: &'a [ScoreComponent],
     pub accuracy_snapshot: Option<&'a grand_edge_domain::ModelAccuracySnapshot>,
     pub config: &'a RecommendationConfig,
+    pub graph_input: Option<&'a GraphRecommendationInput>,
+    pub graph_decision: Option<&'a GraphActionDecision>,
 }
 
 pub fn build_structured_explanation(
@@ -117,6 +121,12 @@ pub fn build_structured_explanation(
         },
         data_quality: &data_quality,
     })?;
+    let graph_reason_atoms = inputs
+        .graph_input
+        .map(|graph_input| build_graph_reason_atoms(graph_input, inputs.graph_decision))
+        .unwrap_or_default();
+    let mut all_reason_atoms = reason_atoms;
+    all_reason_atoms.extend(graph_reason_atoms);
     let invalidation_rules = build_invalidation_rules(
         inputs.recommendation,
         inputs.score_components,
@@ -149,18 +159,31 @@ pub fn build_structured_explanation(
                 .reduce(f64::max),
         }),
         data_quality: &data_quality,
-        explanation_atoms: &reason_atoms,
+        explanation_atoms: &all_reason_atoms,
     })?;
 
-    let summary = derive_summary(inputs.recommendation.action, &reason_atoms, &confidence);
+    let graph_context = inputs
+        .graph_input
+        .map(|graph_input| GraphRecommendationContext {
+            graph_version: graph_input.graph_version.clone(),
+            graph_action: inputs.graph_decision.map(|decision| decision.action),
+            paths: graph_input.graph_paths.clone(),
+            edge_confidence: inputs
+                .graph_decision
+                .and_then(|decision| decision.edge_confidence),
+            historical_path_performance: graph_input.historical_path_performance.clone(),
+        });
+    let summary = derive_summary(inputs.recommendation.action, &all_reason_atoms, &confidence);
     Ok(StructuredRecommendationExplanation {
         summary,
-        reason_atoms,
+        reason_atoms: all_reason_atoms,
         invalidation_rules,
         confidence,
-        graph_version: None,
-        graph_reason_path_count: None,
-        graph_context: None,
+        graph_version: graph_context
+            .as_ref()
+            .map(|value| value.graph_version.clone()),
+        graph_reason_path_count: graph_context.as_ref().map(|value| value.paths.len()),
+        graph_context,
     })
 }
 
@@ -173,6 +196,8 @@ pub fn build_explanation(
     accuracy_snapshot: Option<grand_edge_domain::ModelAccuracySnapshot>,
     recommendation: &Recommendation,
     config: &RecommendationConfig,
+    graph_input: Option<&GraphRecommendationInput>,
+    graph_decision: Option<&GraphActionDecision>,
 ) -> Result<RecommendationExplanation, RecommendationError> {
     let structured_explanation = build_structured_explanation(ExplanationInputs {
         recommendation,
@@ -183,13 +208,15 @@ pub fn build_explanation(
         score_components,
         accuracy_snapshot: accuracy_snapshot.as_ref(),
         config,
+        graph_input,
+        graph_decision,
     })?;
 
     Ok(RecommendationExplanation {
         feature_set_version: feature_vector.feature_set_version.clone(),
         market_rules_version: market_rules.version.clone(),
-        graph_version: None,
-        graph_context: None,
+        graph_version: structured_explanation.graph_version.clone(),
+        graph_context: structured_explanation.graph_context.clone(),
         strategy_votes,
         score_components: score_components
             .iter()
