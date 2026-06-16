@@ -6,4 +6,6 @@ pub enum StorageError {
     Migration(#[from] sqlx::migrate::MigrateError),
     #[error("serialization error: {0}")]
     Serialization(#[from] serde_json::Error),
+    #[error("domain validation error: {0}")]
+    DomainValidation(#[from] grand_edge_domain::DomainValidationError),
 }
