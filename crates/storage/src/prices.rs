@@ -122,6 +122,34 @@ impl PriceRepository {
 
         rows.into_iter().map(row_to_interval_price).collect()
     }
+
+    pub async fn interval_history_between(
+        &self,
+        item_id: ItemId,
+        interval: PriceInterval,
+        after: DateTime<Utc>,
+        before: DateTime<Utc>,
+    ) -> Result<Vec<IntervalPrice>, StorageError> {
+        let rows = sqlx::query(
+            r#"
+            SELECT item_id, bucket_start, interval, avg_high_price, high_price_volume, avg_low_price, low_price_volume
+            FROM interval_prices
+            WHERE item_id = $1
+              AND interval = $2
+              AND bucket_start > $3
+              AND bucket_start <= $4
+            ORDER BY bucket_start ASC
+            "#,
+        )
+        .bind(item_id.0)
+        .bind(enum_to_string(&interval)?)
+        .bind(after)
+        .bind(before)
+        .fetch_all(&self.pool)
+        .await?;
+
+        rows.into_iter().map(row_to_interval_price).collect()
+    }
 }
 
 fn row_to_latest_price(row: sqlx::postgres::PgRow) -> Result<LatestPrice, StorageError> {
