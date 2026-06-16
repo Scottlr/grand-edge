@@ -148,6 +148,8 @@ fn sample_recommendation() -> Recommendation {
         explanation: RecommendationExplanation {
             feature_set_version: "features_v1".to_string(),
             market_rules_version: "osrs_rules_v1_review_required".to_string(),
+            graph_version: None,
+            graph_context: None,
             strategy_votes: vec![StrategySignal {
                 item_id: ItemId(4151),
                 strategy_id: StrategyId::new("spread_edge").unwrap(),
@@ -204,6 +206,7 @@ fn sample_recommendation() -> Recommendation {
                 },
                 graph_version: None,
                 graph_reason_path_count: None,
+                graph_context: None,
             },
         },
     }

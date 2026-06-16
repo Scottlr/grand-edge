@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{DomainValidationError, Probability, RecommendationId, StrategyId};
+use crate::{
+    DomainValidationError, GraphRecommendationContext, Probability, RecommendationId, StrategyId,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -63,6 +65,8 @@ pub struct StructuredRecommendationExplanation {
     pub graph_version: Option<String>,
     #[serde(default)]
     pub graph_reason_path_count: Option<usize>,
+    #[serde(default)]
+    pub graph_context: Option<GraphRecommendationContext>,
 }
 
 impl Default for ConfidenceBreakdown {
@@ -87,6 +91,7 @@ impl Default for StructuredRecommendationExplanation {
             confidence: ConfidenceBreakdown::default(),
             graph_version: None,
             graph_reason_path_count: None,
+            graph_context: None,
         }
     }
 }

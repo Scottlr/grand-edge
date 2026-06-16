@@ -26,6 +26,8 @@ fn api_recommendations_snapshot_is_stable() {
         explanation: RecommendationExplanation {
             feature_set_version: "features_v1".to_string(),
             market_rules_version: "osrs_rules_v1_review_required".to_string(),
+            graph_version: None,
+            graph_context: None,
             strategy_votes: vec![StrategySignal {
                 item_id: ItemId(4151),
                 strategy_id: StrategyId("spread_edge_v1".to_string()),

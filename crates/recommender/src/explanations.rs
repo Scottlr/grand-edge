@@ -160,6 +160,7 @@ pub fn build_structured_explanation(
         confidence,
         graph_version: None,
         graph_reason_path_count: None,
+        graph_context: None,
     })
 }
 
@@ -187,6 +188,8 @@ pub fn build_explanation(
     Ok(RecommendationExplanation {
         feature_set_version: feature_vector.feature_set_version.clone(),
         market_rules_version: market_rules.version.clone(),
+        graph_version: None,
+        graph_context: None,
         strategy_votes,
         score_components: score_components
             .iter()

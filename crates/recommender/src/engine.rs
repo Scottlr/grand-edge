@@ -243,6 +243,8 @@ impl RecommendationEngine {
             explanation: grand_edge_domain::RecommendationExplanation {
                 feature_set_version: input.feature_vector.feature_set_version.clone(),
                 market_rules_version: self.config.market_rules.version.clone(),
+                graph_version: None,
+                graph_context: None,
                 strategy_votes: Vec::new(),
                 score_components: Vec::new(),
                 accuracy_snapshot: None,
