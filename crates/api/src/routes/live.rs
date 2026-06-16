@@ -10,7 +10,7 @@ use tokio_stream::{StreamExt, wrappers::BroadcastStream};
 use utoipa::ToSchema;
 use uuid::Uuid;
 
-use crate::{routes::recommendations::RecommendationActionDto, state::AppState};
+use crate::{recommendations::view::RecommendationActionDto, state::AppState};
 
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 #[serde(tag = "type", rename_all = "snake_case")]

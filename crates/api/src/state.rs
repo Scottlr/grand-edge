@@ -4,7 +4,7 @@ use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use grand_edge_domain::{
     Gp, Item, ItemId, PositionId, PriceInterval, Quantity, Recommendation, RecommendationAction,
-    RecommendationExplanation, RunId, UserId, UserPosition,
+    RunId, UserId, UserPosition,
 };
 use grand_edge_metrics::MetricsEngine;
 use grand_edge_recommender::{RecommendationConfig, RecommendationEngine};
@@ -59,7 +59,7 @@ pub trait ApiServices: Send + Sync {
     async fn get_recommendation_explanation(
         &self,
         recommendation_id: grand_edge_domain::RecommendationId,
-    ) -> Result<Option<RecommendationExplanation>, ApiError>;
+    ) -> Result<Option<Recommendation>, ApiError>;
     async fn list_strategies(&self) -> Result<Vec<StrategyStatusRecord>, ApiError>;
     async fn patch_strategy(
         &self,
@@ -217,13 +217,12 @@ impl ApiServices for RuntimeServices {
     async fn get_recommendation_explanation(
         &self,
         recommendation_id: grand_edge_domain::RecommendationId,
-    ) -> Result<Option<RecommendationExplanation>, ApiError> {
+    ) -> Result<Option<Recommendation>, ApiError> {
         Ok(self
             .storage
             .recommendations()
             .get_recommendation(recommendation_id)
-            .await?
-            .map(|recommendation| recommendation.explanation))
+            .await?)
     }
 
     async fn list_strategies(&self) -> Result<Vec<StrategyStatusRecord>, ApiError> {

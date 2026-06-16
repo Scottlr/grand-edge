@@ -1,47 +1,105 @@
 ---
 source: crates/api/tests/api_contract.rs
-expression: "RecommendationDto::from(recommendation)"
+assertion_line: 187
+expression: "RecommendationDto::from_parts(recommendation_fixture(false, true, false),\nSome(base_item(\"https://oldschool.runescape.wiki/images/Abyssal_whip.png\")),)"
 ---
 {
   "recommendationId": "00000000-0000-0000-0000-000000000000",
   "userId": "00000000-0000-0000-0000-000000000000",
   "itemId": 4151,
+  "itemName": "Abyssal whip",
+  "itemIcon": {
+    "sourceFileName": "Abyssal whip.png",
+    "canonicalFileName": "Abyssal_whip.png",
+    "cdnUrl": "https://oldschool.runescape.wiki/images/Abyssal_whip.png",
+    "source": "mapping_icon"
+  },
   "asOf": "2026-06-16T12:00:00Z",
   "action": "buy",
   "score": 0.9,
+  "confidence": 0.75,
   "predictionConfidence": 0.8,
   "executionConfidence": 0.7,
   "recommendationConfidence": 0.75,
+  "execution": {
+    "observedVolume": 400,
+    "observedVolumeZ": 1.2,
+    "estimatedFillProbability": 0.6,
+    "estimatedCapacity": 8,
+    "liquidityConfidence": 0.7,
+    "note": "Observed volume is a proxy, not true GE depth."
+  },
   "expectedNetGp": 1400,
   "expectedRoi": 0.03,
   "riskLabel": "low",
+  "horizonSeconds": 3600,
+  "primaryReason": "Tax-adjusted edge clears threshold",
   "reasons": [
     "Tax-adjusted edge clears threshold"
   ],
-  "explanation": {
-    "featureSetVersion": "features_v1",
-    "marketRulesVersion": "osrs_rules_v1_review_required",
-    "strategyVotes": [
+  "invalidationRules": [
+    {
+      "metric": "final_score",
+      "operator": "<",
+      "threshold": "0.05",
+      "currentValue": "0.9",
+      "reason": "Score threshold"
+    }
+  ],
+  "modelAgreement": 1.0,
+  "confidenceBreakdown": {
+    "confidence": 0.75,
+    "predictionConfidence": 0.8,
+    "executionConfidence": 0.7,
+    "recommendationConfidence": 0.75,
+    "modelAgreementLabel": "high agreement",
+    "recentAccuracy": null,
+    "dataQualityLabel": "live",
+    "executionQualityLabel": "estimated",
+    "regimeLabel": null,
+    "penalties": [
       {
-        "itemId": 4151,
-        "strategyId": "spread_edge_v1",
-        "modelVersion": "v1",
-        "asOf": "2026-06-16T12:00:00Z",
-        "side": "buy",
-        "horizonSecs": 3600,
-        "confidence": 0.8,
-        "expectedReturn": 0.03,
-        "expectedNetGpPerUnit": 1400
+        "key": "liquidity_penalty",
+        "label": "Liquidity penalty",
+        "value": -0.05,
+        "weight": null
       }
-    ],
-    "scoreComponents": [
-      {
-        "key": "edge",
-        "label": "Edge",
-        "value": 0.7,
-        "weight": 0.5
+    ]
+  },
+  "strategyVotes": [
+    {
+      "itemId": 4151,
+      "strategyId": "spread_edge_v1",
+      "modelVersion": "v1",
+      "asOf": "2026-06-16T12:00:00Z",
+      "side": "buy",
+      "horizonSecs": 3600,
+      "confidence": 0.8,
+      "expectedReturn": 0.03,
+      "expectedNetGpPerUnit": 1400,
+      "targetEntry": 100000,
+      "targetExit": 104000,
+      "stopLoss": 99000,
+      "takeProfit": 104000,
+      "maxQuantity": 8,
+      "execution": {
+        "observedVolume": 400,
+        "observedVolumeZ": 1.2,
+        "estimatedFillProbability": 0.6,
+        "estimatedCapacity": 8,
+        "liquidityConfidence": 0.7,
+        "note": "Observed volume is a proxy, not true GE depth."
+      },
+      "explanation": {
+        "reason": "fixture"
       }
-    ],
-    "accuracySnapshot": null
+    }
+  ],
+  "accuracy": null,
+  "dataState": "live",
+  "marketStatus": {
+    "dataState": "live",
+    "staleReason": null,
+    "degradedReason": null
   }
 }

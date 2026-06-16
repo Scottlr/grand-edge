@@ -36,7 +36,7 @@ pub struct HistoryQuery {
     pub before: Option<DateTime<Utc>>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ItemIconDto {
     pub source_file_name: String,

@@ -63,7 +63,7 @@ function buildCommandCards(
   const cashoutCandidates = recommendations.filter((entry) => entry.action === "cashout");
   const watchCandidates = recommendations.filter((entry) => entry.action === "watch");
   const disagreementCandidates = recommendations.filter((entry) => {
-    const voteSides = new Set(entry.explanation.strategyVotes.map((vote) => vote.side));
+    const voteSides = new Set(entry.strategyVotes.map((vote) => vote.side));
     return voteSides.size > 1;
   });
   const atRiskCandidates = recommendations.filter(
@@ -119,7 +119,7 @@ function buildCommandCards(
       summary: "Recommendations whose strategy votes pull in different directions.",
       recommendation:
         disagreementCandidates.sort(
-          (left, right) => right.explanation.strategyVotes.length - left.explanation.strategyVotes.length,
+          (left, right) => right.strategyVotes.length - left.strategyVotes.length,
         )[0] ?? null,
       tone: "watch",
       icon: Layers3,
