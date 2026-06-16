@@ -5,8 +5,8 @@ use clap::Parser;
 use cli::{Cli, Command};
 use commands::{
     analytics_archive, analytics_export_features, backtest_report, config_print, corpus_import,
-    corpus_validate, doctor_summary, graph_import_relations, model_compare_help, schema_export,
-    unavailable_message,
+    corpus_validate, doctor_summary, graph_discover_edges, graph_import_relations,
+    model_compare_help, schema_export, unavailable_message,
 };
 use grand_edge_configuration::load_config;
 use miette::IntoDiagnostic;
@@ -152,6 +152,18 @@ async fn main() -> miette::Result<()> {
         Command::Graph { command } => match command {
             cli::GraphCommand::ImportRelations { root, dry_run } => {
                 let report = graph_import_relations(cli.profile, &root, dry_run)
+                    .await
+                    .map_err(|error| miette::miette!("{error}"))?;
+                println!("{report}");
+            }
+            cli::GraphCommand::DiscoverEdges {
+                from: _,
+                to: _,
+                method,
+                dry_run,
+                fixture,
+            } => {
+                let report = graph_discover_edges(fixture, dry_run, &method)
                     .await
                     .map_err(|error| miette::miette!("{error}"))?;
                 println!("{report}");

@@ -170,6 +170,18 @@ pub enum GraphCommand {
         #[arg(long, default_value_t = false)]
         dry_run: bool,
     },
+    DiscoverEdges {
+        #[arg(long)]
+        from: Option<String>,
+        #[arg(long)]
+        to: Option<String>,
+        #[arg(long, default_value = "granger_style")]
+        method: String,
+        #[arg(long, default_value_t = true)]
+        dry_run: bool,
+        #[arg(long, default_value_t = false)]
+        fixture: bool,
+    },
 }
 
 #[derive(Debug, Clone, Subcommand)]
