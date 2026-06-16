@@ -1,13 +1,14 @@
 use chrono::{DateTime, Utc};
 use grand_edge_domain::{IntervalPrice, Item, ItemGraphEdge, LatestPrice};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NeighborPriceHistory {
     pub edge: ItemGraphEdge,
     pub interval_1h: Vec<IntervalPrice>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GraphFeatureContext {
     pub graph_version: String,
     pub incoming_neighbors: Vec<NeighborPriceHistory>,
@@ -15,7 +16,7 @@ pub struct GraphFeatureContext {
     pub sector_neighbors: Vec<NeighborPriceHistory>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ItemFeatureInput {
     pub item: Item,
     pub latest: LatestPrice,

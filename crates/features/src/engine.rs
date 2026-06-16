@@ -84,6 +84,13 @@ impl FeatureEngine {
         &self,
         input: ItemFeatureInput,
     ) -> Result<FeatureVector, FeatureError> {
+        Self::compute_item_features_with_config(&self.config, input)
+    }
+
+    pub fn compute_item_features_with_config(
+        config: &FeatureEngineConfig,
+        input: ItemFeatureInput,
+    ) -> Result<FeatureVector, FeatureError> {
         let latest_high = input.latest.high.map(Gp::as_i64);
         let latest_low = input.latest.low.map(Gp::as_i64);
         let mid = mid_price(latest_high, latest_low);
@@ -109,8 +116,7 @@ impl FeatureEngine {
             .zip(rolling_mean_24h)
             .zip(rolling_std_24h)
             .and_then(|((mid, mean), std)| z_score(mid, mean, std));
-        let ewma_volatility_24h =
-            ewma_variance(&hourly_returns, self.config.ewma_lambda).map(f64::sqrt);
+        let ewma_volatility_24h = ewma_variance(&hourly_returns, config.ewma_lambda).map(f64::sqrt);
         let observed_volume_rolling_mean = rolling_mean(&hourly_observed_volumes);
         let observed_volume_rolling_std = rolling_std(&hourly_observed_volumes);
         let observed_volume_z_24h = observed_volume_1h
@@ -192,7 +198,7 @@ impl FeatureEngine {
                 ewma_volatility_24h,
                 mid,
                 &graph_context,
-                &self.config.graph,
+                &config.graph,
             );
             values.extend(graph_snapshot.values);
         }

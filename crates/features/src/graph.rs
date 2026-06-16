@@ -1,4 +1,5 @@
 use grand_edge_domain::{Gp, GraphEdgeType};
+use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value, json};
 
 use crate::snapshot::{GraphFeatureContext, NeighborPriceHistory};
@@ -24,7 +25,7 @@ pub const GRAPH_FEATURE_KEYS: &[&str] = &[
     "graph_missing_neighbor_data_count",
 ];
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GraphFeatureConfig {
     pub max_graph_depth: usize,
     pub min_edge_confidence: f64,
