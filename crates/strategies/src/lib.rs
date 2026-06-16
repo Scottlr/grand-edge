@@ -6,6 +6,7 @@ pub mod config;
 pub mod context;
 pub mod errors;
 pub mod math;
+pub mod prediction_adapter;
 pub mod registry;
 pub mod traits;
 pub mod uncertainty;
@@ -29,6 +30,7 @@ pub use math::{
     ArBaselineConfig, ArForecast, KalmanConfig, KalmanState, KalmanUpdate, forecast_next_price,
     kalman_update,
 };
+pub use prediction_adapter::{PredictionBatch, PredictionSource, strategy_output_to_prediction};
 pub use registry::{StrategyRegistry, StrategyRunResult};
 pub use traits::Strategy;
 pub use uncertainty::{

@@ -1341,12 +1341,14 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "grand-edge-domain",
+ "grand-edge-strategies",
  "ort",
  "serde",
  "serde_json",
  "sha2",
  "tempfile",
  "thiserror",
+ "uuid",
 ]
 
 [[package]]
@@ -1359,6 +1361,7 @@ dependencies = [
  "grand-edge-metrics",
  "grand-edge-simulator",
  "grand-edge-storage",
+ "grand-edge-strategies",
  "insta",
  "proptest",
  "rstest",
@@ -1418,6 +1421,7 @@ dependencies = [
  "serde_json",
  "thiserror",
  "tokio",
+ "uuid",
 ]
 
 [[package]]

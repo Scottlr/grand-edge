@@ -4,13 +4,13 @@ use serde_json::{Map, Value, json};
 use crate::{
     artifacts::ValidatedArtifactBundle,
     errors::ModelRuntimeError,
-    runtime::{InferenceOutput, InferenceRequest},
+    runtime::{InferenceRequest, ModelRuntimePrediction, inference_to_prediction},
 };
 
 pub fn infer(
     request: InferenceRequest,
     bundle: &ValidatedArtifactBundle,
-) -> Result<InferenceOutput, ModelRuntimeError> {
+) -> Result<ModelRuntimePrediction, ModelRuntimeError> {
     let coefficient_model = bundle
         .coefficient_model
         .as_ref()
@@ -37,18 +37,13 @@ pub fn infer(
     }
 
     let probability_positive = sigmoid(linear_score);
-    Ok(InferenceOutput {
-        strategy_id: grand_edge_domain::StrategyId::new(
-            bundle.bundle.metadata.strategy_id.clone(),
-        )?,
-        model_version: grand_edge_domain::ModelVersion::new(
-            bundle.bundle.metadata.model_version.clone(),
-        )?,
-        item_id: request.item_id,
-        as_of: request.as_of,
-        expected_return: Rate::new(linear_score)?,
-        probability_positive: Probability::new(probability_positive)?,
-        explanation: json!({
+    inference_to_prediction(
+        &request,
+        grand_edge_domain::StrategyId::new(bundle.bundle.metadata.strategy_id.clone())?,
+        grand_edge_domain::ModelVersion::new(bundle.bundle.metadata.model_version.clone())?,
+        Rate::new(linear_score)?,
+        Probability::new(probability_positive)?,
+        json!({
             "backend": "coefficients",
             "model_id": coefficient_model.model_id,
             "feature_schema_hash": bundle.feature_schema_hash(),
@@ -56,7 +51,8 @@ pub fn infer(
             "linear_score": linear_score,
             "contributions": contributions,
         }),
-    })
+        grand_edge_strategies::PredictionSource::ModelRuntime,
+    )
 }
 
 fn feature_number(feature_vector: &FeatureVector, name: &str) -> Result<f64, ModelRuntimeError> {

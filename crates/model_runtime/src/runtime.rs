@@ -1,8 +1,13 @@
 use std::path::{Path, PathBuf};
 
 use chrono::{DateTime, Utc};
-use grand_edge_domain::{FeatureVector, ItemId, ModelVersion, Probability, Rate, StrategyId};
+use grand_edge_domain::{
+    FeatureVector, ItemId, ModelVersion, Prediction, PredictionDirection, PredictionId,
+    Probability, Rate, StrategyId,
+};
+use grand_edge_strategies::PredictionSource;
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 use crate::{
     artifacts::{ArtifactBundle, ValidatedArtifactBundle},
@@ -12,6 +17,7 @@ use crate::{
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct InferenceRequest {
+    pub feature_snapshot_id: Uuid,
     pub item_id: ItemId,
     pub as_of: DateTime<Utc>,
     pub feature_vector: FeatureVector,
@@ -19,14 +25,11 @@ pub struct InferenceRequest {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct InferenceOutput {
-    pub strategy_id: StrategyId,
-    pub model_version: ModelVersion,
-    pub item_id: ItemId,
-    pub as_of: DateTime<Utc>,
-    pub expected_return: Rate,
-    pub probability_positive: Probability,
-    pub explanation: serde_json::Value,
+pub struct ModelRuntimePrediction {
+    pub prediction: Prediction,
+    pub source: PredictionSource,
+    pub artifact_hash: String,
+    pub feature_schema_hash: String,
 }
 
 pub struct ModelRuntime {
@@ -61,7 +64,10 @@ impl ModelRuntime {
         ArtifactBundle::from_root(artifact_path, as_of)
     }
 
-    pub fn infer(&self, request: InferenceRequest) -> Result<InferenceOutput, ModelRuntimeError> {
+    pub fn infer(
+        &self,
+        request: InferenceRequest,
+    ) -> Result<ModelRuntimePrediction, ModelRuntimeError> {
         let artifact = request.artifact.clone();
         if request.feature_vector.feature_set_version
             != artifact.bundle.metadata.feature_set_version
@@ -100,6 +106,45 @@ impl ModelRuntime {
             "artifact bundle had no inference backend".to_string(),
         ))
     }
+}
+
+pub(crate) fn inference_to_prediction(
+    request: &InferenceRequest,
+    strategy_id: StrategyId,
+    model_version: ModelVersion,
+    expected_return: Rate,
+    probability_positive: Probability,
+    explanation: serde_json::Value,
+    source: PredictionSource,
+) -> Result<ModelRuntimePrediction, ModelRuntimeError> {
+    let predicted_direction = if expected_return.get() > 0.0 {
+        PredictionDirection::Up
+    } else if expected_return.get() < 0.0 {
+        PredictionDirection::Down
+    } else {
+        PredictionDirection::Flat
+    };
+
+    Ok(ModelRuntimePrediction {
+        prediction: Prediction {
+            prediction_id: PredictionId(Uuid::new_v4()),
+            feature_snapshot_id: request.feature_snapshot_id,
+            item_id: request.item_id,
+            as_of: request.as_of,
+            horizon_secs: grand_edge_domain::HorizonSecs(3_600),
+            model_id: strategy_id,
+            model_version,
+            predicted_direction,
+            predicted_return: Some(expected_return),
+            confidence: probability_positive,
+            prediction_interval: None,
+            explanation,
+            created_at: request.as_of,
+        },
+        source,
+        artifact_hash: request.artifact.bundle.metadata.artifact_uri.clone(),
+        feature_schema_hash: request.artifact.feature_schema_hash().to_string(),
+    })
 }
 
 fn validate_feature_vector(

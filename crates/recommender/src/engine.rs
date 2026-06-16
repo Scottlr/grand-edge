@@ -14,6 +14,9 @@ use crate::{
     RecommendationConfig, RecommendationError, RecommendationScore,
     actions::map_action,
     explanations::{build_explanation, build_reasons},
+    prediction_links::{
+        compatibility_feature_snapshot, persist_recommendation_decision, prediction_contributions,
+    },
     quantity::size_quantity,
     scoring::score_candidate,
 };
@@ -106,10 +109,6 @@ impl RecommendationEngine {
             recommendations.push(recommendation);
         }
 
-        self.storage
-            .recommendations()
-            .insert_recommendations(&recommendations)
-            .await?;
         Ok(recommendations)
     }
 
@@ -328,7 +327,23 @@ impl RecommendationEngine {
             existing_position,
         };
 
-        let recommendation = self.build_recommendation(input)?;
+        let recommendation = self.build_recommendation(input.clone())?;
+        let snapshot = compatibility_feature_snapshot(&input.feature_vector, input.as_of).ok_or(
+            RecommendationError::MissingFeatures(input.feature_vector.item_id.0),
+        )?;
+        let (predictions, contributions) = prediction_contributions(
+            snapshot.feature_snapshot_id,
+            input.as_of,
+            &input.strategy_votes,
+        )?;
+        persist_recommendation_decision(
+            &self.storage,
+            &recommendation,
+            &input.feature_vector,
+            &predictions,
+            &contributions,
+        )
+        .await?;
         let _simulator_reference = &self.simulator;
         Ok(recommendation)
     }

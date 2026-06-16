@@ -2,7 +2,7 @@ use grand_edge_domain::{
     Gp, ItemId, Probability, Rate, Recommendation, RecommendationAction, RecommendationExplanation,
     RecommendationId, RecommendationPredictionLink, UserId,
 };
-use sqlx::{PgPool, Row};
+use sqlx::{PgPool, Postgres, Row, Transaction};
 use uuid::Uuid;
 
 use crate::StorageError;
@@ -36,7 +36,19 @@ impl RecommendationRepository {
         links: &[RecommendationPredictionLink],
     ) -> Result<(), StorageError> {
         let mut transaction = self.pool.begin().await?;
-        execute_insert_recommendation(&mut *transaction, recommendation).await?;
+        self.insert_recommendation_with_links_in_tx(&mut transaction, recommendation, links)
+            .await?;
+        transaction.commit().await?;
+        Ok(())
+    }
+
+    pub async fn insert_recommendation_with_links_in_tx(
+        &self,
+        tx: &mut Transaction<'_, Postgres>,
+        recommendation: &Recommendation,
+        links: &[RecommendationPredictionLink],
+    ) -> Result<(), StorageError> {
+        execute_insert_recommendation(&mut **tx, recommendation).await?;
 
         for link in links {
             let link = RecommendationPredictionLink::new(
@@ -58,11 +70,10 @@ impl RecommendationRepository {
             .bind(link.recommendation_id.0)
             .bind(link.prediction_id.0)
             .bind(link.contribution_weight)
-            .execute(&mut *transaction)
+            .execute(&mut **tx)
             .await?;
         }
 
-        transaction.commit().await?;
         Ok(())
     }
 

@@ -12,4 +12,4 @@ pub use artifacts::{
     ArtifactBundle, ModelArtifactKind, ModelArtifactMetadata, ValidatedArtifactBundle,
 };
 pub use errors::ModelRuntimeError;
-pub use runtime::{InferenceOutput, InferenceRequest, ModelRuntime};
+pub use runtime::{InferenceRequest, ModelRuntime, ModelRuntimePrediction};
