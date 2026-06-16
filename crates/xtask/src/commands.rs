@@ -4,6 +4,11 @@ use std::fmt::Display;
 use std::path::{Path, PathBuf};
 
 use async_trait::async_trait;
+use chrono::{DateTime, NaiveDate, Utc};
+use grand_edge_analytics::{
+    BacktestReportRequest, DatasetExportRequest, export_backtest_report_from_storage,
+    export_feature_dataset_from_storage,
+};
 use grand_edge_configuration::{ConfigProfile, GrandEdgeConfig, load_config};
 use grand_edge_domain::{GraphVersion, ItemGraphEdge, ItemGraphNode};
 use grand_edge_ingest::{
@@ -13,6 +18,7 @@ use grand_edge_ingest::{
 };
 use grand_edge_storage::{Storage, StoredCorpusSource, StoredMarketEvent};
 use secrecy::ExposeSecret;
+use uuid::Uuid;
 
 pub use schema::schema_export;
 
@@ -122,6 +128,60 @@ pub async fn corpus_import(
     Ok(render_corpus_report(&report)?)
 }
 
+pub async fn analytics_export_features(
+    profile: ConfigProfile,
+    from: &str,
+    to: &str,
+    out: &str,
+    feature_set_version: &str,
+    include_predictions: bool,
+    include_outcomes: bool,
+    include_raw_interval_candles: bool,
+) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
+    let config = load_config(profile)?;
+    let storage = Storage::connect(config.database.url.expose_secret()).await?;
+    let request = DatasetExportRequest {
+        output_dir: repo_relative_path(out)?,
+        feature_set_version: feature_set_version.to_string(),
+        item_ids: None,
+        window_start: parse_utc_date(from)?,
+        window_end: parse_utc_date(to)?,
+        include_predictions,
+        include_outcomes,
+        include_raw_interval_candles,
+    };
+    let report = export_feature_dataset_from_storage(&storage, &request).await?;
+    Ok(serde_json::to_string_pretty(&report.manifest)?)
+}
+
+pub async fn backtest_report(
+    profile: ConfigProfile,
+    run_id: &str,
+    out: &str,
+    feature_set_version: &str,
+) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
+    let config = load_config(profile)?;
+    let storage = Storage::connect(config.database.url.expose_secret()).await?;
+    let request = BacktestReportRequest {
+        run_id: Uuid::parse_str(run_id)?,
+        output_dir: repo_relative_path(out)?,
+        feature_set_version: feature_set_version.to_string(),
+    };
+    let report = export_backtest_report_from_storage(&storage, &request).await?;
+    Ok(serde_json::to_string_pretty(&report.manifest)?)
+}
+
+pub fn model_compare_help(
+    strategies: &[String],
+    window: &str,
+) -> Result<String, serde_json::Error> {
+    serde_json::to_string_pretty(&serde_json::json!({
+        "strategies": strategies,
+        "window": window,
+        "note": "Model comparison wiring is reserved for analytics exports and latest stored metrics."
+    }))
+}
+
 fn relation_root(root: &str) -> Result<PathBuf, std::io::Error> {
     let candidate = Path::new(root);
     if candidate.is_absolute() {
@@ -207,6 +267,29 @@ fn corpus_root(root: &str) -> Result<PathBuf, std::io::Error> {
         .join("../..")
         .join(candidate)
         .canonicalize()
+}
+
+fn repo_relative_path(path: &str) -> Result<PathBuf, std::io::Error> {
+    let candidate = Path::new(path);
+    if candidate.is_absolute() {
+        return Ok(candidate.to_path_buf());
+    }
+
+    Ok(PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../..")
+        .join(candidate))
+}
+
+fn parse_utc_date(input: &str) -> Result<DateTime<Utc>, Box<dyn std::error::Error + Send + Sync>> {
+    if let Ok(timestamp) = DateTime::parse_from_rfc3339(input) {
+        return Ok(timestamp.with_timezone(&Utc));
+    }
+
+    let date = NaiveDate::parse_from_str(input, "%Y-%m-%d")?;
+    Ok(date
+        .and_hms_opt(0, 0, 0)
+        .expect("midnight is valid")
+        .and_utc())
 }
 
 fn tool_available(name: &str) -> &'static str {

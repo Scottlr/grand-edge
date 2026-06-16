@@ -150,6 +150,41 @@ impl PriceRepository {
 
         rows.into_iter().map(row_to_interval_price).collect()
     }
+
+    pub async fn list_between(
+        &self,
+        item_ids: Option<&[ItemId]>,
+        interval: Option<PriceInterval>,
+        window_start: DateTime<Utc>,
+        window_end: DateTime<Utc>,
+    ) -> Result<Vec<IntervalPrice>, StorageError> {
+        let interval = interval.map(|value| enum_to_string(&value)).transpose()?;
+        let rows = sqlx::query(
+            r#"
+            SELECT item_id, bucket_start, interval, avg_high_price, high_price_volume, avg_low_price, low_price_volume
+            FROM interval_prices
+            WHERE bucket_start >= $1
+              AND bucket_start <= $2
+              AND ($3::text IS NULL OR interval = $3)
+            ORDER BY bucket_start ASC, item_id ASC
+            "#,
+        )
+        .bind(window_start)
+        .bind(window_end)
+        .bind(interval)
+        .fetch_all(&self.pool)
+        .await?;
+
+        rows.into_iter()
+            .filter_map(|row| {
+                let item_id = ItemId(row.try_get::<i64, _>("item_id").ok()?);
+                if item_ids.is_some_and(|ids| !ids.contains(&item_id)) {
+                    return None;
+                }
+                Some(row_to_interval_price(row))
+            })
+            .collect()
+    }
 }
 
 fn row_to_latest_price(row: sqlx::postgres::PgRow) -> Result<LatestPrice, StorageError> {

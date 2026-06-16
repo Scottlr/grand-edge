@@ -208,6 +208,52 @@ impl StrategyRepository {
 
         rows.into_iter().map(TryFrom::try_from).collect()
     }
+
+    pub async fn list_predictions_between(
+        &self,
+        item_ids: Option<&[ItemId]>,
+        window_start: DateTime<Utc>,
+        window_end: DateTime<Utc>,
+    ) -> Result<Vec<StoredPrediction>, StorageError> {
+        let rows = sqlx::query_as::<_, PredictionRow>(
+            r#"
+            SELECT
+                strategy_id,
+                model_version,
+                item_id,
+                as_of,
+                horizon_secs,
+                side,
+                expected_return,
+                confidence,
+                expected_net_gp_per_unit,
+                target_entry,
+                target_exit,
+                stop_loss,
+                take_profit,
+                max_quantity,
+                explanation
+            FROM strategy_predictions
+            WHERE as_of >= $1
+              AND as_of <= $2
+            ORDER BY as_of ASC, item_id ASC, strategy_id ASC
+            "#,
+        )
+        .bind(window_start)
+        .bind(window_end)
+        .fetch_all(&self.pool)
+        .await?;
+
+        rows.into_iter()
+            .filter_map(|row| {
+                let item_id = ItemId(row.item_id);
+                if item_ids.is_some_and(|ids| !ids.contains(&item_id)) {
+                    return None;
+                }
+                Some(StoredPrediction::try_from(row))
+            })
+            .collect()
+    }
 }
 
 fn enum_to_string<T: serde::Serialize>(value: &T) -> Result<String, StorageError> {

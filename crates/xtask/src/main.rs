@@ -4,8 +4,8 @@ mod commands;
 use clap::Parser;
 use cli::{Cli, Command};
 use commands::{
-    config_print, corpus_import, corpus_validate, doctor_summary, graph_import_relations,
-    schema_export, unavailable_message,
+    analytics_export_features, backtest_report, config_print, corpus_import, corpus_validate,
+    doctor_summary, graph_import_relations, model_compare_help, schema_export, unavailable_message,
 };
 use grand_edge_configuration::load_config;
 use miette::IntoDiagnostic;
@@ -49,24 +49,68 @@ async fn main() -> miette::Result<()> {
                 unavailable_message("features", cli.profile, "features").message
             ));
         }
-        Command::Backtest { .. } => {
-            return Err(miette::miette!(
-                "{}",
-                unavailable_message("backtest", cli.profile, "backtest").message
-            ));
-        }
-        Command::Analytics { .. } => {
-            return Err(miette::miette!(
-                "{}",
-                unavailable_message("analytics", cli.profile, "analytics").message
-            ));
-        }
-        Command::Model { .. } => {
-            return Err(miette::miette!(
-                "{}",
-                unavailable_message("model_runtime", cli.profile, "model").message
-            ));
-        }
+        Command::Backtest { command } => match command {
+            cli::BacktestCommand::Run { .. } => {
+                return Err(miette::miette!(
+                    "{}",
+                    unavailable_message("backtest execution", cli.profile, "backtest").message
+                ));
+            }
+            cli::BacktestCommand::Report {
+                run_id,
+                out,
+                feature_set_version,
+            } => {
+                let report = backtest_report(cli.profile, &run_id, &out, &feature_set_version)
+                    .await
+                    .map_err(|error| miette::miette!("{error}"))?;
+                println!("{report}");
+            }
+        },
+        Command::Analytics { command } => match command {
+            cli::AnalyticsCommand::ExportFeatures {
+                from,
+                to,
+                out,
+                feature_set_version,
+                include_predictions,
+                include_outcomes,
+                include_raw_interval_candles,
+            } => {
+                let report = analytics_export_features(
+                    cli.profile,
+                    &from,
+                    &to,
+                    &out,
+                    &feature_set_version,
+                    include_predictions,
+                    include_outcomes,
+                    include_raw_interval_candles,
+                )
+                .await
+                .map_err(|error| miette::miette!("{error}"))?;
+                println!("{report}");
+            }
+        },
+        Command::Model { command } => match command {
+            cli::ModelCommand::Validate { .. } => {
+                return Err(miette::miette!(
+                    "{}",
+                    unavailable_message("model_runtime", cli.profile, "model validate").message
+                ));
+            }
+            cli::ModelCommand::Evaluate { .. } => {
+                return Err(miette::miette!(
+                    "{}",
+                    unavailable_message("model_runtime", cli.profile, "model evaluate").message
+                ));
+            }
+            cli::ModelCommand::Compare { strategies, window } => {
+                let report = model_compare_help(&strategies, &window)
+                    .map_err(|error| miette::miette!("{error}"))?;
+                println!("{report}");
+            }
+        },
         Command::Schema { command } => match command {
             cli::SchemaCommand::Export { out } => {
                 let report = schema_export(&out)
