@@ -7,6 +7,7 @@ mod dto;
 mod errors;
 mod jobs;
 mod normalize;
+mod relations;
 mod scheduler;
 mod wiki_images;
 
@@ -17,5 +18,6 @@ pub use dto::*;
 pub use errors::*;
 pub use jobs::*;
 pub use normalize::*;
+pub use relations::*;
 pub use scheduler::*;
 pub use wiki_images::*;

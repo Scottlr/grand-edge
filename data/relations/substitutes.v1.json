@@ -1,0 +1,17 @@
+{
+  "schema_version": "v1",
+  "relation_version": "substitutes_v1",
+  "source_ids": [
+    "manual_mechanical_review_v1"
+  ],
+  "generated_at": "2026-06-16T12:00:00Z",
+  "entries": [
+    {
+      "primary_item_id": 4151,
+      "substitute_item_ids": [13265],
+      "confidence": 0.75,
+      "source_ref": "manual_mechanical_review_v1",
+      "requires_review": false
+    }
+  ]
+}

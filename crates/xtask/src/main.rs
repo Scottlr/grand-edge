@@ -3,7 +3,7 @@ mod commands;
 
 use clap::Parser;
 use cli::{Cli, Command};
-use commands::{config_print, doctor_summary, unavailable_message};
+use commands::{config_print, doctor_summary, graph_import_relations, unavailable_message};
 use grand_edge_configuration::load_config;
 use miette::IntoDiagnostic;
 
@@ -70,6 +70,14 @@ async fn main() -> miette::Result<()> {
                 unavailable_message("schema export", cli.profile, "schema").message
             ));
         }
+        Command::Graph { command } => match command {
+            cli::GraphCommand::ImportRelations { root, dry_run } => {
+                let report = graph_import_relations(cli.profile, &root, dry_run)
+                    .await
+                    .map_err(|error| miette::miette!("{error}"))?;
+                println!("{report}");
+            }
+        },
         Command::Server { .. } => {
             return Err(miette::miette!(
                 "{}",

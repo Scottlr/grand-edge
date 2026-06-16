@@ -1,0 +1,18 @@
+{
+  "schema_version": "v1",
+  "relation_version": "item_sets_v1",
+  "source_ids": [
+    "manual_mechanical_review_v1"
+  ],
+  "generated_at": "2026-06-16T12:00:00Z",
+  "entries": [
+    {
+      "set_item_id": 12873,
+      "component_item_ids": [11818, 11820, 11822, 11824],
+      "pack_unpack_free": true,
+      "pack_unpack_instant": true,
+      "confidence": 0.95,
+      "source_ref": "manual_mechanical_review_v1"
+    }
+  ]
+}

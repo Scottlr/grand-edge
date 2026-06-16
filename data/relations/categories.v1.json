@@ -1,0 +1,16 @@
+{
+  "schema_version": "v1",
+  "relation_version": "categories_v1",
+  "source_ids": [
+    "manual_mechanical_review_v1"
+  ],
+  "generated_at": "2026-06-16T12:00:00Z",
+  "entries": [
+    {
+      "category": "abyssal_weapons",
+      "item_ids": [4151, 13265],
+      "confidence": 0.95,
+      "source_ref": "manual_mechanical_review_v1"
+    }
+  ]
+}

@@ -50,6 +50,10 @@ pub enum Command {
         #[command(subcommand)]
         command: SchemaCommand,
     },
+    Graph {
+        #[command(subcommand)]
+        command: GraphCommand,
+    },
     Server {
         #[command(subcommand)]
         command: ServerCommand,
@@ -107,6 +111,16 @@ pub enum ModelCommand {
 #[derive(Debug, Clone, Subcommand)]
 pub enum SchemaCommand {
     Export,
+}
+
+#[derive(Debug, Clone, Subcommand)]
+pub enum GraphCommand {
+    ImportRelations {
+        #[arg(long, default_value = "data/relations")]
+        root: String,
+        #[arg(long, default_value_t = false)]
+        dry_run: bool,
+    },
 }
 
 #[derive(Debug, Clone, Subcommand)]

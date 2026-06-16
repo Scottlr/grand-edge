@@ -1,6 +1,13 @@
 use std::fmt::Display;
+use std::path::{Path, PathBuf};
 
+use async_trait::async_trait;
 use grand_edge_configuration::{ConfigProfile, GrandEdgeConfig, load_config};
+use grand_edge_domain::{GraphVersion, ItemGraphEdge, ItemGraphNode};
+use grand_edge_ingest::{
+    IngestError, RelationCorpusImporter, RelationImportReport, RelationImportStore,
+};
+use grand_edge_storage::{Storage, StoredCorpusSource};
 use secrecy::ExposeSecret;
 
 #[derive(Debug, thiserror::Error)]
@@ -54,6 +61,72 @@ pub fn unavailable_message<T: Display>(
     }
 }
 
+pub async fn graph_import_relations(
+    profile: ConfigProfile,
+    root: &str,
+    dry_run: bool,
+) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
+    let relations_root = relation_root(root)?;
+
+    if dry_run {
+        let importer = RelationCorpusImporter::new(NoopRelationStore);
+        let report = importer
+            .import_relation_files(&relations_root, true)
+            .await?;
+        return Ok(render_relation_report(&report)?);
+    }
+
+    let config = load_config(profile)?;
+    let storage = Storage::connect(config.database.url.expose_secret()).await?;
+    storage.migrate().await?;
+    let importer = RelationCorpusImporter::new(storage);
+    let report = importer
+        .import_relation_files(&relations_root, false)
+        .await?;
+    Ok(render_relation_report(&report)?)
+}
+
+fn relation_root(root: &str) -> Result<PathBuf, std::io::Error> {
+    let candidate = Path::new(root);
+    if candidate.is_absolute() {
+        return candidate.canonicalize();
+    }
+
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../..")
+        .join(candidate)
+        .canonicalize()
+}
+
+fn render_relation_report(report: &RelationImportReport) -> Result<String, serde_json::Error> {
+    serde_json::to_string_pretty(report)
+}
+
+#[derive(Clone, Copy)]
+struct NoopRelationStore;
+
+#[async_trait]
+impl RelationImportStore for NoopRelationStore {
+    async fn upsert_corpus_sources(
+        &self,
+        _sources: &[StoredCorpusSource],
+    ) -> Result<u64, IngestError> {
+        Ok(0)
+    }
+
+    async fn insert_graph_version(&self, _version: &GraphVersion) -> Result<(), IngestError> {
+        Ok(())
+    }
+
+    async fn upsert_graph_nodes(&self, _nodes: &[ItemGraphNode]) -> Result<u64, IngestError> {
+        Ok(0)
+    }
+
+    async fn upsert_graph_edges(&self, _edges: &[ItemGraphEdge]) -> Result<u64, IngestError> {
+        Ok(0)
+    }
+}
+
 fn tool_available(name: &str) -> &'static str {
     if std::process::Command::new(name)
         .arg("--version")
@@ -96,6 +169,7 @@ mod tests {
             "analytics",
             "model",
             "schema",
+            "graph",
             "server",
         ] {
             assert!(help.contains(expected), "{expected} missing from help");

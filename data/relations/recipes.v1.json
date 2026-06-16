@@ -1,0 +1,18 @@
+{
+  "schema_version": "v1",
+  "relation_version": "recipes_v1",
+  "source_ids": [
+    "manual_mechanical_review_v1"
+  ],
+  "generated_at": "2026-06-16T12:00:00Z",
+  "entries": [
+    {
+      "output_item_id": 3144,
+      "component_item_ids": [228, 110, 2350],
+      "pack_unpack_free": false,
+      "pack_unpack_instant": false,
+      "confidence": 0.9,
+      "source_ref": "manual_mechanical_review_v1"
+    }
+  ]
+}

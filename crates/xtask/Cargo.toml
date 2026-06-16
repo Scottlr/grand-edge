@@ -10,8 +10,11 @@ name = "grandedge"
 path = "src/main.rs"
 
 [dependencies]
+async-trait.workspace = true
 clap.workspace = true
 grand-edge-configuration = { path = "../configuration" }
+grand-edge-domain = { path = "../domain" }
+grand-edge-ingest = { path = "../ingest" }
 grand-edge-storage = { path = "../storage" }
 miette.workspace = true
 secrecy.workspace = true
