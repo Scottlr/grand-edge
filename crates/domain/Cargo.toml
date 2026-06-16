@@ -7,6 +7,7 @@ repository.workspace = true
 
 [dependencies]
 chrono.workspace = true
+derive_more = { version = "1", features = ["display", "from"] }
 percent-encoding = "2"
 serde.workspace = true
 serde_json.workspace = true

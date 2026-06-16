@@ -1,8 +1,9 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
-use crate::{ModelAccuracySnapshot, StrategySignal};
+use crate::{
+    Gp, ItemId, ModelAccuracySnapshot, Probability, Rate, RecommendationId, StrategySignal, UserId,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -19,8 +20,8 @@ pub enum RecommendationAction {
 pub struct ScoreComponent {
     pub key: String,
     pub label: String,
-    pub value: f64,
-    pub weight: Option<f64>,
+    pub value: Rate,
+    pub weight: Option<Rate>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -34,17 +35,17 @@ pub struct RecommendationExplanation {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Recommendation {
-    pub recommendation_id: Uuid,
-    pub user_id: Option<Uuid>,
-    pub item_id: i64,
+    pub recommendation_id: RecommendationId,
+    pub user_id: Option<UserId>,
+    pub item_id: ItemId,
     pub as_of: DateTime<Utc>,
     pub action: RecommendationAction,
-    pub score: f64,
-    pub prediction_confidence: Option<f64>,
-    pub execution_confidence: Option<f64>,
-    pub recommendation_confidence: f64,
-    pub expected_net_gp: Option<i64>,
-    pub expected_roi: Option<f64>,
+    pub score: Rate,
+    pub prediction_confidence: Option<Probability>,
+    pub execution_confidence: Option<Probability>,
+    pub recommendation_confidence: Probability,
+    pub expected_net_gp: Option<Gp>,
+    pub expected_roi: Option<Rate>,
     pub risk_label: Option<String>,
     pub reasons: Vec<String>,
     pub explanation: RecommendationExplanation,
