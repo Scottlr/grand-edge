@@ -179,6 +179,7 @@ mod tests {
         let config = StrategyConfig {
             enabled_strategies: vec!["noop".to_string()],
             risk: crate::RiskConfig::default(),
+            ..StrategyConfig::default()
         };
 
         let enabled = registry.enabled(&config);
@@ -198,6 +199,7 @@ mod tests {
                 min_confidence: Probability::new(0.5).unwrap().get(),
                 ..crate::RiskConfig::default()
             },
+            ..StrategyConfig::default()
         };
         let results = registry.generate_all(
             &config,
