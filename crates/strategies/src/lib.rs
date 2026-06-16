@@ -7,11 +7,13 @@ pub mod errors;
 pub mod math;
 pub mod registry;
 pub mod traits;
+pub mod uncertainty;
 pub mod validation;
 
 pub use builtin::{
-    ArBaselineStrategy, ExecutionConfidenceEstimate, KalmanFairValueStrategy, PortfolioCandidate,
-    PortfolioOrderSuggestion, estimate_execution_confidence, optimize_portfolio,
+    AdvancedRiskOverlayStrategy, ArBaselineStrategy, ConformalIntervalStrategy,
+    ExecutionConfidenceEstimate, KalmanFairValueStrategy, PortfolioCandidate,
+    PortfolioOrderSuggestion, RegimeHmmStrategy, estimate_execution_confidence, optimize_portfolio,
     register_baseline_strategies,
 };
 pub use config::{RiskConfig, StrategyConfig};
@@ -23,3 +25,7 @@ pub use math::{
 };
 pub use registry::{StrategyRegistry, StrategyRunResult};
 pub use traits::Strategy;
+pub use uncertainty::{
+    ConformalInterval, MarketRegime, RegimeEstimate, RegimeHeuristicConfig, RegimeMethod,
+    RiskOverlay, RiskOverlayReason, advanced_risk_overlay, classify_regime, conformal_interval,
+};

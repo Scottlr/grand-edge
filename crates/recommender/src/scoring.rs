@@ -52,7 +52,14 @@ pub fn score_candidate(
         * config.lambda_staleness;
     let volatility_penalty = volatility * config.lambda_volatility;
     let spread_penalty = spread_pct * config.lambda_spread;
-    let risk_penalty = volatility_penalty + spread_penalty + staleness_penalty;
+    let overlay = overlay_penalties(signal);
+    let risk_penalty = volatility_penalty
+        + spread_penalty
+        + staleness_penalty
+        + overlay.volatility_penalty
+        + overlay.spread_penalty
+        + overlay.staleness_penalty
+        + overlay.regime_penalty;
 
     let liquidity_penalty = signal
         .execution_estimate
@@ -110,6 +117,26 @@ pub fn score_candidate(
             "Penalty from volatility, spread, and staleness.",
         ),
         component(
+            "regime_penalty",
+            -overlay.regime_penalty,
+            "Additional penalty from advisory market regime overlays.",
+        ),
+        component(
+            "overlay_volatility_penalty",
+            -overlay.volatility_penalty,
+            "Overlay penalty for extreme volatility.",
+        ),
+        component(
+            "overlay_spread_penalty",
+            -overlay.spread_penalty,
+            "Overlay penalty for wide spreads.",
+        ),
+        component(
+            "overlay_staleness_penalty",
+            -overlay.staleness_penalty,
+            "Overlay penalty for stale prices.",
+        ),
+        component(
             "liquidity_penalty",
             -liquidity_penalty,
             "Penalty for uncertain execution quality.",
@@ -144,6 +171,39 @@ pub fn score_candidate(
 
 fn feature_f64(features: &FeatureVector, key: &str) -> Option<f64> {
     features.values.get(key).and_then(|value| value.as_f64())
+}
+
+#[derive(Default)]
+struct OverlayPenaltyBreakdown {
+    volatility_penalty: f64,
+    spread_penalty: f64,
+    staleness_penalty: f64,
+    regime_penalty: f64,
+}
+
+fn overlay_penalties(signal: &StrategySignal) -> OverlayPenaltyBreakdown {
+    let Some(overlay) = signal.explanation.get("risk_overlay") else {
+        return OverlayPenaltyBreakdown::default();
+    };
+
+    OverlayPenaltyBreakdown {
+        volatility_penalty: overlay
+            .get("volatility_penalty")
+            .and_then(|value| value.as_f64())
+            .unwrap_or(0.0),
+        spread_penalty: overlay
+            .get("spread_penalty")
+            .and_then(|value| value.as_f64())
+            .unwrap_or(0.0),
+        staleness_penalty: overlay
+            .get("staleness_penalty")
+            .and_then(|value| value.as_f64())
+            .unwrap_or(0.0),
+        regime_penalty: overlay
+            .get("regime_penalty")
+            .and_then(|value| value.as_f64())
+            .unwrap_or(0.0),
+    }
 }
 
 fn component(name: &str, value: f64, explanation: &str) -> ScoreComponent {
