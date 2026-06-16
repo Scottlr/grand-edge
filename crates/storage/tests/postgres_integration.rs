@@ -112,6 +112,8 @@ async fn migrations_and_key_repositories_round_trip_under_testcontainers() {
             strategy_votes: Vec::new(),
             score_components: Vec::new(),
             accuracy_snapshot: None,
+            structured_explanation: grand_edge_domain::StructuredRecommendationExplanation::default(
+            ),
         },
     };
     storage

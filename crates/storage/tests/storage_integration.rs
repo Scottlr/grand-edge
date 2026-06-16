@@ -363,6 +363,7 @@ fn sample_recommendation() -> Recommendation {
                 weight: Some(Rate::new(0.5).unwrap()),
             }],
             accuracy_snapshot: None,
+            structured_explanation: StructuredRecommendationExplanation::default(),
         },
     }
 }
@@ -400,7 +401,14 @@ fn sample_structured_recommendation() -> Recommendation {
     };
 
     Recommendation {
-        explanation: serde_json::from_value(serde_json::to_value(explanation).unwrap()).unwrap(),
+        explanation: RecommendationExplanation {
+            feature_set_version: base.explanation.feature_set_version.clone(),
+            market_rules_version: base.explanation.market_rules_version.clone(),
+            strategy_votes: base.explanation.strategy_votes.clone(),
+            score_components: base.explanation.score_components.clone(),
+            accuracy_snapshot: base.explanation.accuracy_snapshot.clone(),
+            structured_explanation: explanation,
+        },
         ..base
     }
 }

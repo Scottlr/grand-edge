@@ -14,8 +14,8 @@ use grand_edge_api::{
 use grand_edge_domain::{
     Gp, Item, ItemIcon, ItemId, MarketRules, ModelAccuracySnapshot, ModelVersion, PositionId,
     PriceInterval, Probability, Quantity, Rate, Recommendation, RecommendationAction,
-    RecommendationExplanation, RecommendationId, SignalSide, StrategyId, StrategySignal, UserId,
-    UserPosition, WikiImageSource,
+    RecommendationExplanation, RecommendationId, SignalSide, StrategyId, StrategySignal,
+    StructuredRecommendationExplanation, UserId, UserPosition, WikiImageSource,
 };
 use grand_edge_storage::StoredSimulationRun;
 use http_body_util::BodyExt;
@@ -220,6 +220,7 @@ fn recommendation_fixture() -> Recommendation {
                 max_drawdown: Some(Rate::new(0.1).unwrap()),
                 calibration: serde_json::json!({}),
             }),
+            structured_explanation: StructuredRecommendationExplanation::default(),
         },
     }
 }

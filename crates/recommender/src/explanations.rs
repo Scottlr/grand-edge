@@ -1,9 +1,19 @@
 use grand_edge_domain::{
-    FeatureVector, LatestPrice, MarketRules, RecommendationAction, RecommendationExplanation,
-    ScoreComponent as DomainScoreComponent, StrategySignal, UserPosition,
+    FeatureVector, LatestPrice, MarketRules, Prediction, Recommendation, RecommendationAction,
+    RecommendationExplanation, StrategySignal, StructuredRecommendationExplanation, UserPosition,
 };
 
-use crate::{RecommendationScore, scoring::ScoreComponent};
+use crate::{
+    RecommendationConfig, RecommendationError, RecommendationScore,
+    confidence::{
+        CalibrationSnapshot, ConfidenceInputs, LiquiditySnapshot, build_confidence_breakdown,
+    },
+    reason_atoms::{
+        DataQualitySnapshot, ReasonAtomInputs, RiskProfile, build_invalidation_rules,
+        build_reason_atoms,
+    },
+    scoring::ScoreComponent,
+};
 
 pub fn build_reasons(
     action: RecommendationAction,
@@ -80,14 +90,101 @@ pub fn build_reasons(
     reasons
 }
 
+pub struct ExplanationInputs<'a> {
+    pub recommendation: &'a Recommendation,
+    pub feature_vector: &'a FeatureVector,
+    pub market_rules: &'a MarketRules,
+    pub strategy_votes: &'a [StrategySignal],
+    pub predictions: &'a [Prediction],
+    pub score_components: &'a [ScoreComponent],
+    pub accuracy_snapshot: Option<&'a grand_edge_domain::ModelAccuracySnapshot>,
+    pub config: &'a RecommendationConfig,
+}
+
+pub fn build_structured_explanation(
+    inputs: ExplanationInputs<'_>,
+) -> Result<StructuredRecommendationExplanation, RecommendationError> {
+    let data_quality = data_quality_snapshot(inputs.feature_vector);
+    let reason_atoms = build_reason_atoms(ReasonAtomInputs {
+        recommendation: inputs.recommendation,
+        predictions: inputs.predictions,
+        score_components: inputs.score_components,
+        market_rules: inputs.market_rules,
+        risk_profile: &RiskProfile {
+            min_buy_score: inputs.config.min_buy_score,
+            min_watch_score: inputs.config.min_watch_score,
+            min_execution_confidence: inputs.config.min_execution_confidence,
+        },
+        data_quality: &data_quality,
+    })?;
+    let invalidation_rules = build_invalidation_rules(
+        inputs.recommendation,
+        inputs.score_components,
+        inputs.market_rules,
+        &RiskProfile {
+            min_buy_score: inputs.config.min_buy_score,
+            min_watch_score: inputs.config.min_watch_score,
+            min_execution_confidence: inputs.config.min_execution_confidence,
+        },
+    );
+    let confidence = build_confidence_breakdown(ConfidenceInputs {
+        predictions: inputs.predictions,
+        score_components: inputs.score_components,
+        calibration: Some(&CalibrationSnapshot {
+            recent_directional_accuracy: inputs
+                .accuracy_snapshot
+                .and_then(|snapshot| snapshot.directional_accuracy)
+                .map(|value| value.get()),
+        }),
+        liquidity: Some(&LiquiditySnapshot {
+            liquidity_confidence: inputs
+                .strategy_votes
+                .iter()
+                .filter_map(|vote| {
+                    vote.execution_estimate
+                        .as_ref()
+                        .and_then(|estimate| estimate.liquidity_confidence)
+                        .map(|value| value.get())
+                })
+                .reduce(f64::max),
+        }),
+        data_quality: &data_quality,
+        explanation_atoms: &reason_atoms,
+    })?;
+
+    let summary = derive_summary(inputs.recommendation.action, &reason_atoms, &confidence);
+    Ok(StructuredRecommendationExplanation {
+        summary,
+        reason_atoms,
+        invalidation_rules,
+        confidence,
+        graph_version: None,
+        graph_reason_path_count: None,
+    })
+}
+
 pub fn build_explanation(
     feature_vector: &FeatureVector,
     market_rules: &MarketRules,
     strategy_votes: Vec<StrategySignal>,
+    predictions: &[Prediction],
     score_components: &[ScoreComponent],
     accuracy_snapshot: Option<grand_edge_domain::ModelAccuracySnapshot>,
-) -> RecommendationExplanation {
-    RecommendationExplanation {
+    recommendation: &Recommendation,
+    config: &RecommendationConfig,
+) -> Result<RecommendationExplanation, RecommendationError> {
+    let structured_explanation = build_structured_explanation(ExplanationInputs {
+        recommendation,
+        feature_vector,
+        market_rules,
+        strategy_votes: &strategy_votes,
+        predictions,
+        score_components,
+        accuracy_snapshot: accuracy_snapshot.as_ref(),
+        config,
+    })?;
+
+    Ok(RecommendationExplanation {
         feature_set_version: feature_vector.feature_set_version.clone(),
         market_rules_version: market_rules.version.clone(),
         strategy_votes,
@@ -96,15 +193,59 @@ pub fn build_explanation(
             .map(to_domain_score_component)
             .collect(),
         accuracy_snapshot,
-    }
+        structured_explanation,
+    })
 }
 
-fn to_domain_score_component(component: &ScoreComponent) -> DomainScoreComponent {
-    DomainScoreComponent {
+fn to_domain_score_component(component: &ScoreComponent) -> grand_edge_domain::ScoreComponent {
+    grand_edge_domain::ScoreComponent {
         key: component.name.clone(),
         label: component.name.replace('_', " "),
         value: grand_edge_domain::Rate::new(component.value)
             .unwrap_or_else(|_| grand_edge_domain::Rate(0.0)),
         weight: None,
     }
+}
+
+fn data_quality_snapshot(feature_vector: &FeatureVector) -> DataQualitySnapshot {
+    let stale = feature_vector
+        .values
+        .get("price_staleness_secs")
+        .and_then(|value| value.as_f64())
+        .map(|value| value > 300.0)
+        .unwrap_or(true);
+    let missing_inputs = ["ewma_volatility_24h", "spread_pct", "price_staleness_secs"]
+        .into_iter()
+        .filter(|key| !feature_vector.values.contains_key(*key))
+        .map(str::to_string)
+        .collect::<Vec<_>>();
+    let freshness_confidence = if stale { 0.25 } else { 0.9 };
+    let completeness_confidence = if missing_inputs.is_empty() { 1.0 } else { 0.5 };
+    DataQualitySnapshot {
+        freshness_confidence,
+        completeness_confidence,
+        stale,
+        missing_inputs,
+    }
+}
+
+fn derive_summary(
+    action: RecommendationAction,
+    reason_atoms: &[grand_edge_domain::ReasonAtom],
+    confidence: &grand_edge_domain::ConfidenceBreakdown,
+) -> String {
+    let dominant_reason = reason_atoms
+        .iter()
+        .max_by(|left, right| {
+            left.weight
+                .partial_cmp(&right.weight)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        })
+        .map(|atom| atom.label.clone())
+        .unwrap_or_else(|| "No dominant reason".to_string());
+    format!(
+        "{:?} because {dominant_reason}; recommendation confidence {:.2}",
+        action,
+        confidence.recommendation_confidence.get()
+    )
 }

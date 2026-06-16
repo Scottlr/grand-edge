@@ -65,6 +65,7 @@ pub struct RecommendationExplanationDto {
     pub strategy_votes: Vec<StrategySignalDto>,
     pub score_components: Vec<ScoreComponentDto>,
     pub accuracy_snapshot: Option<serde_json::Value>,
+    pub structured_explanation: serde_json::Value,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
@@ -186,6 +187,8 @@ impl From<RecommendationExplanation> for RecommendationExplanationDto {
             accuracy_snapshot: value
                 .accuracy_snapshot
                 .map(|snapshot| serde_json::to_value(snapshot).unwrap_or(serde_json::Value::Null)),
+            structured_explanation: serde_json::to_value(value.structured_explanation)
+                .unwrap_or(serde_json::Value::Null),
         }
     }
 }

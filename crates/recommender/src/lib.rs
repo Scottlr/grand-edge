@@ -1,12 +1,14 @@
 //! Recommendation orchestration for Grand Edge.
 
 pub mod actions;
+pub mod confidence;
 pub mod config;
 pub mod engine;
 pub mod errors;
 pub mod explanations;
 pub mod prediction_links;
 pub mod quantity;
+pub mod reason_atoms;
 pub mod scoring;
 
 pub use config::RecommendationConfig;
