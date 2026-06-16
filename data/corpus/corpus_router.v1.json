@@ -1,0 +1,122 @@
+[
+  {
+    "route_id": "market_event_context",
+    "helps_with": [
+      "game updates",
+      "events",
+      "bot ban waves",
+      "item sinks",
+      "activity changes",
+      "event linked graph edges"
+    ],
+    "read_first": [
+      "docs/corpus/market-intelligence-corpus.md",
+      "docs/corpus/source-policy.md"
+    ],
+    "search_first": [
+      "rg -n \"game_update|event_hypothesis|affected_item_ids|item_sink|bot_ban\" data/corpus",
+      "rg -n \"MarketEventNode|EventLinked|event\" crates"
+    ],
+    "source_globs": [
+      "data/corpus/events.v1.json",
+      "data/corpus/market_analysis.v1.json",
+      "data/corpus/source_registry.v1.json"
+    ],
+    "max_files_to_open": 3,
+    "max_sample_entries": 5,
+    "stop_and_ask": [
+      "source licensing is unclear",
+      "entry requires review",
+      "event claims would be treated as price truth"
+    ],
+    "forbidden_full_load": true
+  },
+  {
+    "route_id": "competitor_capability_context",
+    "helps_with": [
+      "product gap analysis",
+      "competitor capability notes"
+    ],
+    "read_first": [
+      "docs/corpus/market-intelligence-corpus.md",
+      "docs/corpus/source-policy.md"
+    ],
+    "search_first": [
+      "rg -n \"competitor|capability|gap\" data/corpus docs/corpus",
+      "rg -n \"competitor\" crates apps/web"
+    ],
+    "source_globs": [
+      "data/corpus/competitor_capabilities.v1.json",
+      "data/corpus/review_notes.v1.json"
+    ],
+    "max_files_to_open": 2,
+    "max_sample_entries": 3,
+    "stop_and_ask": [
+      "notes would be exposed to end users",
+      "source or license provenance is missing",
+      "the request needs market truth rather than product-planning context"
+    ],
+    "forbidden_full_load": true
+  },
+  {
+    "route_id": "source_policy_review",
+    "helps_with": [
+      "source ids",
+      "content hashes",
+      "copied text risk",
+      "licensing review",
+      "review workflow"
+    ],
+    "read_first": [
+      "docs/corpus/source-policy.md",
+      "docs/corpus/review-workflow.md"
+    ],
+    "search_first": [
+      "rg -n \"source_id|content_hash|license|requires_review\" docs/corpus data/corpus data/relations",
+      "rg -n \"CorpusSourceEntry|content_hash|requires_review\" crates"
+    ],
+    "source_globs": [
+      "data/corpus/source_registry.v1.json",
+      "data/relations/source_registry.v1.json",
+      "data/corpus/review_notes.v1.json"
+    ],
+    "max_files_to_open": 3,
+    "max_sample_entries": 5,
+    "stop_and_ask": [
+      "source licensing is unclear",
+      "copied text would exceed summary policy",
+      "review metadata is missing"
+    ],
+    "forbidden_full_load": true
+  },
+  {
+    "route_id": "blast_radius_context",
+    "helps_with": [
+      "shock scenarios",
+      "downstream item baskets",
+      "event contagion",
+      "what happens if this moves"
+    ],
+    "read_first": [
+      "docs/corpus/market-intelligence-corpus.md",
+      "docs/corpus/relation-corpus.md"
+    ],
+    "search_first": [
+      "rg -n \"blast|shock|affected_item_ids|downstream|basket\" data/corpus docs/corpus",
+      "rg -n \"blast|shock|scenario|EventLinked\" crates"
+    ],
+    "source_globs": [
+      "data/corpus/events.v1.json",
+      "data/corpus/market_analysis.v1.json",
+      "data/relations/*.v1.json"
+    ],
+    "max_files_to_open": 3,
+    "max_sample_entries": 5,
+    "stop_and_ask": [
+      "scenario reasoning would rely on unreviewed notes",
+      "the route requires full corpus loading",
+      "source ids or graph version context are missing"
+    ],
+    "forbidden_full_load": true
+  }
+]

@@ -1,0 +1,93 @@
+[
+  {
+    "route_id": "mechanical_relation_edge",
+    "helps_with": [
+      "item sets",
+      "recipes",
+      "repairs",
+      "alchemy",
+      "dose or decant",
+      "charge or degrade",
+      "substitutes",
+      "categories"
+    ],
+    "read_first": [
+      "docs/corpus/relation-corpus.md",
+      "docs/corpus/source-policy.md"
+    ],
+    "search_first": [
+      "rg -n \"item_set|recipe|repair|alchemy|dose|decant|charge|degrade|substitute|category\" data/relations",
+      "rg -n \"RelationFile|ItemGraphEdge|GraphEdgeType\" crates"
+    ],
+    "source_globs": [
+      "data/relations/source_registry.v1.json",
+      "data/relations/*.v1.json"
+    ],
+    "max_files_to_open": 3,
+    "max_sample_entries": 5,
+    "stop_and_ask": [
+      "source licensing is unclear",
+      "entry requires review",
+      "invalid item ids appear in curated relation files"
+    ],
+    "forbidden_full_load": true
+  },
+  {
+    "route_id": "linked_item_reasoning",
+    "helps_with": [
+      "linked items ui context",
+      "graph reason atoms",
+      "relation backed market explanations"
+    ],
+    "read_first": [
+      "docs/corpus/relation-corpus.md",
+      "docs/corpus/market-intelligence-corpus.md"
+    ],
+    "search_first": [
+      "rg -n \"linked item|reason atom|graph\" docs/corpus data/relations data/corpus",
+      "rg -n \"EventLinked|GraphEdgeType|ItemGraphEdge\" crates"
+    ],
+    "source_globs": [
+      "data/relations/*.v1.json",
+      "data/corpus/events.v1.json",
+      "data/corpus/market_analysis.v1.json"
+    ],
+    "max_files_to_open": 3,
+    "max_sample_entries": 5,
+    "stop_and_ask": [
+      "review status is unclear",
+      "reasoning would require full corpus loading",
+      "end-user copy would cite competitor notes"
+    ],
+    "forbidden_full_load": true
+  },
+  {
+    "route_id": "ml_graph_feature_context",
+    "helps_with": [
+      "graph feature naming",
+      "artifact export contracts",
+      "no lookahead graph context"
+    ],
+    "read_first": [
+      "docs/corpus/relation-corpus.md",
+      "docs/corpus/token-budgeting.md"
+    ],
+    "search_first": [
+      "rg -n \"graph feature|no lookahead|artifact\" docs/corpus data/relations data/corpus corpus",
+      "rg -n \"feature|graph|artifact\" crates"
+    ],
+    "source_globs": [
+      "data/relations/*.v1.json",
+      "data/corpus/market_analysis.v1.json",
+      "corpus/model-design/**/*.md"
+    ],
+    "max_files_to_open": 3,
+    "max_sample_entries": 5,
+    "stop_and_ask": [
+      "feature naming would overclaim causality",
+      "the task needs broad corpus loading",
+      "review status or source lineage is missing"
+    ],
+    "forbidden_full_load": true
+  }
+]
