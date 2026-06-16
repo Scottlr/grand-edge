@@ -1,0 +1,42 @@
+use utoipa::OpenApi;
+
+#[derive(OpenApi)]
+#[openapi(
+    paths(
+        crate::health,
+        crate::routes::items::list_items,
+        crate::routes::items::get_item,
+        crate::routes::items::get_item_history,
+        crate::routes::recommendations::list_recommendations,
+        crate::routes::recommendations::get_recommendation_explanation,
+        crate::routes::strategies::list_strategies,
+        crate::routes::strategies::patch_strategy,
+        crate::routes::simulations::list_simulations,
+        crate::routes::simulations::create_simulation,
+        crate::routes::positions::list_positions,
+        crate::routes::positions::create_position,
+        crate::routes::positions::update_position,
+        crate::routes::live::stream_live_events,
+        crate::openapi_json
+    ),
+    components(schemas(
+        crate::HealthResponse,
+        crate::routes::items::ItemDto,
+        crate::routes::items::ItemIconDto,
+        crate::routes::items::IntervalDto,
+        crate::routes::items::IntervalPriceDto,
+        crate::routes::recommendations::RecommendationActionDto,
+        crate::routes::recommendations::RecommendationDto,
+        crate::routes::recommendations::RecommendationExplanationDto,
+        crate::routes::recommendations::StrategySignalDto,
+        crate::routes::recommendations::ScoreComponentDto,
+        crate::routes::strategies::StrategyStatusDto,
+        crate::routes::strategies::PatchStrategyRequest,
+        crate::routes::simulations::SimulationRunDto,
+        crate::routes::simulations::CreateSimulationRequest,
+        crate::routes::positions::PositionDto,
+        crate::routes::positions::UpsertPositionRequest,
+        crate::routes::live::LiveEvent
+    ))
+)]
+pub struct ApiDoc;

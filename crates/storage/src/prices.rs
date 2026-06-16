@@ -91,17 +91,31 @@ impl PriceRepository {
         interval: PriceInterval,
         limit: i64,
     ) -> Result<Vec<IntervalPrice>, StorageError> {
+        self.interval_history_before(item_id, interval, limit, None)
+            .await
+    }
+
+    pub async fn interval_history_before(
+        &self,
+        item_id: ItemId,
+        interval: PriceInterval,
+        limit: i64,
+        before: Option<DateTime<Utc>>,
+    ) -> Result<Vec<IntervalPrice>, StorageError> {
         let rows = sqlx::query(
             r#"
             SELECT item_id, bucket_start, interval, avg_high_price, high_price_volume, avg_low_price, low_price_volume
             FROM interval_prices
-            WHERE item_id = $1 AND interval = $2
+            WHERE item_id = $1
+              AND interval = $2
+              AND ($3::timestamptz IS NULL OR bucket_start < $3)
             ORDER BY bucket_start DESC
-            LIMIT $3
+            LIMIT $4
             "#,
         )
         .bind(item_id.0)
         .bind(enum_to_string(&interval)?)
+        .bind(before)
         .bind(limit)
         .fetch_all(&self.pool)
         .await?;

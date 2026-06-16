@@ -1,5 +1,9 @@
-use grand_edge_domain::{Recommendation, UserId};
-use sqlx::PgPool;
+use grand_edge_domain::{
+    Gp, ItemId, Probability, Rate, Recommendation, RecommendationAction, RecommendationExplanation,
+    RecommendationId, UserId,
+};
+use sqlx::{PgPool, Row};
+use uuid::Uuid;
 
 use crate::StorageError;
 
@@ -73,9 +77,115 @@ impl RecommendationRepository {
         user_id: UserId,
         limit: i64,
     ) -> Result<Vec<Recommendation>, StorageError> {
-        let _ = (user_id, limit);
-        Ok(Vec::new())
+        self.list_recent(Some(user_id), None, limit, 0).await
     }
+
+    pub async fn list_recent(
+        &self,
+        user_id: Option<UserId>,
+        action: Option<RecommendationAction>,
+        limit: i64,
+        offset: i64,
+    ) -> Result<Vec<Recommendation>, StorageError> {
+        let action = action.map(|value| enum_to_string(&value)).transpose()?;
+        let rows = sqlx::query(
+            r#"
+            SELECT
+                recommendation_id,
+                user_id,
+                item_id,
+                as_of,
+                action,
+                score,
+                prediction_confidence,
+                execution_confidence,
+                recommendation_confidence,
+                expected_net_gp,
+                expected_roi,
+                risk_label,
+                reasons,
+                explanation
+            FROM recommendations
+            WHERE ($1::uuid IS NULL OR user_id = $1)
+              AND ($2::text IS NULL OR action = $2)
+            ORDER BY as_of DESC, recommendation_id DESC
+            LIMIT $3 OFFSET $4
+            "#,
+        )
+        .bind(user_id.map(|value| value.0))
+        .bind(action)
+        .bind(limit)
+        .bind(offset)
+        .fetch_all(&self.pool)
+        .await?;
+
+        rows.into_iter().map(row_to_recommendation).collect()
+    }
+
+    pub async fn get_recommendation(
+        &self,
+        recommendation_id: RecommendationId,
+    ) -> Result<Option<Recommendation>, StorageError> {
+        let row = sqlx::query(
+            r#"
+            SELECT
+                recommendation_id,
+                user_id,
+                item_id,
+                as_of,
+                action,
+                score,
+                prediction_confidence,
+                execution_confidence,
+                recommendation_confidence,
+                expected_net_gp,
+                expected_roi,
+                risk_label,
+                reasons,
+                explanation
+            FROM recommendations
+            WHERE recommendation_id = $1
+            "#,
+        )
+        .bind(recommendation_id.0)
+        .fetch_optional(&self.pool)
+        .await?;
+
+        row.map(row_to_recommendation).transpose()
+    }
+}
+
+fn row_to_recommendation(row: sqlx::postgres::PgRow) -> Result<Recommendation, StorageError> {
+    let action: String = row.try_get("action")?;
+    let explanation = row.try_get::<serde_json::Value, _>("explanation")?;
+
+    Ok(Recommendation {
+        recommendation_id: RecommendationId(row.try_get::<Uuid, _>("recommendation_id")?),
+        user_id: row.try_get::<Option<Uuid>, _>("user_id")?.map(UserId),
+        item_id: ItemId(row.try_get::<i64, _>("item_id")?),
+        as_of: row.try_get("as_of")?,
+        action: serde_json::from_value(serde_json::Value::String(action))?,
+        score: Rate::new(row.try_get::<f64, _>("score")?)?,
+        prediction_confidence: row
+            .try_get::<Option<f64>, _>("prediction_confidence")?
+            .map(Probability::new)
+            .transpose()?,
+        execution_confidence: row
+            .try_get::<Option<f64>, _>("execution_confidence")?
+            .map(Probability::new)
+            .transpose()?,
+        recommendation_confidence: Probability::new(
+            row.try_get::<f64, _>("recommendation_confidence")?,
+        )?,
+        expected_net_gp: row.try_get::<Option<i64>, _>("expected_net_gp")?.map(Gp),
+        expected_roi: row
+            .try_get::<Option<f64>, _>("expected_roi")?
+            .map(Rate::new)
+            .transpose()?,
+        risk_label: row.try_get("risk_label")?,
+        reasons: serde_json::from_value(row.try_get("reasons")?)?,
+        explanation: serde_json::from_value::<RecommendationExplanation>(explanation)?,
+    })
 }
 
 fn enum_to_string<T: serde::Serialize>(value: &T) -> Result<String, StorageError> {
