@@ -158,6 +158,42 @@ impl RecommendationRepository {
 
         row.map(row_to_recommendation).transpose()
     }
+
+    pub async fn list_pending_outcomes(
+        &self,
+        limit: i64,
+    ) -> Result<Vec<Recommendation>, StorageError> {
+        let rows = sqlx::query(
+            r#"
+            SELECT
+                r.recommendation_id,
+                r.user_id,
+                r.item_id,
+                r.as_of,
+                r.action,
+                r.score,
+                r.prediction_confidence,
+                r.execution_confidence,
+                r.recommendation_confidence,
+                r.expected_net_gp,
+                r.expected_roi,
+                r.risk_label,
+                r.reasons,
+                r.explanation
+            FROM recommendations r
+            LEFT JOIN recommendation_outcomes o
+              ON o.recommendation_id = r.recommendation_id
+            WHERE o.recommendation_id IS NULL
+            ORDER BY r.as_of ASC, r.recommendation_id ASC
+            LIMIT $1
+            "#,
+        )
+        .bind(limit)
+        .fetch_all(&self.pool)
+        .await?;
+
+        rows.into_iter().map(row_to_recommendation).collect()
+    }
 }
 
 pub(crate) fn row_to_recommendation(
