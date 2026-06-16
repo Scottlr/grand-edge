@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc};
-use grand_edge_domain::{Gp, ItemId, ModelVersion, PaperBet, StrategyId};
-use sqlx::PgPool;
+use grand_edge_domain::{Gp, ItemId, ModelVersion, PaperBet, RunId, StrategyId};
+use sqlx::{PgPool, Row};
 use uuid::Uuid;
 
 use crate::StorageError;
@@ -27,6 +27,16 @@ pub struct StoredPaperBet {
     pub hit_reason: Option<String>,
     pub status: String,
     pub explanation: serde_json::Value,
+}
+
+#[derive(Debug, Clone)]
+pub struct StoredSimulationRun {
+    pub run_id: RunId,
+    pub name: String,
+    pub strategy_config: serde_json::Value,
+    pub started_at: DateTime<Utc>,
+    pub finished_at: Option<DateTime<Utc>>,
+    pub status: String,
 }
 
 #[derive(Clone)]
@@ -67,6 +77,46 @@ impl SimulationRepository {
 
     pub async fn insert_paper_bets(&self, _rows: &[PaperBet]) -> Result<u64, StorageError> {
         Ok(0)
+    }
+
+    pub async fn list_runs(
+        &self,
+        limit: i64,
+        offset: i64,
+    ) -> Result<Vec<StoredSimulationRun>, StorageError> {
+        let rows = sqlx::query(
+            r#"
+            SELECT run_id, name, strategy_config, started_at, finished_at, status
+            FROM simulation_runs
+            ORDER BY started_at DESC, run_id DESC
+            LIMIT $1 OFFSET $2
+            "#,
+        )
+        .bind(limit)
+        .bind(offset)
+        .fetch_all(&self.pool)
+        .await?;
+
+        rows.into_iter().map(row_to_simulation_run).collect()
+    }
+
+    pub async fn get_run(
+        &self,
+        run_id: RunId,
+    ) -> Result<Option<StoredSimulationRun>, StorageError> {
+        let row = sqlx::query(
+            r#"
+            SELECT run_id, name, strategy_config, started_at, finished_at, status
+            FROM simulation_runs
+            WHERE run_id = $1
+            LIMIT 1
+            "#,
+        )
+        .bind(run_id.0)
+        .fetch_optional(&self.pool)
+        .await?;
+
+        row.map(row_to_simulation_run).transpose()
     }
 
     pub async fn list_paper_bets_for_strategy(
@@ -116,6 +166,17 @@ impl SimulationRepository {
 
         rows.into_iter().map(TryFrom::try_from).collect()
     }
+}
+
+fn row_to_simulation_run(row: sqlx::postgres::PgRow) -> Result<StoredSimulationRun, StorageError> {
+    Ok(StoredSimulationRun {
+        run_id: RunId(row.try_get::<Uuid, _>("run_id")?),
+        name: row.try_get("name")?,
+        strategy_config: row.try_get("strategy_config")?,
+        started_at: row.try_get("started_at")?,
+        finished_at: row.try_get("finished_at")?,
+        status: row.try_get("status")?,
+    })
 }
 
 #[derive(sqlx::FromRow)]

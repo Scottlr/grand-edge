@@ -72,6 +72,25 @@ impl PositionRepository {
         rows.into_iter().map(row_to_position).collect()
     }
 
+    pub async fn get_position(
+        &self,
+        position_id: PositionId,
+    ) -> Result<Option<UserPosition>, StorageError> {
+        let row = sqlx::query(
+            r#"
+            SELECT position_id, user_id, item_id, quantity, avg_buy_price, bought_at, notes
+            FROM user_positions
+            WHERE position_id = $1
+            LIMIT 1
+            "#,
+        )
+        .bind(position_id.0)
+        .fetch_optional(&self.pool)
+        .await?;
+
+        row.map(row_to_position).transpose()
+    }
+
     pub async fn active_position_for_user_item(
         &self,
         user_id: UserId,

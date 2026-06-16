@@ -48,6 +48,10 @@ impl StrategyRegistry {
         self.strategies.get(strategy_id).map(Arc::as_ref)
     }
 
+    pub fn ids(&self) -> Vec<String> {
+        self.strategies.keys().cloned().collect()
+    }
+
     pub fn generate_all(
         &self,
         config: &StrategyConfig,
