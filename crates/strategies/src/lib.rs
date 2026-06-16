@@ -1,5 +1,6 @@
 //! Strategy traits and signal modules for Grand Edge.
 
+pub mod artifacts;
 pub mod builtin;
 pub mod config;
 pub mod context;
@@ -10,6 +11,11 @@ pub mod traits;
 pub mod uncertainty;
 pub mod validation;
 
+pub use artifacts::{
+    ArtifactFeatureSchema, ModelArtifactKind, ModelArtifactMetadata, ModelCard,
+    TrainingTargetLabel, TripleBarrierLabel, hedge_update, linucb_score, triple_barrier_label,
+    validate_artifact_metadata,
+};
 pub use builtin::{
     AdvancedRiskOverlayStrategy, ArBaselineStrategy, ConformalIntervalStrategy,
     ExecutionConfidenceEstimate, KalmanFairValueStrategy, PortfolioCandidate,
