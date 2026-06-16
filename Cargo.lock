@@ -664,7 +664,15 @@ dependencies = [
 name = "grand-edge-simulator"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "grand-edge-domain",
+ "grand-edge-storage",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "thiserror",
+ "tokio",
+ "uuid",
 ]
 
 [[package]]
