@@ -1,11 +1,12 @@
 use grand_edge_domain::{
-    IntervalPrice, ItemId, PaperBet, PaperBetStatus, StrategySignal, UserPosition,
+    IntervalPrice, ItemGraphEdge, ItemId, PaperBet, PaperBetStatus, StrategySignal, UserPosition,
 };
 use grand_edge_storage::Storage;
 use uuid::Uuid;
 
 use crate::{
     SimulatorConfig, SimulatorError,
+    blast_radius::{BlastRadiusConfig, BlastRadiusResult, Shock, simulate_blast_radius},
     fills::{entry_fill, exit_fill},
     orders::{PaperBetOutcome, SimulatedOrderRequest, SimulatedOrderSide, SimulatedOrderStatus},
     pnl::{realized_profit_gp, realized_roi, tax_on_sale},
@@ -157,6 +158,26 @@ impl SimulationEngine {
         history: &[IntervalPrice],
     ) -> Result<PaperBetOutcome, SimulatorError> {
         replay_user_position(&self.config, position, history)
+    }
+
+    pub fn blast_radius(
+        &self,
+        graph_version: &str,
+        shocks: &[Shock],
+        edges: &[ItemGraphEdge],
+        config: BlastRadiusConfig,
+        regime_multiplier: impl Fn(&ItemGraphEdge) -> f64,
+        liquidity_reliability: impl Fn(i64) -> f64,
+    ) -> BlastRadiusResult {
+        let _ = &self.storage;
+        simulate_blast_radius(
+            graph_version,
+            shocks,
+            edges,
+            config,
+            regime_multiplier,
+            liquidity_reliability,
+        )
     }
 }
 
