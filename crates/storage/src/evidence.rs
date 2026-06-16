@@ -3,7 +3,7 @@ use grand_edge_domain::{
     RecommendationExplanation, RecommendationId, RecommendationOutcome,
     StructuredRecommendationExplanation,
 };
-use sqlx::{PgPool, Row};
+use sqlx::{PgPool, Postgres, Row, Transaction};
 use uuid::Uuid;
 
 use crate::StorageError;
@@ -51,38 +51,16 @@ impl EvidenceRepository {
         &self,
         snapshot: &FeatureSnapshot,
     ) -> Result<(), StorageError> {
-        sqlx::query(
-            r#"
-            INSERT INTO feature_snapshots (
-                feature_snapshot_id, item_id, as_of, feature_set_version, graph_version,
-                source_window_start, source_window_end, features, created_at
-            ) VALUES (
-                $1, $2, $3, $4, $5,
-                $6, $7, $8, $9
-            )
-            ON CONFLICT (feature_snapshot_id) DO UPDATE SET
-                item_id = EXCLUDED.item_id,
-                as_of = EXCLUDED.as_of,
-                feature_set_version = EXCLUDED.feature_set_version,
-                graph_version = EXCLUDED.graph_version,
-                source_window_start = EXCLUDED.source_window_start,
-                source_window_end = EXCLUDED.source_window_end,
-                features = EXCLUDED.features,
-                created_at = EXCLUDED.created_at
-            "#,
-        )
-        .bind(snapshot.feature_snapshot_id)
-        .bind(snapshot.item_id.0)
-        .bind(snapshot.as_of)
-        .bind(&snapshot.feature_set_version)
-        .bind(&snapshot.graph_version)
-        .bind(snapshot.source_window_start)
-        .bind(snapshot.source_window_end)
-        .bind(serde_json::Value::Object(snapshot.features.clone()))
-        .bind(snapshot.created_at)
-        .execute(&self.pool)
-        .await?;
+        execute_insert_feature_snapshot(&self.pool, snapshot).await?;
+        Ok(())
+    }
 
+    pub async fn insert_feature_snapshot_in_tx(
+        &self,
+        tx: &mut Transaction<'_, Postgres>,
+        snapshot: &FeatureSnapshot,
+    ) -> Result<(), StorageError> {
+        execute_insert_feature_snapshot(&mut **tx, snapshot).await?;
         Ok(())
     }
 
@@ -222,6 +200,46 @@ impl EvidenceRepository {
                 .transpose()?,
         }))
     }
+}
+
+async fn execute_insert_feature_snapshot<'a, E>(
+    executor: E,
+    snapshot: &FeatureSnapshot,
+) -> Result<sqlx::postgres::PgQueryResult, StorageError>
+where
+    E: sqlx::Executor<'a, Database = sqlx::Postgres>,
+{
+    Ok(sqlx::query(
+        r#"
+        INSERT INTO feature_snapshots (
+            feature_snapshot_id, item_id, as_of, feature_set_version, graph_version,
+            source_window_start, source_window_end, features, created_at
+        ) VALUES (
+            $1, $2, $3, $4, $5,
+            $6, $7, $8, $9
+        )
+        ON CONFLICT (feature_snapshot_id) DO UPDATE SET
+            item_id = EXCLUDED.item_id,
+            as_of = EXCLUDED.as_of,
+            feature_set_version = EXCLUDED.feature_set_version,
+            graph_version = EXCLUDED.graph_version,
+            source_window_start = EXCLUDED.source_window_start,
+            source_window_end = EXCLUDED.source_window_end,
+            features = EXCLUDED.features,
+            created_at = EXCLUDED.created_at
+        "#,
+    )
+    .bind(snapshot.feature_snapshot_id)
+    .bind(snapshot.item_id.0)
+    .bind(snapshot.as_of)
+    .bind(&snapshot.feature_set_version)
+    .bind(&snapshot.graph_version)
+    .bind(snapshot.source_window_start)
+    .bind(snapshot.source_window_end)
+    .bind(serde_json::Value::Object(snapshot.features.clone()))
+    .bind(snapshot.created_at)
+    .execute(executor)
+    .await?)
 }
 
 pub(crate) fn row_to_feature_snapshot(

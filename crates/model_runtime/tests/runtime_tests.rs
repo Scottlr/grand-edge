@@ -159,6 +159,7 @@ fn coefficient_model_scores_fixture() {
         .validate_bundle_path(&coefficient_bundle(), validation_as_of())
         .unwrap();
     let request = InferenceRequest {
+        feature_snapshot_id: uuid::Uuid::new_v4(),
         item_id: ItemId(4151),
         as_of: validation_as_of(),
         feature_vector: coefficient_feature_vector(),
@@ -166,9 +167,10 @@ fn coefficient_model_scores_fixture() {
     };
 
     let output = runtime.infer(request).unwrap();
-    assert!((output.expected_return.get() - 0.3).abs() < 1e-12);
-    assert!((output.probability_positive.get() - 0.574_442_516_8).abs() < 1e-9);
-    assert_eq!(output.explanation["backend"], "coefficients");
+    assert!((output.prediction.predicted_return.unwrap().get() - 0.3).abs() < 1e-12);
+    assert!((output.prediction.confidence.get() - 0.574_442_516_8).abs() < 1e-9);
+    assert_eq!(output.prediction.explanation["backend"], "coefficients");
+    assert!(output.prediction.explanation.get("action").is_none());
 }
 
 #[test]
@@ -178,6 +180,7 @@ fn onnx_artifact_requires_feature_flag() {
         .validate_bundle_path(&python_export_bundle(), validation_as_of())
         .unwrap();
     let request = InferenceRequest {
+        feature_snapshot_id: uuid::Uuid::new_v4(),
         item_id: ItemId(4151),
         as_of: validation_as_of(),
         feature_vector: feature_vector_for_names(&[
