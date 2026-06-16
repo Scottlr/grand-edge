@@ -95,21 +95,51 @@ pub enum BacktestCommand {
         from: String,
         to: String,
     },
+    Report {
+        #[arg(long)]
+        run_id: String,
+        #[arg(long)]
+        out: String,
+        #[arg(long, default_value = "features_v1")]
+        feature_set_version: String,
+    },
 }
 
 #[derive(Debug, Clone, Subcommand)]
 pub enum AnalyticsCommand {
     ExportFeatures {
+        #[arg(long)]
         from: String,
+        #[arg(long)]
         to: String,
+        #[arg(long)]
         out: String,
+        #[arg(long, default_value = "features_v1")]
+        feature_set_version: String,
+        #[arg(long, default_value_t = false)]
+        include_predictions: bool,
+        #[arg(long, default_value_t = false)]
+        include_outcomes: bool,
+        #[arg(long, default_value_t = false)]
+        include_raw_interval_candles: bool,
     },
 }
 
 #[derive(Debug, Clone, Subcommand)]
 pub enum ModelCommand {
-    Validate { artifact: String },
-    Evaluate { strategy: String, version: String },
+    Validate {
+        artifact: String,
+    },
+    Evaluate {
+        strategy: String,
+        version: String,
+    },
+    Compare {
+        #[arg(long = "strategy", required = true)]
+        strategies: Vec<String>,
+        #[arg(long)]
+        window: String,
+    },
 }
 
 #[derive(Debug, Clone, Subcommand)]

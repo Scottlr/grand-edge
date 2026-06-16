@@ -59,6 +59,8 @@ Docker is optional in this task. It is not the only supported workflow.
 - `cargo run -p grand-edge-xtask -- --help`
 - `cargo run -p grand-edge-xtask -- config print --profile local`
 - `cargo run -p grand-edge-xtask -- schema export --out schemas`
+- `cargo run -p grand-edge-xtask -- analytics export-features --from 2026-01-01 --to 2026-02-01 --out reports/datasets/jan --include-raw-interval-candles`
+- `cargo run -p grand-edge-xtask -- backtest report --run-id <uuid> --out reports/backtests/<id>`
 
 The API binary is a placeholder today and will be expanded in later tasks.
 

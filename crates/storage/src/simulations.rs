@@ -166,6 +166,45 @@ impl SimulationRepository {
 
         rows.into_iter().map(TryFrom::try_from).collect()
     }
+
+    pub async fn list_paper_bets_for_run(
+        &self,
+        run_id: Uuid,
+    ) -> Result<Vec<StoredPaperBet>, StorageError> {
+        let rows = sqlx::query_as::<_, PaperBetRow>(
+            r#"
+            SELECT
+                bet_id,
+                run_id,
+                recommendation_id,
+                strategy_id,
+                model_version,
+                item_id,
+                entry_time,
+                entry_price,
+                quantity,
+                target_exit,
+                stop_loss,
+                exit_time,
+                exit_price,
+                tax_paid,
+                realized_profit_gp,
+                realized_roi,
+                max_drawdown,
+                hit_reason,
+                status,
+                explanation
+            FROM paper_bets
+            WHERE run_id = $1
+            ORDER BY entry_time ASC, bet_id ASC
+            "#,
+        )
+        .bind(run_id)
+        .fetch_all(&self.pool)
+        .await?;
+
+        rows.into_iter().map(TryFrom::try_from).collect()
+    }
 }
 
 fn row_to_simulation_run(row: sqlx::postgres::PgRow) -> Result<StoredSimulationRun, StorageError> {

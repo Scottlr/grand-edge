@@ -5,6 +5,7 @@ members = [
   "crates/model_runtime",
   "crates/ingest",
   "crates/storage",
+  "crates/analytics",
   "crates/features",
   "crates/strategies",
   "crates/recommender",
