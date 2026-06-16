@@ -8,4 +8,6 @@ pub enum StorageError {
     Serialization(#[from] serde_json::Error),
     #[error("domain validation error: {0}")]
     DomainValidation(#[from] grand_edge_domain::DomainValidationError),
+    #[error("graph domain validation error: {0}")]
+    GraphDomainValidation(#[from] grand_edge_domain::GraphDomainError),
 }
