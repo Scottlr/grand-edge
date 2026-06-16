@@ -1,0 +1,47 @@
+---
+source: crates/api/tests/api_contract.rs
+expression: "RecommendationDto::from(recommendation)"
+---
+{
+  "recommendationId": "00000000-0000-0000-0000-000000000000",
+  "userId": "00000000-0000-0000-0000-000000000000",
+  "itemId": 4151,
+  "asOf": "2026-06-16T12:00:00Z",
+  "action": "buy",
+  "score": 0.9,
+  "predictionConfidence": 0.8,
+  "executionConfidence": 0.7,
+  "recommendationConfidence": 0.75,
+  "expectedNetGp": 1400,
+  "expectedRoi": 0.03,
+  "riskLabel": "low",
+  "reasons": [
+    "Tax-adjusted edge clears threshold"
+  ],
+  "explanation": {
+    "featureSetVersion": "features_v1",
+    "marketRulesVersion": "osrs_rules_v1_review_required",
+    "strategyVotes": [
+      {
+        "itemId": 4151,
+        "strategyId": "spread_edge_v1",
+        "modelVersion": "v1",
+        "asOf": "2026-06-16T12:00:00Z",
+        "side": "buy",
+        "horizonSecs": 3600,
+        "confidence": 0.8,
+        "expectedReturn": 0.03,
+        "expectedNetGpPerUnit": 1400
+      }
+    ],
+    "scoreComponents": [
+      {
+        "key": "edge",
+        "label": "Edge",
+        "value": 0.7,
+        "weight": 0.5
+      }
+    ],
+    "accuracySnapshot": null
+  }
+}

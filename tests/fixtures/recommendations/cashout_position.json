@@ -1,0 +1,7 @@
+{
+  "itemId": 4151,
+  "action": "cashout",
+  "currentLowPrice": 105000,
+  "avgBuyPrice": 100000,
+  "expectedReason": "after-tax profit"
+}

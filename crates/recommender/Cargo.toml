@@ -17,5 +17,13 @@ thiserror.workspace = true
 uuid.workspace = true
 
 [dev-dependencies]
+criterion.workspace = true
+insta.workspace = true
+proptest.workspace = true
+rstest.workspace = true
 sqlx.workspace = true
 tokio.workspace = true
+
+[[bench]]
+name = "recommend_all"
+harness = false

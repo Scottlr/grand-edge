@@ -1,0 +1,111 @@
+---
+source: crates/recommender/tests/recommendation_snapshots.rs
+expression: recommendation.explanation
+---
+{
+  "feature_set_version": "features_v1",
+  "market_rules_version": "osrs_rules_v1_review_required",
+  "strategy_votes": [
+    {
+      "item_id": 4151,
+      "strategy_id": "spread_edge_v1",
+      "model_version": "v1",
+      "as_of": "2026-06-16T12:00:00Z",
+      "side": "buy",
+      "horizon_secs": 3600,
+      "confidence": 0.8,
+      "expected_return": 0.03,
+      "expected_net_gp_per_unit": 1400,
+      "target_entry": 100000,
+      "target_exit": 104000,
+      "stop_loss": 99000,
+      "take_profit": 104000,
+      "max_quantity": 8,
+      "execution_estimate": {
+        "observed_liquidity": {
+          "observed_volume": 400,
+          "observed_high_side_volume": 220,
+          "observed_low_side_volume": 180,
+          "observed_volume_z": 1.2,
+          "observed_volume_reliability": 0.7,
+          "high_low_volume_ratio": 1.22,
+          "note": "proxy"
+        },
+        "estimated_fill_probability": 0.6,
+        "liquidity_confidence": 0.7,
+        "estimated_capacity": 8,
+        "participation_rate": 0.05,
+        "confidence_haircut": 0.5,
+        "spread_pct": 0.02,
+        "price_staleness_seconds": 120,
+        "volatility": 0.03
+      },
+      "explanation": {
+        "reason": "fixture"
+      }
+    }
+  ],
+  "score_components": [
+    {
+      "key": "raw_edge",
+      "label": "raw edge",
+      "value": 0.03,
+      "weight": null
+    },
+    {
+      "key": "liquidity_adjusted_edge",
+      "label": "liquidity adjusted edge",
+      "value": -0.04500000000000001,
+      "weight": null
+    },
+    {
+      "key": "prediction_confidence",
+      "label": "prediction confidence",
+      "value": 0.8,
+      "weight": null
+    },
+    {
+      "key": "execution_confidence",
+      "label": "execution confidence",
+      "value": 0.6,
+      "weight": null
+    },
+    {
+      "key": "recommendation_confidence",
+      "label": "recommendation confidence",
+      "value": 0.68,
+      "weight": null
+    },
+    {
+      "key": "risk_penalty",
+      "label": "risk penalty",
+      "value": -0.0205,
+      "weight": null
+    },
+    {
+      "key": "liquidity_penalty",
+      "label": "liquidity penalty",
+      "value": -0.07500000000000001,
+      "weight": null
+    },
+    {
+      "key": "model_confidence_bonus",
+      "label": "model confidence bonus",
+      "value": 0.0,
+      "weight": null
+    },
+    {
+      "key": "user_fit_bonus",
+      "label": "user fit bonus",
+      "value": 0.0,
+      "weight": null
+    },
+    {
+      "key": "final_score",
+      "label": "final score",
+      "value": 0.05449999999999998,
+      "weight": null
+    }
+  ],
+  "accuracy_snapshot": null
+}
