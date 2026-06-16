@@ -14,4 +14,10 @@ serde_json.workspace = true
 thiserror.workspace = true
 
 [dev-dependencies]
+criterion.workspace = true
+insta.workspace = true
 tokio.workspace = true
+
+[[bench]]
+name = "strategy_batch"
+harness = false

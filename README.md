@@ -53,11 +53,22 @@ Docker is optional in this task. It is not the only supported workflow.
 - `cargo fmt --check`
 - `cargo check --workspace`
 - `cargo test --workspace`
+- `cargo test --workspace -- --ignored`
+- `cargo bench --workspace --no-run`
 - `cargo run -p grand-edge-api`
 - `cargo run -p grand-edge-xtask -- --help`
 - `cargo run -p grand-edge-xtask -- config print --profile local`
 
 The API binary is a placeholder today and will be expanded in later tasks.
+
+## Test Harnesses
+
+- Deterministic fixtures live under `tests/fixtures/` and crate-local `tests/fixtures/`.
+- Network-free OSRS Wiki client coverage should use `wiremock`, not live API calls.
+- Docker-backed storage reality checks live in ignored `testcontainers` tests.
+- Snapshot coverage uses `insta` for explanation and API-shape assertions.
+- Bench targets compile with `cargo bench --workspace --no-run` and serve as
+  stable baselines rather than immediate optimization proofs.
 
 ## Frontend Commands
 

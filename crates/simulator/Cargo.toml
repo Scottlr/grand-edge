@@ -15,5 +15,12 @@ thiserror.workspace = true
 uuid.workspace = true
 
 [dev-dependencies]
+criterion.workspace = true
+proptest.workspace = true
+rstest.workspace = true
 sqlx.workspace = true
 tokio.workspace = true
+
+[[bench]]
+name = "historical_replay"
+harness = false

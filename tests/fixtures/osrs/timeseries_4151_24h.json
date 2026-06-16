@@ -1,0 +1,18 @@
+{
+  "data": [
+    {
+      "timestamp": 1716181200,
+      "avgHighPrice": 2910000,
+      "avgLowPrice": 2895000,
+      "highPriceVolume": 12,
+      "lowPriceVolume": 10
+    },
+    {
+      "timestamp": 1716267600,
+      "avgHighPrice": 2920000,
+      "avgLowPrice": 2905000,
+      "highPriceVolume": 9,
+      "lowPriceVolume": 8
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+[
+  {
+    "examine": "A weapon from the abyss.",
+    "id": 4151,
+    "members": true,
+    "lowalch": 72000,
+    "limit": 70,
+    "value": 120001,
+    "highalch": 108001,
+    "icon": "Abyssal whip.png",
+    "name": "Abyssal whip"
+  },
+  {
+    "examine": "A tall white hat.",
+    "id": 1949,
+    "members": false,
+    "lowalch": null,
+    "limit": 100,
+    "value": 4,
+    "highalch": 2,
+    "icon": "Chef&#39;s hat.png",
+    "name": "Chef's hat"
+  }
+]
