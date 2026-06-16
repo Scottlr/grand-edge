@@ -7,3 +7,15 @@ repository.workspace = true
 
 [dependencies]
 grand-edge-domain = { path = "../domain" }
+grand-edge-metrics = { path = "../metrics" }
+grand-edge-simulator = { path = "../simulator" }
+grand-edge-storage = { path = "../storage" }
+chrono.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+uuid.workspace = true
+
+[dev-dependencies]
+sqlx.workspace = true
+tokio.workspace = true
