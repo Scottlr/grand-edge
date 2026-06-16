@@ -1,0 +1,17 @@
+{
+  "model_id": "momentum_logit_v1",
+  "version": "2026-06-16.1",
+  "features": [
+    "return_1h",
+    "return_6h",
+    "observed_volume_z_24h",
+    "spread_pct"
+  ],
+  "intercept": -0.31,
+  "weights": [
+    0.8,
+    0.4,
+    0.2,
+    -1.1
+  ]
+}

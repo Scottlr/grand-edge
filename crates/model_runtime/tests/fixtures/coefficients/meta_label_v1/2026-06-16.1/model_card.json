@@ -1,0 +1,19 @@
+{
+  "strategy_id": "meta_label_v1",
+  "model_version": "2026-06-16.1",
+  "feature_set_version": "features_v1",
+  "feature_schema_hash": "sha256:f82737e1b4f673ba96cb8a1b0b3409eef0507ebc010b27e4aaed4685d33e8331",
+  "training_window_start": "2026-01-01T00:00:00Z",
+  "training_window_end": "2026-05-01T00:00:00Z",
+  "evaluation_window_start": "2026-05-01T00:00:00Z",
+  "evaluation_window_end": "2026-06-01T00:00:00Z",
+  "metrics": {
+    "directional_accuracy": 0.58,
+    "window": "seven_days"
+  },
+  "known_limitations": [
+    "Coefficient fixture uses proxy liquidity signals and is intended for runtime smoke validation only."
+  ],
+  "target_label": "future_actionable_return_6h",
+  "notes": "Coefficient fixture for Rust-only inference smoke tests."
+}

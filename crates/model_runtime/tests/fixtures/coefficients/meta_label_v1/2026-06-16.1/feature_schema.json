@@ -1,0 +1,11 @@
+{
+  "feature_set_version": "features_v1",
+  "feature_names": [
+    "return_1h",
+    "return_6h",
+    "observed_volume_z_24h",
+    "spread_pct"
+  ],
+  "target_label": "future_actionable_return_6h",
+  "feature_schema_hash": "sha256:f82737e1b4f673ba96cb8a1b0b3409eef0507ebc010b27e4aaed4685d33e8331"
+}

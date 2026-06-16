@@ -2,6 +2,7 @@
 members = [
   "crates/configuration",
   "crates/domain",
+  "crates/model_runtime",
   "crates/ingest",
   "crates/storage",
   "crates/features",
