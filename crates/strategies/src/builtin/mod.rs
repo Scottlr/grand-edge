@@ -8,16 +8,21 @@ use grand_edge_domain::{
 
 use crate::{LookbackSpec, Strategy, StrategyContext, StrategyError, StrategyRegistry};
 
+pub mod advanced_risk_overlay;
 pub mod ar_baseline;
+pub mod conformal_interval;
 pub mod execution_confidence;
 pub mod kalman_fair_value;
 pub mod mean_reversion;
 pub mod momentum;
 pub mod portfolio_optimizer;
+pub mod regime_hmm;
 pub mod spread_edge;
 pub mod volatility_filter;
 
+pub use advanced_risk_overlay::AdvancedRiskOverlayStrategy;
 pub use ar_baseline::ArBaselineStrategy;
+pub use conformal_interval::ConformalIntervalStrategy;
 pub use execution_confidence::{
     ExecutionConfidenceEstimate, ExecutionConfidenceStrategy, estimate_execution_confidence,
 };
@@ -27,6 +32,7 @@ pub use momentum::{MomentumConfig, MomentumStrategy};
 pub use portfolio_optimizer::{
     PortfolioCandidate, PortfolioOptimizerStrategy, PortfolioOrderSuggestion, optimize_portfolio,
 };
+pub use regime_hmm::RegimeHmmStrategy;
 pub use spread_edge::{SpreadEdgeConfig, SpreadEdgeStrategy};
 pub use volatility_filter::VolatilityFilterStrategy;
 
@@ -127,6 +133,9 @@ pub fn register_baseline_strategies(registry: &mut StrategyRegistry) -> Result<(
     registry.register(Arc::new(PortfolioOptimizerStrategy::default()))?;
     registry.register(Arc::new(KalmanFairValueStrategy::default()))?;
     registry.register(Arc::new(ArBaselineStrategy::default()))?;
+    registry.register(Arc::new(RegimeHmmStrategy::default()))?;
+    registry.register(Arc::new(ConformalIntervalStrategy::default()))?;
+    registry.register(Arc::new(AdvancedRiskOverlayStrategy::default()))?;
     Ok(())
 }
 
@@ -306,7 +315,7 @@ mod tests {
     }
 
     #[test]
-    fn register_baseline_strategies_registers_all_eight() {
+    fn register_baseline_strategies_registers_all_eleven() {
         let mut registry = StrategyRegistry::new();
         register_baseline_strategies(&mut registry).unwrap();
         for strategy_id in [
@@ -318,6 +327,9 @@ mod tests {
             "portfolio_optimizer_v1",
             "kalman_fair_value_v1",
             "arima_baseline_v1",
+            "regime_hmm_v1",
+            "conformal_interval_v1",
+            "advanced_risk_overlay_v1",
         ] {
             assert!(
                 registry.get(strategy_id).is_some(),

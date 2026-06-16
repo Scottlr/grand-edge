@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::math::{ArBaselineConfig, KalmanConfig};
+use crate::uncertainty::RegimeHeuristicConfig;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StrategyConfig {
@@ -8,6 +9,7 @@ pub struct StrategyConfig {
     pub risk: RiskConfig,
     pub kalman_fair_value: KalmanConfig,
     pub ar_baseline: ArBaselineConfig,
+    pub regime_heuristic: RegimeHeuristicConfig,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -17,6 +19,10 @@ pub struct RiskConfig {
     pub min_expected_roi: f64,
     pub min_confidence: f64,
     pub participation_rate: f64,
+    pub overlay_volatility_penalty_weight: f64,
+    pub overlay_spread_penalty_weight: f64,
+    pub overlay_staleness_penalty_weight: f64,
+    pub overlay_regime_penalty_weight: f64,
 }
 
 impl Default for StrategyConfig {
@@ -26,6 +32,7 @@ impl Default for StrategyConfig {
             risk: RiskConfig::default(),
             kalman_fair_value: KalmanConfig::default(),
             ar_baseline: ArBaselineConfig::default(),
+            regime_heuristic: RegimeHeuristicConfig::default(),
         }
     }
 }
@@ -38,6 +45,10 @@ impl Default for RiskConfig {
             min_expected_roi: 0.01,
             min_confidence: 0.55,
             participation_rate: 0.10,
+            overlay_volatility_penalty_weight: 1.0,
+            overlay_spread_penalty_weight: 1.5,
+            overlay_staleness_penalty_weight: 0.05,
+            overlay_regime_penalty_weight: 0.20,
         }
     }
 }
@@ -60,6 +71,17 @@ impl Default for ArBaselineConfig {
             phi: 0.35,
             min_expected_return: 0.01,
             confidence_floor: 0.35,
+        }
+    }
+}
+
+impl Default for RegimeHeuristicConfig {
+    fn default() -> Self {
+        Self {
+            high_volatility_z: 2.0,
+            high_spread_pct: 0.035,
+            low_observed_volume_z: -1.0,
+            trend_return_threshold: 0.02,
         }
     }
 }

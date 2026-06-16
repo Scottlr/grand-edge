@@ -111,3 +111,29 @@ fn advanced_baselines_emit_stable_explanation_keys() {
             .contains("simplified AR(1) on price differences")
     );
 }
+
+#[test]
+fn risk_overlay_reason_keys_survive_serialization() {
+    let mut registry = StrategyRegistry::new();
+    register_baseline_strategies(&mut registry).unwrap();
+
+    let signal = registry
+        .get("advanced_risk_overlay_v1")
+        .unwrap()
+        .generate(
+            &grand_edge_strategies::builtin::test_context(),
+            &item(),
+            &latest(),
+            &features(),
+        )
+        .unwrap();
+    let overlay = signal.explanation.get("risk_overlay").unwrap().clone();
+    let round_trip: grand_edge_strategies::RiskOverlay = serde_json::from_value(overlay).unwrap();
+
+    assert!(round_trip.reasons.iter().all(|reason| {
+        reason
+            .key
+            .chars()
+            .all(|ch| ch.is_ascii_lowercase() || ch == '_')
+    }));
+}
