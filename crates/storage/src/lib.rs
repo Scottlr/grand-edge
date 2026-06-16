@@ -31,6 +31,6 @@ pub use positions::PositionRepository;
 pub use predictions::PredictionRepository;
 pub use prices::PriceRepository;
 pub use reason_outcomes::ReasonOutcomeRepository;
-pub use recommendations::RecommendationRepository;
+pub use recommendations::{EvaluatedRecommendationRecord, RecommendationRepository};
 pub use simulations::{SimulationRepository, StoredPaperBet, StoredSimulationRun};
 pub use strategies::{StoredPrediction, StrategyRepository};
