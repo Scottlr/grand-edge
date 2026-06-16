@@ -123,6 +123,18 @@ pub enum AnalyticsCommand {
         #[arg(long, default_value_t = false)]
         include_raw_interval_candles: bool,
     },
+    Archive {
+        #[arg(long)]
+        as_of: String,
+        #[arg(long)]
+        out: String,
+        #[arg(long, default_value_t = true)]
+        dry_run: bool,
+        #[arg(long, default_value_t = false)]
+        allow_hot_delete: bool,
+        #[arg(long)]
+        fixture: Option<String>,
+    },
 }
 
 #[derive(Debug, Clone, Subcommand)]
