@@ -93,6 +93,7 @@ fn recommendation_input() -> RecommendationInput {
         strategy_votes: vec![signal],
         accuracy_snapshot: None,
         existing_position: None,
+        graph_input: None,
     }
 }
 
@@ -101,5 +102,29 @@ fn recommendation_explanation_snapshot() {
     let recommendation = engine()
         .build_recommendation(recommendation_input())
         .unwrap();
-    assert_json_snapshot!("recommendation_explanation", recommendation.explanation);
+    let mut snapshot = serde_json::to_value(&recommendation.explanation).unwrap();
+    normalize_prediction_ids(&mut snapshot);
+    assert_json_snapshot!("recommendation_explanation", snapshot);
+}
+
+fn normalize_prediction_ids(value: &mut serde_json::Value) {
+    match value {
+        serde_json::Value::Object(map) => {
+            if map.contains_key("prediction_id") {
+                map.insert(
+                    "prediction_id".to_string(),
+                    serde_json::Value::String("<prediction-id>".to_string()),
+                );
+            }
+            for child in map.values_mut() {
+                normalize_prediction_ids(child);
+            }
+        }
+        serde_json::Value::Array(values) => {
+            for child in values {
+                normalize_prediction_ids(child);
+            }
+        }
+        _ => {}
+    }
 }

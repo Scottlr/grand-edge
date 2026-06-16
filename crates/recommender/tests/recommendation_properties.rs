@@ -114,6 +114,7 @@ proptest! {
             strategy_votes: vec![signal(expected_net_gp_per_unit, 10, 10)],
             accuracy_snapshot: None,
             existing_position: None,
+            graph_input: None,
         };
 
         let recommendation = engine().build_recommendation(input).unwrap();

@@ -6,6 +6,7 @@ pub mod config;
 pub mod engine;
 pub mod errors;
 pub mod explanations;
+pub mod graph_actions;
 pub mod prediction_links;
 pub mod quantity;
 pub mod reason_atoms;

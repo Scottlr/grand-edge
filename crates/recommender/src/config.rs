@@ -1,6 +1,8 @@
 use grand_edge_domain::MarketRules;
 use serde::{Deserialize, Serialize};
 
+use crate::graph_actions::GraphActionConfig;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RecommendationConfig {
     pub min_buy_score: f64,
@@ -17,6 +19,7 @@ pub struct RecommendationConfig {
     pub execution_confidence_weight: f64,
     pub feature_set_version: String,
     pub market_rules: MarketRules,
+    pub graph_actions: GraphActionConfig,
 }
 
 impl Default for RecommendationConfig {
@@ -36,6 +39,7 @@ impl Default for RecommendationConfig {
             execution_confidence_weight: 0.20,
             feature_set_version: "features_v1".to_string(),
             market_rules: MarketRules::default(),
+            graph_actions: GraphActionConfig::default(),
         }
     }
 }
