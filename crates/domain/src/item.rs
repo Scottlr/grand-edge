@@ -2,18 +2,20 @@ use chrono::{DateTime, Utc};
 use percent_encoding::{AsciiSet, NON_ALPHANUMERIC, percent_decode_str, utf8_percent_encode};
 use serde::{Deserialize, Serialize};
 
+use crate::{Gp, ItemId};
+
 const WIKI_IMAGE_PATH_SET: &AsciiSet = &NON_ALPHANUMERIC.remove(b'-').remove(b'.').remove(b'_');
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Item {
-    pub item_id: i64,
+    pub item_id: ItemId,
     pub name: String,
     pub examine: Option<String>,
     pub members: bool,
     pub buy_limit: Option<i32>,
-    pub low_alch: Option<i64>,
-    pub high_alch: Option<i64>,
-    pub value: Option<i64>,
+    pub low_alch: Option<Gp>,
+    pub high_alch: Option<Gp>,
+    pub value: Option<Gp>,
     pub icon: Option<ItemIcon>,
     pub updated_at: DateTime<Utc>,
 }

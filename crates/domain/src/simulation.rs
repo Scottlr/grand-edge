@@ -1,6 +1,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
+
+use crate::{ItemId, OrderId, RecommendationId};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -28,9 +29,9 @@ pub enum PaperBetStatus {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PaperBet {
-    pub paper_bet_id: Uuid,
-    pub recommendation_id: Option<Uuid>,
-    pub item_id: i64,
+    pub paper_bet_id: OrderId,
+    pub recommendation_id: Option<RecommendationId>,
+    pub item_id: ItemId,
     pub created_at: DateTime<Utc>,
     pub status: PaperBetStatus,
     pub execution_mode: ExecutionMode,
