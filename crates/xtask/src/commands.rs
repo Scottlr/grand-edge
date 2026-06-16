@@ -7,8 +7,8 @@ use std::path::{Path, PathBuf};
 use async_trait::async_trait;
 use chrono::{DateTime, NaiveDate, Utc};
 use grand_edge_analytics::{
-    BacktestReportRequest, DatasetExportRequest, export_backtest_report_from_storage,
-    export_feature_dataset_from_storage,
+    BacktestReportRequest, DatasetExportRequest, discover_fixture_edges,
+    export_backtest_report_from_storage, export_feature_dataset_from_storage,
 };
 use grand_edge_configuration::{ConfigProfile, GrandEdgeConfig, load_config};
 use grand_edge_domain::{GraphVersion, ItemGraphEdge, ItemGraphNode};
@@ -98,6 +98,24 @@ pub async fn graph_import_relations(
         .import_relation_files(&relations_root, false)
         .await?;
     Ok(render_relation_report(&report)?)
+}
+
+pub async fn graph_discover_edges(
+    fixture: bool,
+    dry_run: bool,
+    method: &str,
+) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
+    if fixture {
+        let report = discover_fixture_edges(dry_run)?;
+        return Ok(serde_json::to_string_pretty(&serde_json::json!({
+            "method": method,
+            "report": report,
+        }))?);
+    }
+
+    Err(Box::new(CommandUnavailableError {
+        message: "graph discover-edges currently requires --fixture until historical dataset selection is wired".to_string(),
+    }))
 }
 
 pub async fn corpus_validate(
