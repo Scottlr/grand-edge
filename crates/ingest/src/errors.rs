@@ -30,6 +30,8 @@ pub enum IngestError {
     Http(#[from] reqwest::Error),
     #[error("unexpected OSRS Wiki response status {status}")]
     UnexpectedStatus { status: StatusCode, body: String },
+    #[error("storage operation failed")]
+    Storage(#[from] grand_edge_storage::StorageError),
     #[error("wiki image normalization failed")]
     WikiImage(#[from] ItemImageError),
 }
