@@ -20,5 +20,19 @@ Use `uv` for environment management when available:
 - `uv run --project ml ruff check .`
 - `uv run --project ml pytest`
 - `uv run --project ml python -m grandedge_ml.export --help`
+- `cargo check -p grandedge_py`
+- `cargo check --workspace --exclude grandedge_py`
+- `cd ml && uv run --project . maturin develop`
+- `cd ml && uv run --project . pytest tests/test_rust_bindings.py`
+
+If the uv-managed venv does not include `pip`, seed it once before the
+`maturin develop` step:
+
+- `cd ml && uv run --project . python -m ensurepip`
 
 Optional training dependencies are behind `--extra training`.
+
+Rust research bindings are optional and one-way: Python may import Rust for
+offline research helpers, but production Rust crates must not import Python.
+See `ml/docs/rust-bindings.md` for the binding request/response shapes and the
+intended workflow.

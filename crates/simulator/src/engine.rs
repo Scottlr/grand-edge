@@ -96,18 +96,26 @@ impl SimulationEngine {
         request: SimulatedOrderRequest,
         history: &[IntervalPrice],
     ) -> Result<PaperBetOutcome, SimulatorError> {
+        Self::simulate_from_history_with_config(&self.config, request, history)
+    }
+
+    pub fn simulate_from_history_with_config(
+        config: &SimulatorConfig,
+        request: SimulatedOrderRequest,
+        history: &[IntervalPrice],
+    ) -> Result<PaperBetOutcome, SimulatorError> {
         if request.quantity <= 0 {
             return Err(SimulatorError::InvalidRequest(
                 "quantity must be positive".to_string(),
             ));
         }
 
-        let entry = entry_fill(&self.config, &request, history)?;
-        let exit = exit_fill(&self.config, &entry, &request, history)?;
-        let tax_paid = tax_on_sale(&self.config.market_rules, request.item_id, exit.fill_price)
+        let entry = entry_fill(config, &request, history)?;
+        let exit = exit_fill(config, &entry, &request, history)?;
+        let tax_paid = tax_on_sale(&config.market_rules, request.item_id, exit.fill_price)
             * entry.filled_quantity;
         let profit = realized_profit_gp(
-            &self.config.market_rules,
+            &config.market_rules,
             request.item_id,
             entry.fill_price,
             exit.fill_price,
@@ -145,7 +153,7 @@ impl SimulationEngine {
             hit_reason,
             status,
             explanation: serde_json::json!({
-                "execution_mode": self.config.execution_mode,
+                "execution_mode": config.execution_mode,
                 "entry": entry.explanation,
                 "exit": exit.explanation,
             }),

@@ -10,6 +10,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
   "jsonschema>=4.25",
+  "maturin>=1.7",
   "numpy>=2.0",
   "polars>=1.30",
   "pytest>=8.3",
@@ -29,6 +30,12 @@ tracking = ["mlflow>=2.16"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/grandedge_ml"]
+
+[tool.maturin]
+manifest-path = "../crates/grandedge_py/Cargo.toml"
+module-name = "grandedge_py"
+python-source = "src"
+features = ["pyo3/extension-module", "pyo3/abi3-py312"]
 
 [tool.ruff]
 line-length = 100

@@ -12,6 +12,7 @@ members = [
   "crates/simulator",
   "crates/metrics",
   "crates/api",
+  "crates/grandedge_py",
   "crates/xtask",
 ]
 resolver = "3"
@@ -40,6 +41,7 @@ schemars = { version = "1", features = ["chrono04", "uuid1"] }
 secrecy = { version = "0.10", features = ["serde"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+pyo3 = { version = "0.23", features = ["extension-module", "abi3-py312"] }
 sqlx = { version = "0.8", features = ["runtime-tokio", "tls-rustls", "postgres", "chrono", "uuid", "json"] }
 testcontainers = "0.25"
 thiserror = "2"

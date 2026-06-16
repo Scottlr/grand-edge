@@ -1,6 +1,8 @@
+use serde::{Deserialize, Serialize};
+
 use crate::graph::GraphFeatureConfig;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FeatureEngineConfig {
     pub rolling_window_5m: usize,
     pub rolling_window_1h: usize,
