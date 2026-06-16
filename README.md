@@ -33,8 +33,9 @@ Docker is optional in this task. It is not the only supported workflow.
 
 1. Install Rust with `rustup`, Node.js 20+, npm, and ensure a Postgres 16+
    instance is reachable.
-2. Copy `.env.example` to `.env` and adjust `DATABASE_URL` if your Postgres host
-   differs.
+2. Copy `configs/local.example.toml` to `configs/local.toml` for file-based local
+   overrides, then copy `.env.example` to `.env` only if you need environment
+   overrides such as `DATABASE_URL`.
 3. Run `cargo check --workspace` from the repository root.
 4. Run `npm --prefix apps/web install`.
 5. Run `npm --prefix apps/web run dev` to start the frontend shell.
@@ -53,6 +54,8 @@ Docker is optional in this task. It is not the only supported workflow.
 - `cargo check --workspace`
 - `cargo test --workspace`
 - `cargo run -p grand-edge-api`
+- `cargo run -p grand-edge-xtask -- --help`
+- `cargo run -p grand-edge-xtask -- config print --profile local`
 
 The API binary is a placeholder today and will be expanded in later tasks.
 
@@ -67,7 +70,9 @@ The API binary is a placeholder today and will be expanded in later tasks.
 
 ## Environment
 
-The required scaffold-time environment keys live in `.env.example`:
+The shared runtime configuration now layers `configs/default.toml`, optional
+`configs/{profile}.toml`, optional `configs/local.toml`, and environment
+overrides from `.env.example`:
 
 - `DATABASE_URL`
 - `GRAND_EDGE_USER_AGENT`
