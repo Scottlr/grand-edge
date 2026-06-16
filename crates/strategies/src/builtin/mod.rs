@@ -11,10 +11,14 @@ use crate::{LookbackSpec, Strategy, StrategyContext, StrategyError, StrategyRegi
 pub mod advanced_risk_overlay;
 pub mod ar_baseline;
 pub mod conformal_interval;
+pub mod contextual_bandit;
 pub mod execution_confidence;
+pub mod gbm_ranker;
 pub mod kalman_fair_value;
 pub mod mean_reversion;
+pub mod meta_label;
 pub mod momentum;
+pub mod online_ensemble;
 pub mod portfolio_optimizer;
 pub mod regime_hmm;
 pub mod spread_edge;
@@ -23,12 +27,16 @@ pub mod volatility_filter;
 pub use advanced_risk_overlay::AdvancedRiskOverlayStrategy;
 pub use ar_baseline::ArBaselineStrategy;
 pub use conformal_interval::ConformalIntervalStrategy;
+pub use contextual_bandit::ContextualBanditStrategy;
 pub use execution_confidence::{
     ExecutionConfidenceEstimate, ExecutionConfidenceStrategy, estimate_execution_confidence,
 };
+pub use gbm_ranker::GbmRankerStrategy;
 pub use kalman_fair_value::KalmanFairValueStrategy;
 pub use mean_reversion::{MeanReversionConfig, MeanReversionStrategy};
+pub use meta_label::MetaLabelStrategy;
 pub use momentum::{MomentumConfig, MomentumStrategy};
+pub use online_ensemble::OnlineEnsembleStrategy;
 pub use portfolio_optimizer::{
     PortfolioCandidate, PortfolioOptimizerStrategy, PortfolioOrderSuggestion, optimize_portfolio,
 };
@@ -136,6 +144,10 @@ pub fn register_baseline_strategies(registry: &mut StrategyRegistry) -> Result<(
     registry.register(Arc::new(RegimeHmmStrategy::default()))?;
     registry.register(Arc::new(ConformalIntervalStrategy::default()))?;
     registry.register(Arc::new(AdvancedRiskOverlayStrategy::default()))?;
+    registry.register(Arc::new(GbmRankerStrategy::default()))?;
+    registry.register(Arc::new(ContextualBanditStrategy::default()))?;
+    registry.register(Arc::new(OnlineEnsembleStrategy::default()))?;
+    registry.register(Arc::new(MetaLabelStrategy::default()))?;
     Ok(())
 }
 
@@ -315,7 +327,7 @@ mod tests {
     }
 
     #[test]
-    fn register_baseline_strategies_registers_all_eleven() {
+    fn register_baseline_strategies_registers_all_fifteen() {
         let mut registry = StrategyRegistry::new();
         register_baseline_strategies(&mut registry).unwrap();
         for strategy_id in [
@@ -330,6 +342,10 @@ mod tests {
             "regime_hmm_v1",
             "conformal_interval_v1",
             "advanced_risk_overlay_v1",
+            "gbm_ranker_v1",
+            "contextual_bandit_v1",
+            "online_ensemble_v1",
+            "meta_label_v1",
         ] {
             assert!(
                 registry.get(strategy_id).is_some(),
