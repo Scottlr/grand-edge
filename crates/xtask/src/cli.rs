@@ -54,6 +54,10 @@ pub enum Command {
         #[command(subcommand)]
         command: GraphCommand,
     },
+    Corpus {
+        #[command(subcommand)]
+        command: CorpusCommand,
+    },
     Server {
         #[command(subcommand)]
         command: ServerCommand,
@@ -117,6 +121,20 @@ pub enum SchemaCommand {
 pub enum GraphCommand {
     ImportRelations {
         #[arg(long, default_value = "data/relations")]
+        root: String,
+        #[arg(long, default_value_t = false)]
+        dry_run: bool,
+    },
+}
+
+#[derive(Debug, Clone, Subcommand)]
+pub enum CorpusCommand {
+    Validate {
+        #[arg(long, default_value = "data/corpus")]
+        root: String,
+    },
+    Import {
+        #[arg(long, default_value = "data/corpus")]
         root: String,
         #[arg(long, default_value_t = false)]
         dry_run: bool,

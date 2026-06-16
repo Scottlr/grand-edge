@@ -3,6 +3,7 @@
 mod checkpoint;
 mod client;
 mod config;
+mod corpus;
 mod dto;
 mod errors;
 mod jobs;
@@ -14,6 +15,7 @@ mod wiki_images;
 pub use checkpoint::*;
 pub use client::*;
 pub use config::*;
+pub use corpus::*;
 pub use dto::*;
 pub use errors::*;
 pub use jobs::*;

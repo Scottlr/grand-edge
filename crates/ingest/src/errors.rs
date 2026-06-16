@@ -42,4 +42,6 @@ pub enum IngestError {
     Json(#[from] serde_json::Error),
     #[error("invalid relation corpus: {0}")]
     InvalidRelationCorpus(String),
+    #[error("invalid market intelligence corpus: {0}")]
+    InvalidMarketIntelligenceCorpus(String),
 }

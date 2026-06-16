@@ -5,9 +5,11 @@ use async_trait::async_trait;
 use grand_edge_configuration::{ConfigProfile, GrandEdgeConfig, load_config};
 use grand_edge_domain::{GraphVersion, ItemGraphEdge, ItemGraphNode};
 use grand_edge_ingest::{
-    IngestError, RelationCorpusImporter, RelationImportReport, RelationImportStore,
+    IngestError, MarketIntelligenceCorpusImporter, MarketIntelligenceImportReport,
+    MarketIntelligenceImportStore, RelationCorpusImporter, RelationImportReport,
+    RelationImportStore,
 };
-use grand_edge_storage::{Storage, StoredCorpusSource};
+use grand_edge_storage::{Storage, StoredCorpusSource, StoredMarketEvent};
 use secrecy::ExposeSecret;
 
 #[derive(Debug, thiserror::Error)]
@@ -86,6 +88,36 @@ pub async fn graph_import_relations(
     Ok(render_relation_report(&report)?)
 }
 
+pub async fn corpus_validate(
+    root: &str,
+) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
+    let corpus_root = corpus_root(root)?;
+    let importer = MarketIntelligenceCorpusImporter::new(NoopCorpusStore);
+    let report = importer.import_corpus_files(&corpus_root, true).await?;
+    Ok(render_corpus_report(&report)?)
+}
+
+pub async fn corpus_import(
+    profile: ConfigProfile,
+    root: &str,
+    dry_run: bool,
+) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
+    let corpus_root = corpus_root(root)?;
+
+    if dry_run {
+        let importer = MarketIntelligenceCorpusImporter::new(NoopCorpusStore);
+        let report = importer.import_corpus_files(&corpus_root, true).await?;
+        return Ok(render_corpus_report(&report)?);
+    }
+
+    let config = load_config(profile)?;
+    let storage = Storage::connect(config.database.url.expose_secret()).await?;
+    storage.migrate().await?;
+    let importer = MarketIntelligenceCorpusImporter::new(storage);
+    let report = importer.import_corpus_files(&corpus_root, false).await?;
+    Ok(render_corpus_report(&report)?)
+}
+
 fn relation_root(root: &str) -> Result<PathBuf, std::io::Error> {
     let candidate = Path::new(root);
     if candidate.is_absolute() {
@@ -102,8 +134,16 @@ fn render_relation_report(report: &RelationImportReport) -> Result<String, serde
     serde_json::to_string_pretty(report)
 }
 
+fn render_corpus_report(
+    report: &MarketIntelligenceImportReport,
+) -> Result<String, serde_json::Error> {
+    serde_json::to_string_pretty(report)
+}
+
 #[derive(Clone, Copy)]
 struct NoopRelationStore;
+#[derive(Clone, Copy)]
+struct NoopCorpusStore;
 
 #[async_trait]
 impl RelationImportStore for NoopRelationStore {
@@ -125,6 +165,44 @@ impl RelationImportStore for NoopRelationStore {
     async fn upsert_graph_edges(&self, _edges: &[ItemGraphEdge]) -> Result<u64, IngestError> {
         Ok(0)
     }
+}
+
+#[async_trait]
+impl MarketIntelligenceImportStore for NoopCorpusStore {
+    async fn upsert_corpus_sources(
+        &self,
+        _sources: &[StoredCorpusSource],
+    ) -> Result<u64, IngestError> {
+        Ok(0)
+    }
+
+    async fn insert_graph_version(&self, _version: &GraphVersion) -> Result<(), IngestError> {
+        Ok(())
+    }
+
+    async fn upsert_graph_nodes(&self, _nodes: &[ItemGraphNode]) -> Result<u64, IngestError> {
+        Ok(0)
+    }
+
+    async fn upsert_market_events(&self, _events: &[StoredMarketEvent]) -> Result<(), IngestError> {
+        Ok(())
+    }
+
+    async fn upsert_graph_edges(&self, _edges: &[ItemGraphEdge]) -> Result<u64, IngestError> {
+        Ok(0)
+    }
+}
+
+fn corpus_root(root: &str) -> Result<PathBuf, std::io::Error> {
+    let candidate = Path::new(root);
+    if candidate.is_absolute() {
+        return candidate.canonicalize();
+    }
+
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../..")
+        .join(candidate)
+        .canonicalize()
 }
 
 fn tool_available(name: &str) -> &'static str {
@@ -170,6 +248,7 @@ mod tests {
             "model",
             "schema",
             "graph",
+            "corpus",
             "server",
         ] {
             assert!(help.contains(expected), "{expected} missing from help");
