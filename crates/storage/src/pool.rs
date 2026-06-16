@@ -1,8 +1,9 @@
 use sqlx::{PgPool, postgres::PgPoolOptions};
 
 use crate::{
-    CheckpointRepository, FeatureRepository, ItemRepository, MetricsRepository, PositionRepository,
-    PriceRepository, RecommendationRepository, SimulationRepository, StorageError,
+    CheckpointRepository, EvidenceRepository, FeatureRepository, ItemRepository, MetricsRepository,
+    OutcomeRepository, PositionRepository, PredictionRepository, PriceRepository,
+    ReasonOutcomeRepository, RecommendationRepository, SimulationRepository, StorageError,
     StrategyRepository,
 };
 
@@ -49,12 +50,28 @@ impl Storage {
         FeatureRepository::new(self.pool.clone())
     }
 
+    pub fn evidence(&self) -> EvidenceRepository {
+        EvidenceRepository::new(self.pool.clone())
+    }
+
+    pub fn predictions(&self) -> PredictionRepository {
+        PredictionRepository::new(self.pool.clone())
+    }
+
     pub fn strategies(&self) -> StrategyRepository {
         StrategyRepository::new(self.pool.clone())
     }
 
     pub fn recommendations(&self) -> RecommendationRepository {
         RecommendationRepository::new(self.pool.clone())
+    }
+
+    pub fn outcomes(&self) -> OutcomeRepository {
+        OutcomeRepository::new(self.pool.clone())
+    }
+
+    pub fn reason_outcomes(&self) -> ReasonOutcomeRepository {
+        ReasonOutcomeRepository::new(self.pool.clone())
     }
 
     pub fn positions(&self) -> PositionRepository {
