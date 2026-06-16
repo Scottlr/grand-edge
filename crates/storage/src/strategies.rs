@@ -1,8 +1,30 @@
-use grand_edge_domain::StrategySignal;
+use chrono::{DateTime, Utc};
+use grand_edge_domain::{
+    Gp, ItemId, ModelVersion, Probability, Quantity, Rate, SignalSide, StrategyId, StrategySignal,
+};
 use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::StorageError;
+
+#[derive(Debug, Clone)]
+pub struct StoredPrediction {
+    pub strategy_id: StrategyId,
+    pub model_version: ModelVersion,
+    pub item_id: ItemId,
+    pub as_of: DateTime<Utc>,
+    pub horizon_secs: i64,
+    pub side: SignalSide,
+    pub expected_return: Rate,
+    pub confidence: Probability,
+    pub expected_net_gp_per_unit: Gp,
+    pub target_entry: Option<Gp>,
+    pub target_exit: Option<Gp>,
+    pub stop_loss: Option<Gp>,
+    pub take_profit: Option<Gp>,
+    pub max_quantity: Option<Quantity>,
+    pub explanation: serde_json::Value,
+}
 
 #[derive(Clone)]
 pub struct StrategyRepository {
@@ -69,6 +91,52 @@ impl StrategyRepository {
 
         Ok(affected)
     }
+
+    pub async fn list_predictions_for_strategy(
+        &self,
+        strategy_id: &str,
+        model_version: &str,
+        horizon_secs: i64,
+        window_start: DateTime<Utc>,
+        window_end: DateTime<Utc>,
+    ) -> Result<Vec<StoredPrediction>, StorageError> {
+        let rows = sqlx::query_as::<_, PredictionRow>(
+            r#"
+            SELECT
+                strategy_id,
+                model_version,
+                item_id,
+                as_of,
+                horizon_secs,
+                side,
+                expected_return,
+                confidence,
+                expected_net_gp_per_unit,
+                target_entry,
+                target_exit,
+                stop_loss,
+                take_profit,
+                max_quantity,
+                explanation
+            FROM strategy_predictions
+            WHERE strategy_id = $1
+              AND model_version = $2
+              AND horizon_secs = $3
+              AND as_of >= $4
+              AND as_of <= $5
+            ORDER BY as_of ASC
+            "#,
+        )
+        .bind(strategy_id)
+        .bind(model_version)
+        .bind(horizon_secs)
+        .bind(window_start)
+        .bind(window_end)
+        .fetch_all(&self.pool)
+        .await?;
+
+        rows.into_iter().map(TryFrom::try_from).collect()
+    }
 }
 
 fn enum_to_string<T: serde::Serialize>(value: &T) -> Result<String, StorageError> {
@@ -77,4 +145,48 @@ fn enum_to_string<T: serde::Serialize>(value: &T) -> Result<String, StorageError
         .as_str()
         .expect("serde rename_all enums serialize to string")
         .to_string())
+}
+
+#[derive(sqlx::FromRow)]
+struct PredictionRow {
+    strategy_id: String,
+    model_version: String,
+    item_id: i64,
+    as_of: DateTime<Utc>,
+    horizon_secs: i64,
+    side: String,
+    expected_return: f64,
+    confidence: f64,
+    expected_net_gp_per_unit: i64,
+    target_entry: Option<i64>,
+    target_exit: Option<i64>,
+    stop_loss: Option<i64>,
+    take_profit: Option<i64>,
+    max_quantity: Option<i64>,
+    explanation: serde_json::Value,
+}
+
+impl TryFrom<PredictionRow> for StoredPrediction {
+    type Error = StorageError;
+
+    fn try_from(value: PredictionRow) -> Result<Self, Self::Error> {
+        let side = serde_json::from_value(serde_json::Value::String(value.side))?;
+        Ok(Self {
+            strategy_id: StrategyId::new(value.strategy_id)?,
+            model_version: ModelVersion::new(value.model_version)?,
+            item_id: ItemId(value.item_id),
+            as_of: value.as_of,
+            horizon_secs: value.horizon_secs,
+            side,
+            expected_return: Rate::new(value.expected_return)?,
+            confidence: Probability::new(value.confidence)?,
+            expected_net_gp_per_unit: Gp(value.expected_net_gp_per_unit),
+            target_entry: value.target_entry.map(Gp),
+            target_exit: value.target_exit.map(Gp),
+            stop_loss: value.stop_loss.map(Gp),
+            take_profit: value.take_profit.map(Gp),
+            max_quantity: value.max_quantity.map(Quantity),
+            explanation: value.explanation,
+        })
+    }
 }

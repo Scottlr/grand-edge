@@ -19,5 +19,5 @@ pub use pool::Storage;
 pub use positions::PositionRepository;
 pub use prices::PriceRepository;
 pub use recommendations::RecommendationRepository;
-pub use simulations::SimulationRepository;
-pub use strategies::StrategyRepository;
+pub use simulations::{SimulationRepository, StoredPaperBet};
+pub use strategies::{StoredPrediction, StrategyRepository};

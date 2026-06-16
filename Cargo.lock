@@ -650,7 +650,15 @@ dependencies = [
 name = "grand-edge-metrics"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "grand-edge-domain",
+ "grand-edge-storage",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "thiserror",
+ "tokio",
+ "uuid",
 ]
 
 [[package]]
