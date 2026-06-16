@@ -1,0 +1,46 @@
+{
+  "generated_at": "2026-06-16T22:06:31.452410700Z",
+  "generator": "grand-edge-xtask@0.1.0",
+  "schemas": [
+    {
+      "name": "artifact_feature_schema_document",
+      "path": "artifact_feature_schema_document.schema.json",
+      "sha256": "9521fad816d0a6560cfde5e8240965bbfbfd6e4013581eb940a71dfecf220a51"
+    },
+    {
+      "name": "model_artifact_metadata",
+      "path": "model_artifact_metadata.schema.json",
+      "sha256": "96730bd73bf7fd1cd1b3a42bdc94575b6962cb8a02fa5705937546c8f0e1811e"
+    },
+    {
+      "name": "model_card_document",
+      "path": "model_card_document.schema.json",
+      "sha256": "8dac1e83fc960766a99f0dbe36242b0af4d752a4eecb29260b3cdbbfa448620e"
+    },
+    {
+      "name": "openapi",
+      "path": "openapi.json",
+      "sha256": "0f2050e0803eb10b93078f431eb2b0a80a269fcad7460b7a0413a22f576d847a"
+    },
+    {
+      "name": "recommendation_explanation",
+      "path": "recommendation_explanation.schema.json",
+      "sha256": "fac162bde9d57d8336c2cd9c46707347faaf97065a46b8462772784982e40ffc"
+    },
+    {
+      "name": "risk_config",
+      "path": "risk_config.schema.json",
+      "sha256": "ab0480917dabf1f38669da5745688e96c257bd8295aac6484e5f9b5c102b26e8"
+    },
+    {
+      "name": "strategy_config",
+      "path": "strategy_config.schema.json",
+      "sha256": "091b5001d6897d6e97adc8c59cd05892f1167e6106deca39cb9ef9eb55e4e3c7"
+    },
+    {
+      "name": "structured_recommendation_explanation",
+      "path": "structured_recommendation_explanation.schema.json",
+      "sha256": "9b0d39b67981480de0c7009328ec092c0508a3e3e1352ff3f03289131a2cf088"
+    }
+  ]
+}

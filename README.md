@@ -58,6 +58,7 @@ Docker is optional in this task. It is not the only supported workflow.
 - `cargo run -p grand-edge-api`
 - `cargo run -p grand-edge-xtask -- --help`
 - `cargo run -p grand-edge-xtask -- config print --profile local`
+- `cargo run -p grand-edge-xtask -- schema export --out schemas`
 
 The API binary is a placeholder today and will be expanded in later tasks.
 
@@ -93,6 +94,20 @@ overrides from `.env.example`:
 
 `GRAND_EDGE_USER_AGENT` must remain descriptive and include the project name and
 contact address for future OSRS Wiki API access.
+
+## Contract Schemas
+
+Rust-owned contract exports live under `schemas/` and are generated with:
+
+- `cargo run -p grand-edge-xtask -- schema export --out schemas`
+
+This writes JSON Schemas for strategy config, risk config, artifact metadata,
+artifact documents, and recommendation explanation contracts, plus
+`schemas/openapi.json` and `schemas/schema-manifest.json`.
+
+The local API also serves Swagger UI at `/swagger-ui/` when
+`api.swagger_ui_enabled = true`. Leave that enabled for local/dev review, and
+disable it in production-facing config where public API browsing is not wanted.
 
 ## Planning
 

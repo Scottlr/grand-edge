@@ -27,6 +27,7 @@ max_timeseries_requests_per_minute = 30
 bind_addr = "127.0.0.1:3000"
 cors_origin = "http://localhost:5173"
 default_user_id = "00000000-0000-0000-0000-000000000001"
+swagger_ui_enabled = true
 
 [logging]
 format = "text"

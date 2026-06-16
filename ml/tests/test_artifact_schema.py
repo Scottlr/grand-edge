@@ -1,10 +1,15 @@
 from datetime import UTC, datetime
+import json
+from pathlib import Path
 
+import jsonschema
 import pytest
 
 from grandedge_ml.artifact_schema import (
     ModelArtifactKind,
     ModelArtifactMetadata,
+    load_rust_schema,
+    validate_against_rust_schema,
     validate_artifact_metadata,
 )
 
@@ -72,3 +77,26 @@ def test_artifact_rejects_future_training_window() -> None:
             expected_feature_set_version="features_v1",
             as_of=datetime(2026, 6, 16, 12, 0, tzinfo=UTC),
         )
+
+
+def test_model_artifact_metadata_matches_rust_schema() -> None:
+    metadata = build_metadata()
+    validate_against_rust_schema(metadata.__dict__, "model_artifact_metadata")
+
+
+def test_model_card_fixture_matches_rust_schema() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+    fixture = (
+        repo_root
+        / "crates"
+        / "model_runtime"
+        / "tests"
+        / "fixtures"
+        / "python_export"
+        / "gbm_ranker_v1"
+        / "2026-06-16.1"
+        / "model_card.json"
+    )
+    payload = json.loads(fixture.read_text(encoding="utf-8"))
+    schema = load_rust_schema("model_card_document")
+    jsonschema.Draft202012Validator(schema).validate(payload)

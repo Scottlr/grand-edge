@@ -1,10 +1,11 @@
 use chrono::{DateTime, Utc};
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::{DomainValidationError, ItemId};
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct GraphVersion {
     pub graph_version: String,
     pub source_hash: String,
@@ -12,7 +13,7 @@ pub struct GraphVersion {
     pub description: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct ItemGraphNode {
     pub item_id: ItemId,
     pub graph_version: String,
@@ -21,7 +22,7 @@ pub struct ItemGraphNode {
     pub updated_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum GraphEdgeType {
     IngredientOf,
@@ -50,7 +51,7 @@ pub enum GraphEdgeType {
     CandidateNamePattern,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum GraphEdgeDirection {
     Upstream,
@@ -58,7 +59,7 @@ pub enum GraphEdgeDirection {
     Bidirectional,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum GraphEdgeSourceType {
     Mechanical,
@@ -68,7 +69,7 @@ pub enum GraphEdgeSourceType {
     EventCorpus,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum EdgeObservationMethod {
     Correlation,
@@ -80,7 +81,7 @@ pub enum EdgeObservationMethod {
     ChangePoint,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum GraphRecommendationAction {
     BuyLinked,
@@ -117,7 +118,7 @@ pub enum GraphDomainError {
     LearnedEdgeRequiresObservation,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct ItemGraphEdge {
     pub edge_id: Uuid,
     pub graph_version: String,
@@ -140,7 +141,7 @@ pub struct ItemGraphEdge {
     pub updated_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct EdgeObservation {
     pub edge_id: Uuid,
     pub observed_at: DateTime<Utc>,
@@ -155,7 +156,7 @@ pub struct EdgeObservation {
     pub metadata: serde_json::Value,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct GraphPathStep {
     pub from_item_id: ItemId,
     pub to_item_id: ItemId,
@@ -165,7 +166,7 @@ pub struct GraphPathStep {
     pub weight: f64,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct GraphPath {
     pub source_item_id: ItemId,
     pub target_item_id: ItemId,
@@ -174,7 +175,7 @@ pub struct GraphPath {
     pub expected_impact: Option<f64>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct GraphRecommendationContext {
     pub graph_version: String,
     #[serde(default)]

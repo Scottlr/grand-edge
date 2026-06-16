@@ -1,0 +1,38 @@
+{
+  "$defs": {
+    "TrainingTargetLabel": {
+      "enum": [
+        "future_return_6h",
+        "future_tax_adjusted_return_6h",
+        "future_actionable_return_6h"
+      ],
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "feature_names": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "feature_schema_hash": {
+      "type": "string"
+    },
+    "feature_set_version": {
+      "type": "string"
+    },
+    "target_label": {
+      "$ref": "#/$defs/TrainingTargetLabel"
+    }
+  },
+  "required": [
+    "feature_set_version",
+    "feature_names",
+    "target_label",
+    "feature_schema_hash"
+  ],
+  "title": "ArtifactFeatureSchemaDocument",
+  "type": "object"
+}

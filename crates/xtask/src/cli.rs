@@ -114,7 +114,10 @@ pub enum ModelCommand {
 
 #[derive(Debug, Clone, Subcommand)]
 pub enum SchemaCommand {
-    Export,
+    Export {
+        #[arg(long, default_value = "schemas")]
+        out: String,
+    },
 }
 
 #[derive(Debug, Clone, Subcommand)]

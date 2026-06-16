@@ -1,9 +1,10 @@
 use chrono::{DateTime, Utc};
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::StrategyError;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum ModelArtifactKind {
     GbdtRanker,
@@ -12,7 +13,7 @@ pub enum ModelArtifactKind {
     MetaLabel,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct ModelArtifactMetadata {
     pub strategy_id: String,
     pub model_version: String,
@@ -27,13 +28,13 @@ pub struct ModelArtifactMetadata {
     pub artifact_kind: ModelArtifactKind,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct ArtifactFeatureSchema {
     pub feature_names: Vec<String>,
     pub target_label: TrainingTargetLabel,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum TrainingTargetLabel {
     FutureReturn6h,
@@ -41,14 +42,14 @@ pub enum TrainingTargetLabel {
     FutureActionableReturn6h,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct ModelCard {
     pub strategy_id: String,
     pub target_label: TrainingTargetLabel,
     pub notes: String,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum TripleBarrierLabel {
     TakeProfit,

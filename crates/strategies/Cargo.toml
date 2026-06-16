@@ -9,6 +9,7 @@ repository.workspace = true
 grand-edge-domain = { path = "../domain" }
 grand-edge-storage = { path = "../storage" }
 chrono.workspace = true
+schemars.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true

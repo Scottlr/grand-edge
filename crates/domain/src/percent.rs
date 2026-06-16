@@ -1,17 +1,30 @@
 use derive_more::{Display, From};
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::DomainValidationError;
 
 #[derive(
-    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, Display, From,
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    Serialize,
+    Deserialize,
+    Display,
+    From,
+    JsonSchema,
 )]
 pub struct BasisPoints(pub i32);
 
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize, JsonSchema)]
 pub struct Probability(pub f64);
 
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize, JsonSchema)]
 pub struct Rate(pub f64);
 
 impl Probability {

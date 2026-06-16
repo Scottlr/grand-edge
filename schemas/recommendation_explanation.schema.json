@@ -1,0 +1,789 @@
+{
+  "$defs": {
+    "ConfidenceBreakdown": {
+      "properties": {
+        "data_quality_confidence": {
+          "$ref": "#/$defs/Probability"
+        },
+        "explanation_confidence": {
+          "$ref": "#/$defs/Probability"
+        },
+        "liquidity_confidence": {
+          "$ref": "#/$defs/Probability"
+        },
+        "model_calibration_confidence": {
+          "$ref": "#/$defs/Probability"
+        },
+        "prediction_confidence": {
+          "$ref": "#/$defs/Probability"
+        },
+        "recommendation_confidence": {
+          "$ref": "#/$defs/Probability"
+        }
+      },
+      "required": [
+        "prediction_confidence",
+        "recommendation_confidence",
+        "data_quality_confidence",
+        "model_calibration_confidence",
+        "liquidity_confidence",
+        "explanation_confidence"
+      ],
+      "type": "object"
+    },
+    "ExecutionEstimate": {
+      "properties": {
+        "confidence_haircut": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Probability"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "estimated_capacity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Quantity"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "estimated_fill_probability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Probability"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "liquidity_confidence": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Probability"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "observed_liquidity": {
+          "$ref": "#/$defs/ObservedLiquidityProxy"
+        },
+        "participation_rate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Probability"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "price_staleness_seconds": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HorizonSecs"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "spread_pct": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Rate"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "volatility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Rate"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "observed_liquidity"
+      ],
+      "type": "object"
+    },
+    "Gp": {
+      "format": "int64",
+      "type": "integer"
+    },
+    "GraphEdgeType": {
+      "enum": [
+        "ingredient_of",
+        "component_of_set",
+        "repair_conversion",
+        "dose_conversion",
+        "alch_floor",
+        "death_coffer_value",
+        "charge_conversion",
+        "degrade_conversion",
+        "shop_floor_ceiling",
+        "substitute",
+        "complement",
+        "shared_source",
+        "shared_sink",
+        "same_category",
+        "event_linked",
+        "player_behaviour_link",
+        "correlated_with",
+        "leads",
+        "co_moves_after_events",
+        "shock_transmits_to",
+        "graph_neighbor_predictive",
+        "regime_dependent_link",
+        "candidate_dose_conversion",
+        "candidate_name_pattern"
+      ],
+      "type": "string"
+    },
+    "GraphPath": {
+      "properties": {
+        "expected_impact": {
+          "format": "double",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "path_confidence": {
+          "format": "double",
+          "type": "number"
+        },
+        "source_item_id": {
+          "$ref": "#/$defs/ItemId"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/GraphPathStep"
+          },
+          "type": "array"
+        },
+        "target_item_id": {
+          "$ref": "#/$defs/ItemId"
+        }
+      },
+      "required": [
+        "source_item_id",
+        "target_item_id",
+        "steps",
+        "path_confidence"
+      ],
+      "type": "object"
+    },
+    "GraphPathStep": {
+      "properties": {
+        "confidence": {
+          "format": "double",
+          "type": "number"
+        },
+        "edge_id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "edge_type": {
+          "$ref": "#/$defs/GraphEdgeType"
+        },
+        "from_item_id": {
+          "$ref": "#/$defs/ItemId"
+        },
+        "to_item_id": {
+          "$ref": "#/$defs/ItemId"
+        },
+        "weight": {
+          "format": "double",
+          "type": "number"
+        }
+      },
+      "required": [
+        "from_item_id",
+        "to_item_id",
+        "edge_id",
+        "edge_type",
+        "confidence",
+        "weight"
+      ],
+      "type": "object"
+    },
+    "GraphRecommendationAction": {
+      "enum": [
+        "buy_linked",
+        "pair_trade",
+        "rotate",
+        "hedge",
+        "exploit_conversion",
+        "avoid_blast_radius",
+        "cashout_before_contagion",
+        "watch_second_order"
+      ],
+      "type": "string"
+    },
+    "GraphRecommendationContext": {
+      "properties": {
+        "edge_confidence": {
+          "default": null,
+          "format": "double",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "graph_action": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GraphRecommendationAction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "graph_version": {
+          "type": "string"
+        },
+        "historical_path_performance": {
+          "default": null
+        },
+        "paths": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/GraphPath"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "graph_version"
+      ],
+      "type": "object"
+    },
+    "HorizonSecs": {
+      "format": "int64",
+      "type": "integer"
+    },
+    "InvalidationRule": {
+      "properties": {
+        "current_value": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "label": {
+          "type": "string"
+        },
+        "metric": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "rule_key": {
+          "type": "string"
+        },
+        "threshold": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "rule_key",
+        "label",
+        "metric",
+        "operator",
+        "threshold"
+      ],
+      "type": "object"
+    },
+    "ItemId": {
+      "format": "int64",
+      "type": "integer"
+    },
+    "ModelAccuracySnapshot": {
+      "properties": {
+        "avg_realized_roi": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Rate"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "brier_score": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Rate"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "calibration": true,
+        "directional_accuracy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Rate"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lookback_window": {
+          "type": "string"
+        },
+        "max_drawdown": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Rate"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "model_version": {
+          "$ref": "#/$defs/ModelVersion"
+        },
+        "sample_size": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "strategy_id": {
+          "$ref": "#/$defs/StrategyId"
+        }
+      },
+      "required": [
+        "strategy_id",
+        "model_version",
+        "lookback_window",
+        "sample_size",
+        "calibration"
+      ],
+      "type": "object"
+    },
+    "ModelVersion": {
+      "type": "string"
+    },
+    "ObservedLiquidityProxy": {
+      "properties": {
+        "high_low_volume_ratio": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Rate"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "note": {
+          "type": "string"
+        },
+        "observed_high_side_volume": {
+          "$ref": "#/$defs/Quantity"
+        },
+        "observed_low_side_volume": {
+          "$ref": "#/$defs/Quantity"
+        },
+        "observed_volume": {
+          "$ref": "#/$defs/Quantity"
+        },
+        "observed_volume_reliability": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Probability"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "observed_volume_z": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Rate"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "observed_volume",
+        "observed_high_side_volume",
+        "observed_low_side_volume",
+        "note"
+      ],
+      "type": "object"
+    },
+    "Probability": {
+      "format": "double",
+      "type": "number"
+    },
+    "Quantity": {
+      "format": "int64",
+      "type": "integer"
+    },
+    "Rate": {
+      "format": "double",
+      "type": "number"
+    },
+    "ReasonAtom": {
+      "properties": {
+        "direction": {
+          "$ref": "#/$defs/ReasonDirection"
+        },
+        "evidence": true,
+        "label": {
+          "type": "string"
+        },
+        "reason_key": {
+          "type": "string"
+        },
+        "reason_type": {
+          "$ref": "#/$defs/ReasonType"
+        },
+        "weight": {
+          "format": "double",
+          "type": "number"
+        }
+      },
+      "required": [
+        "reason_type",
+        "reason_key",
+        "label",
+        "direction",
+        "weight",
+        "evidence"
+      ],
+      "type": "object"
+    },
+    "ReasonDirection": {
+      "enum": [
+        "positive",
+        "negative",
+        "neutral"
+      ],
+      "type": "string"
+    },
+    "ReasonType": {
+      "enum": [
+        "model_signal",
+        "cost_check",
+        "liquidity_check",
+        "risk_check",
+        "calibration_check",
+        "data_quality_check",
+        "user_exposure_check",
+        "rule_check",
+        "graph_relationship"
+      ],
+      "type": "string"
+    },
+    "ScoreComponent": {
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/Rate"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Rate"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "key",
+        "label",
+        "value"
+      ],
+      "type": "object"
+    },
+    "SignalSide": {
+      "enum": [
+        "buy",
+        "sell",
+        "hold",
+        "avoid",
+        "cashout",
+        "watch"
+      ],
+      "type": "string"
+    },
+    "StrategyId": {
+      "type": "string"
+    },
+    "StrategySignal": {
+      "properties": {
+        "as_of": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "confidence": {
+          "$ref": "#/$defs/Probability"
+        },
+        "execution_estimate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ExecutionEstimate"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "expected_net_gp_per_unit": {
+          "$ref": "#/$defs/Gp"
+        },
+        "expected_return": {
+          "$ref": "#/$defs/Rate"
+        },
+        "explanation": true,
+        "horizon_secs": {
+          "$ref": "#/$defs/HorizonSecs"
+        },
+        "item_id": {
+          "$ref": "#/$defs/ItemId"
+        },
+        "max_quantity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Quantity"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "model_version": {
+          "$ref": "#/$defs/ModelVersion"
+        },
+        "side": {
+          "$ref": "#/$defs/SignalSide"
+        },
+        "stop_loss": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Gp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "strategy_id": {
+          "$ref": "#/$defs/StrategyId"
+        },
+        "take_profit": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Gp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "target_entry": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Gp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "target_exit": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Gp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "item_id",
+        "strategy_id",
+        "model_version",
+        "as_of",
+        "side",
+        "horizon_secs",
+        "confidence",
+        "expected_return",
+        "expected_net_gp_per_unit",
+        "explanation"
+      ],
+      "type": "object"
+    },
+    "StructuredRecommendationExplanation": {
+      "properties": {
+        "confidence": {
+          "$ref": "#/$defs/ConfidenceBreakdown"
+        },
+        "graph_context": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GraphRecommendationContext"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "graph_reason_path_count": {
+          "default": null,
+          "format": "uint",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "graph_version": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "invalidation_rules": {
+          "items": {
+            "$ref": "#/$defs/InvalidationRule"
+          },
+          "type": "array"
+        },
+        "reason_atoms": {
+          "items": {
+            "$ref": "#/$defs/ReasonAtom"
+          },
+          "type": "array"
+        },
+        "summary": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "summary",
+        "reason_atoms",
+        "invalidation_rules",
+        "confidence"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "accuracy_snapshot": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ModelAccuracySnapshot"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "feature_set_version": {
+      "type": "string"
+    },
+    "graph_context": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/GraphRecommendationContext"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "graph_version": {
+      "default": null,
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "market_rules_version": {
+      "type": "string"
+    },
+    "score_components": {
+      "items": {
+        "$ref": "#/$defs/ScoreComponent"
+      },
+      "type": "array"
+    },
+    "strategy_votes": {
+      "items": {
+        "$ref": "#/$defs/StrategySignal"
+      },
+      "type": "array"
+    },
+    "structured_explanation": {
+      "$ref": "#/$defs/StructuredRecommendationExplanation",
+      "default": {
+        "confidence": {
+          "data_quality_confidence": 0.0,
+          "explanation_confidence": 0.0,
+          "liquidity_confidence": 0.0,
+          "model_calibration_confidence": 0.0,
+          "prediction_confidence": 0.0,
+          "recommendation_confidence": 0.0
+        },
+        "graph_context": null,
+        "graph_reason_path_count": null,
+        "graph_version": null,
+        "invalidation_rules": [],
+        "reason_atoms": [],
+        "summary": ""
+      }
+    }
+  },
+  "required": [
+    "feature_set_version",
+    "market_rules_version",
+    "strategy_votes",
+    "score_components"
+  ],
+  "title": "RecommendationExplanation",
+  "type": "object"
+}

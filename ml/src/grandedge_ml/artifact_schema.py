@@ -1,9 +1,12 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass, is_dataclass
+import json
 from datetime import UTC, datetime
 from enum import StrEnum
 from pathlib import Path
+
+import jsonschema
 
 
 class ModelArtifactKind(StrEnum):
@@ -118,3 +121,31 @@ def validate_artifact_metadata(
         raise ValueError("artifact evaluation window must not extend past as_of")
     if trained_at < training_window_start:
         raise ValueError("trained_at must be after the training window start")
+
+
+def load_rust_schema(schema_name: str) -> dict:
+    schema_path = (
+        Path(__file__).resolve().parents[3]
+        / "schemas"
+        / f"{schema_name}.schema.json"
+    )
+    return json.loads(schema_path.read_text(encoding="utf-8"))
+
+
+def validate_against_rust_schema(payload: dict, schema_name: str) -> None:
+    schema = load_rust_schema(schema_name)
+    jsonschema.Draft202012Validator(schema).validate(to_jsonable(payload))
+
+
+def to_jsonable(value):
+    if is_dataclass(value):
+        return to_jsonable(asdict(value))
+    if isinstance(value, datetime):
+        return ensure_utc(value).isoformat().replace("+00:00", "Z")
+    if isinstance(value, StrEnum):
+        return str(value)
+    if isinstance(value, dict):
+        return {key: to_jsonable(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [to_jsonable(item) for item in value]
+    return value

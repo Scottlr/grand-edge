@@ -1,12 +1,13 @@
 use derive_more::{Display, From};
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::DomainValidationError;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, Display, From)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, Display, From, JsonSchema)]
 pub struct StrategyId(pub String);
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, Display, From)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, Display, From, JsonSchema)]
 pub struct ModelVersion(pub String);
 
 impl StrategyId {

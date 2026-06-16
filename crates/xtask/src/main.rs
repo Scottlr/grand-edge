@@ -5,7 +5,7 @@ use clap::Parser;
 use cli::{Cli, Command};
 use commands::{
     config_print, corpus_import, corpus_validate, doctor_summary, graph_import_relations,
-    unavailable_message,
+    schema_export, unavailable_message,
 };
 use grand_edge_configuration::load_config;
 use miette::IntoDiagnostic;
@@ -67,12 +67,14 @@ async fn main() -> miette::Result<()> {
                 unavailable_message("model_runtime", cli.profile, "model").message
             ));
         }
-        Command::Schema { .. } => {
-            return Err(miette::miette!(
-                "{}",
-                unavailable_message("schema export", cli.profile, "schema").message
-            ));
-        }
+        Command::Schema { command } => match command {
+            cli::SchemaCommand::Export { out } => {
+                let report = schema_export(&out)
+                    .await
+                    .map_err(|error| miette::miette!("{error}"))?;
+                println!("{report}");
+            }
+        },
         Command::Graph { command } => match command {
             cli::GraphCommand::ImportRelations { root, dry_run } => {
                 let report = graph_import_relations(cli.profile, &root, dry_run)

@@ -1,6 +1,7 @@
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct ArBaselineConfig {
     pub intercept: f64,
     pub phi: f64,
@@ -8,7 +9,7 @@ pub struct ArBaselineConfig {
     pub confidence_floor: f64,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct ArForecast {
     pub forecast_delta: f64,
     pub forecast_price: f64,

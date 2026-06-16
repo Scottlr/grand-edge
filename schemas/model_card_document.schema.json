@@ -1,0 +1,75 @@
+{
+  "$defs": {
+    "TrainingTargetLabel": {
+      "enum": [
+        "future_return_6h",
+        "future_tax_adjusted_return_6h",
+        "future_actionable_return_6h"
+      ],
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "evaluation_window_end": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "evaluation_window_start": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "feature_schema_hash": {
+      "type": "string"
+    },
+    "feature_set_version": {
+      "type": "string"
+    },
+    "known_limitations": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "metrics": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "model_version": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "strategy_id": {
+      "type": "string"
+    },
+    "target_label": {
+      "$ref": "#/$defs/TrainingTargetLabel"
+    },
+    "training_window_end": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "training_window_start": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "strategy_id",
+    "model_version",
+    "feature_set_version",
+    "feature_schema_hash",
+    "training_window_start",
+    "training_window_end",
+    "evaluation_window_start",
+    "evaluation_window_end",
+    "metrics",
+    "known_limitations",
+    "target_label",
+    "notes"
+  ],
+  "title": "ModelCardDocument",
+  "type": "object"
+}

@@ -1,0 +1,1170 @@
+{
+  "components": {
+    "schemas": {
+      "CreateSimulationRequest": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "strategyConfig": {}
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "IntervalDto": {
+        "enum": [
+          "5m",
+          "1h",
+          "6h",
+          "24h"
+        ],
+        "type": "string"
+      },
+      "IntervalPriceDto": {
+        "properties": {
+          "avgHighPrice": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "avgLowPrice": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "bucketStart": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "highPriceVolume": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "interval": {
+            "$ref": "#/components/schemas/IntervalDto"
+          },
+          "itemId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lowPriceVolume": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "itemId",
+          "bucketStart",
+          "interval",
+          "highPriceVolume",
+          "lowPriceVolume"
+        ],
+        "type": "object"
+      },
+      "ItemDto": {
+        "properties": {
+          "buyLimit": {
+            "format": "int32",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "examine": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "highAlch": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "icon": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ItemIconDto"
+              }
+            ]
+          },
+          "itemId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lowAlch": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "members": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "itemId",
+          "name",
+          "members"
+        ],
+        "type": "object"
+      },
+      "ItemIconDto": {
+        "properties": {
+          "canonicalFileName": {
+            "type": "string"
+          },
+          "cdnUrl": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceFileName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sourceFileName",
+          "canonicalFileName",
+          "cdnUrl",
+          "source"
+        ],
+        "type": "object"
+      },
+      "LiveEvent": {
+        "oneOf": [
+          {
+            "properties": {
+              "item_id": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "observed_at": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "price_updated"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "item_id",
+              "observed_at",
+              "type"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "action": {
+                "$ref": "#/components/schemas/RecommendationActionDto"
+              },
+              "item_id": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "recommendation_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "recommendation_updated"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "recommendation_id",
+              "item_id",
+              "action",
+              "type"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "run_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "simulation_updated"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "run_id",
+              "status",
+              "type"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "strategy_id": {
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "strategy_config_updated"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "strategy_id",
+              "enabled",
+              "type"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "PatchStrategyRequest": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ],
+        "type": "object"
+      },
+      "PositionDto": {
+        "properties": {
+          "avgBuyPrice": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "boughtAt": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "itemId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "positionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "quantity": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "userId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "positionId",
+          "userId",
+          "itemId",
+          "quantity",
+          "avgBuyPrice"
+        ],
+        "type": "object"
+      },
+      "RecommendationActionDto": {
+        "enum": [
+          "buy",
+          "add",
+          "hold",
+          "cashout",
+          "avoid",
+          "watch"
+        ],
+        "type": "string"
+      },
+      "RecommendationDto": {
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/RecommendationActionDto"
+          },
+          "asOf": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "executionConfidence": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "expectedNetGp": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "expectedRoi": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "explanation": {
+            "$ref": "#/components/schemas/RecommendationExplanationDto"
+          },
+          "itemId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "predictionConfidence": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "recommendationConfidence": {
+            "format": "double",
+            "type": "number"
+          },
+          "recommendationId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "riskLabel": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "score": {
+            "format": "double",
+            "type": "number"
+          },
+          "userId": {
+            "format": "uuid",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "recommendationId",
+          "itemId",
+          "asOf",
+          "action",
+          "score",
+          "recommendationConfidence",
+          "reasons",
+          "explanation"
+        ],
+        "type": "object"
+      },
+      "RecommendationExplanationDto": {
+        "properties": {
+          "accuracySnapshot": {},
+          "featureSetVersion": {
+            "type": "string"
+          },
+          "marketRulesVersion": {
+            "type": "string"
+          },
+          "scoreComponents": {
+            "items": {
+              "$ref": "#/components/schemas/ScoreComponentDto"
+            },
+            "type": "array"
+          },
+          "strategyVotes": {
+            "items": {
+              "$ref": "#/components/schemas/StrategySignalDto"
+            },
+            "type": "array"
+          },
+          "structuredExplanation": {}
+        },
+        "required": [
+          "featureSetVersion",
+          "marketRulesVersion",
+          "strategyVotes",
+          "scoreComponents",
+          "structuredExplanation"
+        ],
+        "type": "object"
+      },
+      "ScoreComponentDto": {
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "format": "double",
+            "type": "number"
+          },
+          "weight": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "value"
+        ],
+        "type": "object"
+      },
+      "SimulationRunDto": {
+        "properties": {
+          "finishedAt": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "runId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "strategyConfig": {}
+        },
+        "required": [
+          "runId",
+          "name",
+          "strategyConfig",
+          "startedAt",
+          "status"
+        ],
+        "type": "object"
+      },
+      "StrategySignalDto": {
+        "properties": {
+          "asOf": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "confidence": {
+            "format": "double",
+            "type": "number"
+          },
+          "expectedNetGpPerUnit": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "expectedReturn": {
+            "format": "double",
+            "type": "number"
+          },
+          "horizonSecs": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "itemId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "modelVersion": {
+            "type": "string"
+          },
+          "side": {
+            "type": "string"
+          },
+          "strategyId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "itemId",
+          "strategyId",
+          "modelVersion",
+          "asOf",
+          "side",
+          "horizonSecs",
+          "confidence",
+          "expectedReturn",
+          "expectedNetGpPerUnit"
+        ],
+        "type": "object"
+      },
+      "StrategyStatusDto": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "strategyId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "strategyId",
+          "enabled"
+        ],
+        "type": "object"
+      },
+      "UpsertPositionRequest": {
+        "properties": {
+          "avgBuyPrice": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "boughtAt": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "itemId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "quantity": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "itemId",
+          "quantity",
+          "avgBuyPrice"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "",
+    "license": {
+      "identifier": "MIT",
+      "name": "MIT"
+    },
+    "title": "grand-edge-api",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/items": {
+      "get": {
+        "operationId": "list_items",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ItemDto"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "crate::routes::items"
+        ]
+      }
+    },
+    "/api/items/{id}": {
+      "get": {
+        "operationId": "get_item",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemDto"
+                }
+              }
+            },
+            "description": ""
+          },
+          "404": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "crate::routes::items"
+        ]
+      }
+    },
+    "/api/items/{id}/history": {
+      "get": {
+        "operationId": "get_item_history",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "interval",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/IntervalDto"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": [
+                "integer",
+                "null"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "before",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IntervalPriceDto"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": ""
+          },
+          "400": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "crate::routes::items"
+        ]
+      }
+    },
+    "/api/live/stream": {
+      "get": {
+        "operationId": "stream_live_events",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveEvent"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "crate::routes::live"
+        ]
+      }
+    },
+    "/api/openapi.json": {
+      "get": {
+        "operationId": "openapi_json",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "crate"
+        ]
+      }
+    },
+    "/api/recommendations": {
+      "get": {
+        "operationId": "list_recommendations",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "user_id",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "action",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/components/schemas/RecommendationActionDto"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RecommendationDto"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "crate::routes::recommendations"
+        ]
+      }
+    },
+    "/api/recommendations/{id}/explanation": {
+      "get": {
+        "operationId": "get_recommendation_explanation",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendationExplanationDto"
+                }
+              }
+            },
+            "description": ""
+          },
+          "404": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "crate::routes::recommendations"
+        ]
+      }
+    },
+    "/api/simulations": {
+      "get": {
+        "operationId": "list_simulations",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SimulationRunDto"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "crate::routes::simulations"
+        ]
+      },
+      "post": {
+        "operationId": "create_simulation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSimulationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationRunDto"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "crate::routes::simulations"
+        ]
+      }
+    },
+    "/api/strategies": {
+      "get": {
+        "operationId": "list_strategies",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/StrategyStatusDto"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "crate::routes::strategies"
+        ]
+      }
+    },
+    "/api/strategies/{id}": {
+      "patch": {
+        "operationId": "patch_strategy",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchStrategyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StrategyStatusDto"
+                }
+              }
+            },
+            "description": ""
+          },
+          "404": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "crate::routes::strategies"
+        ]
+      }
+    },
+    "/api/users/me/positions": {
+      "get": {
+        "operationId": "list_positions",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PositionDto"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "crate::routes::positions"
+        ]
+      },
+      "post": {
+        "operationId": "create_position",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertPositionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PositionDto"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "crate::routes::positions"
+        ]
+      }
+    },
+    "/api/users/me/positions/{id}": {
+      "patch": {
+        "operationId": "update_position",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertPositionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PositionDto"
+                }
+              }
+            },
+            "description": ""
+          },
+          "404": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "crate::routes::positions"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "health",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "tags": [
+          "crate"
+        ]
+      }
+    }
+  }
+}

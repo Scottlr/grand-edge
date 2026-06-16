@@ -1,9 +1,10 @@
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::math::{ArBaselineConfig, KalmanConfig};
 use crate::uncertainty::RegimeHeuristicConfig;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct StrategyConfig {
     pub enabled_strategies: Vec<String>,
     pub risk: RiskConfig,
@@ -12,7 +13,7 @@ pub struct StrategyConfig {
     pub regime_heuristic: RegimeHeuristicConfig,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct RiskConfig {
     pub max_gp_per_item: i64,
     pub max_portfolio_drawdown: f64,

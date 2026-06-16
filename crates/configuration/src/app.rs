@@ -52,6 +52,8 @@ pub struct ApiRuntimeConfig {
     pub bind_addr: SocketAddr,
     pub cors_origin: Option<String>,
     pub default_user_id: Option<uuid::Uuid>,
+    #[serde(default = "default_swagger_ui_enabled")]
+    pub swagger_ui_enabled: bool,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -119,6 +121,10 @@ impl GrandEdgeConfig {
     pub fn osrs_request_timeout(&self) -> Duration {
         Duration::from_millis(self.osrs_wiki.request_timeout_ms)
     }
+}
+
+fn default_swagger_ui_enabled() -> bool {
+    true
 }
 
 impl OsrsWikiRuntimeConfig {

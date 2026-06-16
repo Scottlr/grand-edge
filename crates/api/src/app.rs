@@ -6,6 +6,7 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use tower_http::{cors::CorsLayer, trace::TraceLayer};
 use utoipa::{OpenApi, ToSchema};
+use utoipa_swagger_ui::SwaggerUi;
 
 use crate::{openapi::ApiDoc, routes, state::AppState};
 
@@ -14,7 +15,11 @@ pub struct HealthResponse {
     pub status: String,
 }
 
-pub fn build_router(state: AppState, cors_origin: Option<String>) -> Router {
+pub fn build_router(
+    state: AppState,
+    cors_origin: Option<String>,
+    swagger_ui_enabled: bool,
+) -> Router {
     let cors = if let Some(origin) = cors_origin {
         CorsLayer::new()
             .allow_methods([Method::GET, Method::POST, Method::PATCH])
@@ -27,7 +32,7 @@ pub fn build_router(state: AppState, cors_origin: Option<String>) -> Router {
         CorsLayer::permissive()
     };
 
-    Router::new()
+    let router = Router::new()
         .route("/health", get(crate::health))
         .route("/api/items", get(routes::items::list_items))
         .route("/api/items/{id}", get(routes::items::get_item))
@@ -68,7 +73,14 @@ pub fn build_router(state: AppState, cors_origin: Option<String>) -> Router {
         .route("/api/openapi.json", get(crate::openapi_json))
         .with_state(state)
         .layer(TraceLayer::new_for_http())
-        .layer(cors)
+        .layer(cors);
+
+    if swagger_ui_enabled {
+        router
+            .merge(SwaggerUi::new("/swagger-ui").url("/swagger-ui/openapi.json", ApiDoc::openapi()))
+    } else {
+        router
+    }
 }
 
 pub fn openapi_document() -> utoipa::openapi::OpenApi {

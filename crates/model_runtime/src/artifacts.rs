@@ -1,6 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use chrono::{DateTime, Utc};
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -12,7 +13,7 @@ use crate::{
     },
 };
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum ModelArtifactKind {
     GbdtRanker,
@@ -21,7 +22,7 @@ pub enum ModelArtifactKind {
     MetaLabel,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct ModelArtifactMetadata {
     pub strategy_id: String,
     pub model_version: String,
@@ -36,7 +37,7 @@ pub struct ModelArtifactMetadata {
     pub artifact_kind: ModelArtifactKind,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct ArtifactBundle {
     pub root: PathBuf,
     pub metadata: ModelArtifactMetadata,
@@ -47,7 +48,7 @@ pub struct ArtifactBundle {
     pub coefficient_path: Option<PathBuf>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct ValidatedArtifactBundle {
     pub bundle: ArtifactBundle,
     pub feature_schema: ArtifactFeatureSchemaDocument,
