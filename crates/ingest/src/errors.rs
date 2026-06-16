@@ -32,6 +32,14 @@ pub enum IngestError {
     UnexpectedStatus { status: StatusCode, body: String },
     #[error("storage operation failed")]
     Storage(#[from] grand_edge_storage::StorageError),
+    #[error("graph domain validation failed")]
+    GraphDomain(#[from] grand_edge_domain::GraphDomainError),
     #[error("wiki image normalization failed")]
     WikiImage(#[from] ItemImageError),
+    #[error("filesystem operation failed")]
+    Io(#[from] std::io::Error),
+    #[error("json serialization or parsing failed")]
+    Json(#[from] serde_json::Error),
+    #[error("invalid relation corpus: {0}")]
+    InvalidRelationCorpus(String),
 }

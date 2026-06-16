@@ -1,0 +1,17 @@
+{
+  "schema_version": "v1",
+  "relation_version": "alchemy_v1",
+  "source_ids": [
+    "osrs_wiki_mapping_v1"
+  ],
+  "generated_at": "2026-06-16T12:00:00Z",
+  "entries": [
+    {
+      "item_id": 4151,
+      "high_alch_gp": 72000,
+      "low_alch_gp": 48000,
+      "nature_rune_item_id": 561,
+      "source_ref": "osrs_wiki_mapping_v1"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "schema_version": "v1",
+  "relation_version": "degrade_links_v1",
+  "source_ids": [
+    "manual_mechanical_review_v1"
+  ],
+  "generated_at": "2026-06-16T12:00:00Z",
+  "entries": [
+    {
+      "broken_item_id": 20465,
+      "repaired_item_id": 20463,
+      "repair_cost_gp": 0,
+      "repair_method": "degrade",
+      "confidence": 0.85,
+      "source_ref": "manual_mechanical_review_v1"
+    }
+  ]
+}

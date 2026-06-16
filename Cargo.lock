@@ -1317,6 +1317,7 @@ dependencies = [
  "tokio",
  "tracing",
  "tracing-subscriber",
+ "uuid",
  "wiremock",
 ]
 
@@ -1428,8 +1429,11 @@ dependencies = [
 name = "grand-edge-xtask"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "clap",
  "grand-edge-configuration",
+ "grand-edge-domain",
+ "grand-edge-ingest",
  "grand-edge-storage",
  "miette",
  "secrecy",

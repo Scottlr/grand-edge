@@ -1,0 +1,29 @@
+{
+  "schema_version": "v1",
+  "relation_version": "relations_v1",
+  "source_ids": [
+    "osrs_wiki_mapping_v1",
+    "manual_mechanical_review_v1"
+  ],
+  "generated_at": "2026-06-16T12:00:00Z",
+  "entries": [
+    {
+      "source_id": "osrs_wiki_mapping_v1",
+      "title": "OSRS Wiki item mapping export",
+      "url": "https://prices.runescape.wiki/api/v1/osrs/mapping",
+      "retrieved_at": "2026-06-16T12:00:00Z",
+      "license_note": "OSRS Wiki API terms apply",
+      "content_hash": "mapping_v1_fixture_hash",
+      "source_type": "wiki"
+    },
+    {
+      "source_id": "manual_mechanical_review_v1",
+      "title": "Grand Edge curated mechanical review",
+      "url": null,
+      "retrieved_at": "2026-06-16T12:00:00Z",
+      "license_note": "Internal curated notes",
+      "content_hash": "manual_review_fixture_hash",
+      "source_type": "manual_curation"
+    }
+  ]
+}
