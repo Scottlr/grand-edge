@@ -1,0 +1,40 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "grandedge-ml"
+version = "0.1.0"
+description = "Research-only model training and artifact export for Grand Edge."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "numpy>=2.0",
+  "polars>=1.30",
+  "pytest>=8.3",
+  "ruff>=0.12",
+]
+
+[project.optional-dependencies]
+training = [
+  "lightgbm>=4.5",
+  "matplotlib>=3.9",
+  "onnxruntime>=1.19",
+  "optuna>=3.6",
+  "scikit-learn>=1.5",
+  "skl2onnx>=1.17",
+]
+tracking = ["mlflow>=2.16"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/grandedge_ml"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -101,3 +101,20 @@ invariants is
 `features/rust-backed-osrs-recommendation-terminal/tasks.md` together with the
 task detail files under
 `features/rust-backed-osrs-recommendation-terminal/tasks/`.
+
+## ML Research Workspace
+
+The repository now includes a research-only Python workspace under `ml/`.
+Python may load Rust-produced dataset exports, train offline experiments, and
+export artifact bundles for Rust validation, but it must not serve live
+recommendations or become a runtime dependency of the Rust production path.
+
+Use `uv` for the ML workflow:
+
+- `uv sync --project ml`
+- `uv run --project ml ruff check .`
+- `uv run --project ml pytest`
+- `uv run --project ml python -m grandedge_ml.export --help`
+
+The intended handoff is Rust analytics export -> Python artifact export -> Rust
+artifact validation/runtime. See [docs/running/ml-workflow.md](/C:/Users/scott/OneDrive/Documents/grand-edge/docs/running/ml-workflow.md:1).
