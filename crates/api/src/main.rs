@@ -1,17 +1,16 @@
-use std::net::SocketAddr;
-
 #[tokio::main]
-async fn main() {
-    tracing_subscriber::fmt::init();
+async fn main() -> anyhow::Result<()> {
+    let config =
+        grand_edge_configuration::load_config(grand_edge_configuration::ConfigProfile::Local)?;
+    let _ = grand_edge_configuration::init_tracing(&config.logging);
 
-    let address = SocketAddr::from(([127, 0, 0, 1], 3000));
+    let address = config.api.bind_addr;
     tracing::info!("grand-edge-api placeholder listening on {address}");
 
-    let listener = tokio::net::TcpListener::bind(address)
-        .await
-        .expect("placeholder listener should bind");
+    let listener = tokio::net::TcpListener::bind(address).await?;
 
     axum::serve(listener, axum::Router::new())
         .await
         .expect("placeholder server should run");
+    Ok(())
 }

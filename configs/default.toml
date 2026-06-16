@@ -1,0 +1,41 @@
+[database]
+url = "postgres://grand_edge:grand_edge@localhost:5432/grand_edge"
+max_connections = 5
+
+[osrs_wiki]
+base_url = "https://prices.runescape.wiki/api/v1/osrs"
+app_name = "GrandEdge"
+contact_email = "scott.rangeley@outlook.com"
+user_agent = "GrandEdge/0.1 (OSRS Grand Exchange recommendation terminal; contact: scott.rangeley@outlook.com)"
+request_timeout_ms = 10000
+max_requests_per_second = 1.0
+burst_size = 2
+respect_retry_after = true
+max_retries = 3
+initial_backoff_ms = 500
+max_backoff_ms = 30000
+
+[ingest]
+poll_latest_seconds = 60
+poll_5m_seconds = 300
+poll_1h_seconds = 3600
+sync_mapping_seconds = 86400
+max_timeseries_items_per_run = 100
+max_timeseries_requests_per_minute = 30
+
+[api]
+bind_addr = "127.0.0.1:3000"
+cors_origin = "http://localhost:5173"
+default_user_id = "00000000-0000-0000-0000-000000000001"
+
+[logging]
+format = "text"
+level = "info"
+
+[artifacts]
+root_dir = "ml/artifacts"
+registry_token = ""
+
+[auth]
+session_key = "local-dev-session-key"
+jwt_issuer = "grand-edge-local"

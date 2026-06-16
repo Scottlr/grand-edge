@@ -10,10 +10,12 @@ name = "grand-edge-api"
 path = "src/main.rs"
 
 [dependencies]
+anyhow.workspace = true
 axum.workspace = true
 tokio.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
+grand-edge-configuration = { path = "../configuration" }
 grand-edge-domain = { path = "../domain" }
 grand-edge-features = { path = "../features" }
 grand-edge-ingest = { path = "../ingest" }

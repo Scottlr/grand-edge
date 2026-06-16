@@ -1,0 +1,6 @@
+[database]
+url = "postgres://grand_edge:grand_edge@localhost:5432/grand_edge"
+
+[api]
+bind_addr = "127.0.0.1:3000"
+cors_origin = "http://localhost:5173"
