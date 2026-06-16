@@ -2,7 +2,8 @@ use chrono::{TimeZone, Utc};
 use grand_edge_api::routes::recommendations::RecommendationDto;
 use grand_edge_domain::{
     Gp, ItemId, ModelVersion, Probability, Rate, Recommendation, RecommendationAction,
-    RecommendationExplanation, RecommendationId, StrategyId, StrategySignal, UserId,
+    RecommendationExplanation, RecommendationId, StrategyId, StrategySignal,
+    StructuredRecommendationExplanation, UserId,
 };
 use insta::assert_json_snapshot;
 
@@ -50,6 +51,7 @@ fn api_recommendations_snapshot_is_stable() {
                 weight: Some(Rate::new(0.5).unwrap()),
             }],
             accuracy_snapshot: None,
+            structured_explanation: StructuredRecommendationExplanation::default(),
         },
     };
 

@@ -306,11 +306,9 @@ fn row_to_linked_prediction(
 fn graph_from_explanation(
     explanation: &RecommendationExplanation,
 ) -> Option<RecommendationGraphEvidence> {
-    let structured = serde_json::to_value(explanation).ok().and_then(|value| {
-        serde_json::from_value::<StructuredRecommendationExplanation>(value).ok()
-    })?;
+    let structured: &StructuredRecommendationExplanation = &explanation.structured_explanation;
 
-    let graph_version = structured.graph_version?;
+    let graph_version = structured.graph_version.clone()?;
     Some(RecommendationGraphEvidence {
         graph_version,
         graph_links: Vec::new(),

@@ -201,13 +201,6 @@ impl RecommendationEngine {
             input.existing_position.as_ref(),
             &self.config.market_rules,
         );
-        let explanation = build_explanation(
-            &input.feature_vector,
-            &self.config.market_rules,
-            input.strategy_votes,
-            &score.components,
-            input.accuracy_snapshot,
-        );
         let risk_label = risk_label(&score);
         let expected_roi = Some(input.primary_signal.expected_return);
         let _simulation_path = match action {
@@ -217,7 +210,7 @@ impl RecommendationEngine {
             _ => Some("skipped_without_trade_action"),
         };
 
-        Ok(Recommendation {
+        let mut recommendation = Recommendation {
             recommendation_id: RecommendationId(Uuid::new_v4()),
             user_id: input.user_id,
             item_id: input.primary_signal.item_id,
@@ -247,8 +240,36 @@ impl RecommendationEngine {
             expected_roi,
             risk_label,
             reasons,
-            explanation,
-        })
+            explanation: grand_edge_domain::RecommendationExplanation {
+                feature_set_version: input.feature_vector.feature_set_version.clone(),
+                market_rules_version: self.config.market_rules.version.clone(),
+                strategy_votes: Vec::new(),
+                score_components: Vec::new(),
+                accuracy_snapshot: None,
+                structured_explanation:
+                    grand_edge_domain::StructuredRecommendationExplanation::default(),
+            },
+        };
+        let snapshot = compatibility_feature_snapshot(&input.feature_vector, input.as_of).ok_or(
+            RecommendationError::MissingFeatures(input.feature_vector.item_id.0),
+        )?;
+        let (predictions, _) = prediction_contributions(
+            snapshot.feature_snapshot_id,
+            input.as_of,
+            &input.strategy_votes,
+        )?;
+        recommendation.explanation = build_explanation(
+            &input.feature_vector,
+            &self.config.market_rules,
+            input.strategy_votes,
+            &predictions,
+            &score.components,
+            input.accuracy_snapshot,
+            &recommendation,
+            &self.config,
+        )?;
+
+        Ok(recommendation)
     }
 
     async fn recommend_for_item_group(

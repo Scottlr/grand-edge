@@ -2,7 +2,8 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    Gp, ItemId, ModelAccuracySnapshot, Probability, Rate, RecommendationId, StrategySignal, UserId,
+    Gp, ItemId, ModelAccuracySnapshot, Probability, Rate, RecommendationId, StrategySignal,
+    StructuredRecommendationExplanation, UserId,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -31,6 +32,8 @@ pub struct RecommendationExplanation {
     pub strategy_votes: Vec<StrategySignal>,
     pub score_components: Vec<ScoreComponent>,
     pub accuracy_snapshot: Option<ModelAccuracySnapshot>,
+    #[serde(default)]
+    pub structured_explanation: StructuredRecommendationExplanation,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

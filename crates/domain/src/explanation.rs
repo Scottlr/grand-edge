@@ -65,6 +65,32 @@ pub struct StructuredRecommendationExplanation {
     pub graph_reason_path_count: Option<usize>,
 }
 
+impl Default for ConfidenceBreakdown {
+    fn default() -> Self {
+        Self {
+            prediction_confidence: Probability::new(0.0).expect("zero probability is valid"),
+            recommendation_confidence: Probability::new(0.0).expect("zero probability is valid"),
+            data_quality_confidence: Probability::new(0.0).expect("zero probability is valid"),
+            model_calibration_confidence: Probability::new(0.0).expect("zero probability is valid"),
+            liquidity_confidence: Probability::new(0.0).expect("zero probability is valid"),
+            explanation_confidence: Probability::new(0.0).expect("zero probability is valid"),
+        }
+    }
+}
+
+impl Default for StructuredRecommendationExplanation {
+    fn default() -> Self {
+        Self {
+            summary: String::new(),
+            reason_atoms: Vec::new(),
+            invalidation_rules: Vec::new(),
+            confidence: ConfidenceBreakdown::default(),
+            graph_version: None,
+            graph_reason_path_count: None,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct RecommendationPredictionLink {
     pub recommendation_id: RecommendationId,
