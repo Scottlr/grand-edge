@@ -158,11 +158,7 @@ impl RuntimeServices {
 
         let mut registry = StrategyRegistry::new();
         register_baseline_strategies(&mut registry)?;
-        let enabled_strategies = registry.ids();
-        let strategy_config = StrategyConfig {
-            enabled_strategies,
-            risk: grand_edge_strategies::RiskConfig::default(),
-        };
+        let strategy_config = StrategyConfig::default();
 
         Ok(Self {
             storage,

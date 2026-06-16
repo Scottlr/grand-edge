@@ -54,6 +54,7 @@ fn strategy_batch(c: &mut Criterion) {
     let config = StrategyConfig {
         enabled_strategies: registry.ids(),
         risk: grand_edge_strategies::RiskConfig::default(),
+        ..StrategyConfig::default()
     };
     let ctx = test_context();
 

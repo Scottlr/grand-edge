@@ -8,16 +8,20 @@ use grand_edge_domain::{
 
 use crate::{LookbackSpec, Strategy, StrategyContext, StrategyError, StrategyRegistry};
 
+pub mod ar_baseline;
 pub mod execution_confidence;
+pub mod kalman_fair_value;
 pub mod mean_reversion;
 pub mod momentum;
 pub mod portfolio_optimizer;
 pub mod spread_edge;
 pub mod volatility_filter;
 
+pub use ar_baseline::ArBaselineStrategy;
 pub use execution_confidence::{
     ExecutionConfidenceEstimate, ExecutionConfidenceStrategy, estimate_execution_confidence,
 };
+pub use kalman_fair_value::KalmanFairValueStrategy;
 pub use mean_reversion::{MeanReversionConfig, MeanReversionStrategy};
 pub use momentum::{MomentumConfig, MomentumStrategy};
 pub use portfolio_optimizer::{
@@ -121,6 +125,8 @@ pub fn register_baseline_strategies(registry: &mut StrategyRegistry) -> Result<(
     registry.register(Arc::new(VolatilityFilterStrategy::default()))?;
     registry.register(Arc::new(ExecutionConfidenceStrategy::default()))?;
     registry.register(Arc::new(PortfolioOptimizerStrategy::default()))?;
+    registry.register(Arc::new(KalmanFairValueStrategy::default()))?;
+    registry.register(Arc::new(ArBaselineStrategy::default()))?;
     Ok(())
 }
 
@@ -300,7 +306,7 @@ mod tests {
     }
 
     #[test]
-    fn register_baseline_strategies_registers_all_six() {
+    fn register_baseline_strategies_registers_all_eight() {
         let mut registry = StrategyRegistry::new();
         register_baseline_strategies(&mut registry).unwrap();
         for strategy_id in [
@@ -310,6 +316,8 @@ mod tests {
             "volatility_filter_v1",
             "execution_confidence_v1",
             "portfolio_optimizer_v1",
+            "kalman_fair_value_v1",
+            "arima_baseline_v1",
         ] {
             assert!(
                 registry.get(strategy_id).is_some(),
