@@ -10,6 +10,16 @@ pub enum ModelRuntimeError {
     FeatureSchemaHashMismatch,
     #[error("feature vector does not match artifact schema: {0}")]
     FeatureSchemaMismatch(String),
+    #[error("graph artifact metadata missing")]
+    MissingGraphMetadata,
+    #[error("graph artifact relation_corpus_hash missing")]
+    MissingRelationCorpusHash,
+    #[error("graph artifact feature groups missing")]
+    MissingGraphFeatureGroups,
+    #[error("graph neural network artifacts are deferred until runtime support is added")]
+    GraphNeuralNetworkDeferred,
+    #[error("learned-edge artifacts must not claim causality in model card text")]
+    CausalLearnedEdgeClaim,
     #[error("unsupported artifact kind for current runtime: {0}")]
     UnsupportedArtifactKind(&'static str),
     #[error("io error")]

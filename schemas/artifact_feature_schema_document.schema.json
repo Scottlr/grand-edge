@@ -1,5 +1,19 @@
 {
   "$defs": {
+    "GraphFeatureGroup": {
+      "enum": [
+        "own_item_features",
+        "observed_execution_proxy_features",
+        "neighbor_return_features",
+        "sector_features",
+        "conversion_features",
+        "shock_features",
+        "edge_stability_features",
+        "event_features",
+        "missing_data_flags"
+      ],
+      "type": "string"
+    },
     "TrainingTargetLabel": {
       "enum": [
         "future_return_6h",
@@ -22,6 +36,12 @@
     },
     "feature_set_version": {
       "type": "string"
+    },
+    "graph_feature_groups": {
+      "items": {
+        "$ref": "#/$defs/GraphFeatureGroup"
+      },
+      "type": "array"
     },
     "target_label": {
       "$ref": "#/$defs/TrainingTargetLabel"

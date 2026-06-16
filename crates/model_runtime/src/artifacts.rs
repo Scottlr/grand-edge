@@ -8,7 +8,7 @@ use crate::{
     errors::ModelRuntimeError,
     schema::{
         ArtifactFeatureSchemaDocument, CalibrationDocument, CoefficientModelDocument,
-        ModelCardDocument, TrainingTargetLabel, validate_coefficient_model,
+        GraphArtifactMetadata, ModelCardDocument, TrainingTargetLabel, validate_coefficient_model,
         validate_feature_schema, validate_model_card,
     },
 };
@@ -17,6 +17,8 @@ use crate::{
 #[serde(rename_all = "snake_case")]
 pub enum ModelArtifactKind {
     GbdtRanker,
+    GraphRanker,
+    GraphNeuralNetworkDeferred,
     ContextualBandit,
     OnlineEnsemble,
     MetaLabel,
@@ -35,6 +37,7 @@ pub struct ModelArtifactMetadata {
     pub evaluation_window_end: DateTime<Utc>,
     pub artifact_uri: String,
     pub artifact_kind: ModelArtifactKind,
+    pub graph: Option<GraphArtifactMetadata>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
@@ -131,6 +134,10 @@ impl ArtifactBundle {
                 )
             })?;
         let metadata = ModelArtifactMetadata {
+            artifact_kind: infer_artifact_kind(
+                &model_card.strategy_id,
+                coefficient_model.is_some(),
+            )?,
             strategy_id: model_card.strategy_id.clone(),
             model_version: model_card.model_version.clone(),
             feature_set_version: model_card.feature_set_version.clone(),
@@ -141,11 +148,26 @@ impl ArtifactBundle {
             evaluation_window_start: model_card.evaluation_window_start,
             evaluation_window_end: model_card.evaluation_window_end,
             artifact_uri: artifact_path.canonicalize()?.to_string_lossy().into_owned(),
-            artifact_kind: infer_artifact_kind(
-                &model_card.strategy_id,
-                coefficient_model.is_some(),
-            )?,
+            graph: model_card.graph.clone(),
         };
+
+        if matches!(
+            metadata.artifact_kind,
+            ModelArtifactKind::GraphRanker | ModelArtifactKind::GraphNeuralNetworkDeferred
+        ) {
+            if metadata.graph.is_none() {
+                return Err(ModelRuntimeError::MissingGraphMetadata);
+            }
+            if feature_schema.graph_feature_groups.is_empty() {
+                return Err(ModelRuntimeError::MissingGraphFeatureGroups);
+            }
+            if matches!(
+                metadata.artifact_kind,
+                ModelArtifactKind::GraphNeuralNetworkDeferred
+            ) {
+                return Err(ModelRuntimeError::GraphNeuralNetworkDeferred);
+            }
+        }
 
         Ok(ValidatedArtifactBundle {
             bundle: Self {
@@ -175,6 +197,12 @@ pub fn infer_artifact_kind(
 
     if strategy_id.starts_with("gbm_ranker") {
         return Ok(ModelArtifactKind::GbdtRanker);
+    }
+    if strategy_id.starts_with("graph_ranker") {
+        return Ok(ModelArtifactKind::GraphRanker);
+    }
+    if strategy_id.starts_with("graph_gnn") || strategy_id.starts_with("graph_neural_network") {
+        return Ok(ModelArtifactKind::GraphNeuralNetworkDeferred);
     }
     if strategy_id.starts_with("contextual_bandit") {
         return Ok(ModelArtifactKind::ContextualBandit);

@@ -8,9 +8,35 @@ use crate::StrategyError;
 #[serde(rename_all = "snake_case")]
 pub enum ModelArtifactKind {
     GbdtRanker,
+    GraphRanker,
+    GraphNeuralNetworkDeferred,
     ContextualBandit,
     OnlineEnsemble,
     MetaLabel,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum GraphFeatureGroup {
+    OwnItemFeatures,
+    ObservedExecutionProxyFeatures,
+    NeighborReturnFeatures,
+    SectorFeatures,
+    ConversionFeatures,
+    ShockFeatures,
+    EdgeStabilityFeatures,
+    EventFeatures,
+    MissingDataFlags,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+pub struct GraphArtifactMetadata {
+    pub graph_feature_set_version: String,
+    pub graph_version: String,
+    pub relation_corpus_hash: String,
+    pub edge_observation_window_start: DateTime<Utc>,
+    pub edge_observation_window_end: DateTime<Utc>,
+    pub graph_feature_groups: Vec<GraphFeatureGroup>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
@@ -26,12 +52,16 @@ pub struct ModelArtifactMetadata {
     pub evaluation_window_end: DateTime<Utc>,
     pub artifact_uri: String,
     pub artifact_kind: ModelArtifactKind,
+    #[serde(default)]
+    pub graph: Option<GraphArtifactMetadata>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct ArtifactFeatureSchema {
     pub feature_names: Vec<String>,
     pub target_label: TrainingTargetLabel,
+    #[serde(default)]
+    pub graph_feature_groups: Vec<GraphFeatureGroup>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
@@ -102,6 +132,34 @@ pub fn validate_artifact_metadata(
         return Err(StrategyError::Validation(
             "artifact evaluation window end must be after evaluation start".to_string(),
         ));
+    }
+    if matches!(
+        metadata.artifact_kind,
+        ModelArtifactKind::GraphRanker | ModelArtifactKind::GraphNeuralNetworkDeferred
+    ) {
+        let graph = metadata.graph.as_ref().ok_or_else(|| {
+            StrategyError::Validation("graph artifacts require graph metadata".to_string())
+        })?;
+        if graph.graph_feature_set_version.trim().is_empty() {
+            return Err(StrategyError::Validation(
+                "graph artifacts require graph_feature_set_version".to_string(),
+            ));
+        }
+        if graph.graph_version.trim().is_empty() {
+            return Err(StrategyError::Validation(
+                "graph artifacts require graph_version".to_string(),
+            ));
+        }
+        if graph.relation_corpus_hash.trim().is_empty() {
+            return Err(StrategyError::Validation(
+                "graph artifacts require relation_corpus_hash".to_string(),
+            ));
+        }
+        if graph.graph_feature_groups.is_empty() {
+            return Err(StrategyError::Validation(
+                "graph artifacts require graph_feature_groups".to_string(),
+            ));
+        }
     }
 
     Ok(())
@@ -177,9 +235,9 @@ mod tests {
     use chrono::{TimeZone, Utc};
 
     use super::{
-        ArtifactFeatureSchema, ModelArtifactKind, ModelArtifactMetadata, ModelCard,
-        TrainingTargetLabel, TripleBarrierLabel, hedge_update, linucb_score, triple_barrier_label,
-        validate_artifact_metadata,
+        ArtifactFeatureSchema, GraphArtifactMetadata, GraphFeatureGroup, ModelArtifactKind,
+        ModelArtifactMetadata, ModelCard, TrainingTargetLabel, TripleBarrierLabel, hedge_update,
+        linucb_score, triple_barrier_label, validate_artifact_metadata,
     };
 
     fn metadata() -> ModelArtifactMetadata {
@@ -195,6 +253,7 @@ mod tests {
             evaluation_window_end: Utc.with_ymd_and_hms(2026, 6, 9, 0, 0, 0).unwrap(),
             artifact_uri: "file:///tmp/gbm_ranker_v1.json".to_string(),
             artifact_kind: ModelArtifactKind::GbdtRanker,
+            graph: None,
         }
     }
 
@@ -239,6 +298,7 @@ mod tests {
                 "missing_data_flags".to_string(),
             ],
             target_label: TrainingTargetLabel::FutureActionableReturn6h,
+            graph_feature_groups: vec![],
         };
 
         assert!(
@@ -285,6 +345,32 @@ mod tests {
         assert_eq!(
             triple_barrier_label(100.0, 0.03, 0.02, &[99.0, 101.0, 103.2]),
             Some(TripleBarrierLabel::TakeProfit)
+        );
+    }
+
+    #[test]
+    fn graph_artifact_requires_graph_metadata() {
+        let mut metadata = metadata();
+        metadata.strategy_id = "graph_ranker_v1".to_string();
+        metadata.feature_set_version = "graph_features_v1".to_string();
+        metadata.artifact_kind = ModelArtifactKind::GraphRanker;
+        metadata.graph = Some(GraphArtifactMetadata {
+            graph_feature_set_version: "graph_features_v1".to_string(),
+            graph_version: "graph_v1".to_string(),
+            relation_corpus_hash: "sha256:graph-corpus-fixture".to_string(),
+            edge_observation_window_start: Utc.with_ymd_and_hms(2026, 5, 1, 0, 0, 0).unwrap(),
+            edge_observation_window_end: Utc.with_ymd_and_hms(2026, 6, 9, 0, 0, 0).unwrap(),
+            graph_feature_groups: vec![GraphFeatureGroup::NeighborReturnFeatures],
+        });
+
+        assert!(
+            validate_artifact_metadata(
+                &metadata,
+                "graph_ranker_v1",
+                "graph_features_v1",
+                Utc.with_ymd_and_hms(2026, 6, 16, 12, 0, 0).unwrap(),
+            )
+            .is_ok()
         );
     }
 }

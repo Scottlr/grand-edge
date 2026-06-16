@@ -6,6 +6,8 @@ import jsonschema
 import pytest
 
 from grandedge_ml.artifact_schema import (
+    GraphArtifactMetadata,
+    GraphFeatureGroup,
     ModelArtifactKind,
     ModelArtifactMetadata,
     load_rust_schema,
@@ -82,6 +84,33 @@ def test_artifact_rejects_future_training_window() -> None:
 def test_model_artifact_metadata_matches_rust_schema() -> None:
     metadata = build_metadata()
     validate_against_rust_schema(metadata.__dict__, "model_artifact_metadata")
+
+
+def test_graph_artifact_requires_graph_version() -> None:
+    metadata = ModelArtifactMetadata(
+        **{
+            **build_metadata().__dict__,
+            "strategy_id": "graph_ranker_v1",
+            "feature_set_version": "graph_features_v1",
+            "artifact_kind": ModelArtifactKind.GRAPH_RANKER,
+            "graph": GraphArtifactMetadata(
+                graph_feature_set_version="graph_features_v1",
+                graph_version="",
+                relation_corpus_hash="sha256:graph-corpus-fixture",
+                edge_observation_window_start=datetime(2026, 1, 1, 0, 0, tzinfo=UTC),
+                edge_observation_window_end=datetime(2026, 6, 1, 0, 0, tzinfo=UTC),
+                graph_feature_groups=[GraphFeatureGroup.NEIGHBOR_RETURN_FEATURES],
+            ),
+        }
+    )
+
+    with pytest.raises(ValueError, match="graph_version"):
+        validate_artifact_metadata(
+            metadata,
+            expected_strategy_id="graph_ranker_v1",
+            expected_feature_set_version="graph_features_v1",
+            as_of=datetime(2026, 6, 16, 12, 0, tzinfo=UTC),
+        )
 
 
 def test_model_card_fixture_matches_rust_schema() -> None:

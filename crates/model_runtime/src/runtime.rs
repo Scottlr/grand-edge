@@ -92,6 +92,10 @@ impl ModelRuntime {
                 return Err(ModelRuntimeError::UnsupportedArtifactKind(
                     match artifact.bundle.metadata.artifact_kind {
                         crate::artifacts::ModelArtifactKind::GbdtRanker => "gbdt_ranker",
+                        crate::artifacts::ModelArtifactKind::GraphRanker => "graph_ranker",
+                        crate::artifacts::ModelArtifactKind::GraphNeuralNetworkDeferred => {
+                            "graph_neural_network_deferred"
+                        }
                         crate::artifacts::ModelArtifactKind::ContextualBandit => {
                             "contextual_bandit"
                         }

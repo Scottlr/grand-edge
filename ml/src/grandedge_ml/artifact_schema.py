@@ -11,6 +11,8 @@ import jsonschema
 
 class ModelArtifactKind(StrEnum):
     GBDT_RANKER = "gbdt_ranker"
+    GRAPH_RANKER = "graph_ranker"
+    GRAPH_NEURAL_NETWORK_DEFERRED = "graph_neural_network_deferred"
     CONTEXTUAL_BANDIT = "contextual_bandit"
     ONLINE_ENSEMBLE = "online_ensemble"
     META_LABEL = "meta_label"
@@ -22,10 +24,33 @@ class TrainingTargetLabel(StrEnum):
     FUTURE_ACTIONABLE_RETURN_6H = "future_actionable_return_6h"
 
 
+class GraphFeatureGroup(StrEnum):
+    OWN_ITEM_FEATURES = "own_item_features"
+    OBSERVED_EXECUTION_PROXY_FEATURES = "observed_execution_proxy_features"
+    NEIGHBOR_RETURN_FEATURES = "neighbor_return_features"
+    SECTOR_FEATURES = "sector_features"
+    CONVERSION_FEATURES = "conversion_features"
+    SHOCK_FEATURES = "shock_features"
+    EDGE_STABILITY_FEATURES = "edge_stability_features"
+    EVENT_FEATURES = "event_features"
+    MISSING_DATA_FLAGS = "missing_data_flags"
+
+
+@dataclass(frozen=True)
+class GraphArtifactMetadata:
+    graph_feature_set_version: str
+    graph_version: str
+    relation_corpus_hash: str
+    edge_observation_window_start: datetime
+    edge_observation_window_end: datetime
+    graph_feature_groups: list[GraphFeatureGroup]
+
+
 @dataclass(frozen=True)
 class ArtifactFeatureSchema:
     feature_names: list[str]
     target_label: TrainingTargetLabel
+    graph_feature_groups: list[GraphFeatureGroup]
 
 
 @dataclass(frozen=True)
@@ -49,6 +74,7 @@ class ModelCard:
     known_limitations: list[str]
     target_label: TrainingTargetLabel
     notes: str
+    graph: GraphArtifactMetadata | None = None
 
 
 @dataclass(frozen=True)
@@ -64,6 +90,7 @@ class ModelArtifactMetadata:
     evaluation_window_end: datetime
     artifact_uri: str
     artifact_kind: ModelArtifactKind
+    graph: GraphArtifactMetadata | None = None
 
 
 @dataclass(frozen=True)
@@ -121,6 +148,20 @@ def validate_artifact_metadata(
         raise ValueError("artifact evaluation window must not extend past as_of")
     if trained_at < training_window_start:
         raise ValueError("trained_at must be after the training window start")
+    if metadata.artifact_kind in {
+        ModelArtifactKind.GRAPH_RANKER,
+        ModelArtifactKind.GRAPH_NEURAL_NETWORK_DEFERRED,
+    }:
+        if metadata.graph is None:
+            raise ValueError("graph artifacts require graph metadata")
+        if not metadata.graph.graph_feature_set_version.strip():
+            raise ValueError("graph artifacts require graph_feature_set_version")
+        if not metadata.graph.graph_version.strip():
+            raise ValueError("graph artifacts require graph_version")
+        if not metadata.graph.relation_corpus_hash.strip():
+            raise ValueError("graph artifacts require relation_corpus_hash")
+        if not metadata.graph.graph_feature_groups:
+            raise ValueError("graph artifacts require graph_feature_groups")
 
 
 def load_rust_schema(schema_name: str) -> dict:
