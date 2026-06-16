@@ -1,3 +1,4 @@
+mod archive;
 mod schema;
 
 use std::fmt::Display;
@@ -20,6 +21,7 @@ use grand_edge_storage::{Storage, StoredCorpusSource, StoredMarketEvent};
 use secrecy::ExposeSecret;
 use uuid::Uuid;
 
+pub use archive::analytics_archive;
 pub use schema::schema_export;
 
 #[derive(Debug, thiserror::Error)]

@@ -4,8 +4,12 @@ use std::path::PathBuf;
 pub enum AnalyticsError {
     #[error("window_end must be after window_start")]
     InvalidWindow,
+    #[error("invalid retention policy: {0}")]
+    InvalidRetentionPolicy(&'static str),
     #[error("simulation run `{0}` was not found")]
     MissingRun(uuid::Uuid),
+    #[error("archive delete blocked: {0}")]
+    ArchiveDeleteBlocked(String),
     #[error("failed to create directory `{0}`")]
     CreateDirectory(PathBuf),
     #[error("path has no file name: `{0}`")]

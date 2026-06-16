@@ -4,8 +4,9 @@ mod commands;
 use clap::Parser;
 use cli::{Cli, Command};
 use commands::{
-    analytics_export_features, backtest_report, config_print, corpus_import, corpus_validate,
-    doctor_summary, graph_import_relations, model_compare_help, schema_export, unavailable_message,
+    analytics_archive, analytics_export_features, backtest_report, config_print, corpus_import,
+    corpus_validate, doctor_summary, graph_import_relations, model_compare_help, schema_export,
+    unavailable_message,
 };
 use grand_edge_configuration::load_config;
 use miette::IntoDiagnostic;
@@ -86,6 +87,35 @@ async fn main() -> miette::Result<()> {
                     include_predictions,
                     include_outcomes,
                     include_raw_interval_candles,
+                )
+                .await
+                .map_err(|error| miette::miette!("{error}"))?;
+                println!("{report}");
+            }
+            cli::AnalyticsCommand::Archive {
+                as_of,
+                out,
+                dry_run,
+                allow_hot_delete,
+                fixture,
+            } => {
+                let as_of = chrono::DateTime::parse_from_rfc3339(&as_of)
+                    .map(|value| value.with_timezone(&chrono::Utc))
+                    .or_else(|_| {
+                        chrono::NaiveDate::parse_from_str(&as_of, "%Y-%m-%d").map(|date| {
+                            date.and_hms_opt(0, 0, 0)
+                                .expect("midnight is valid")
+                                .and_utc()
+                        })
+                    })
+                    .map_err(|error| miette::miette!("{error}"))?;
+                let report = analytics_archive(
+                    cli.profile,
+                    as_of,
+                    &out,
+                    dry_run,
+                    allow_hot_delete,
+                    fixture.as_deref(),
                 )
                 .await
                 .map_err(|error| miette::miette!("{error}"))?;
