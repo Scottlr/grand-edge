@@ -1,0 +1,66 @@
+use sqlx::{PgPool, postgres::PgPoolOptions};
+
+use crate::{
+    FeatureRepository, ItemRepository, MetricsRepository, PositionRepository, PriceRepository,
+    RecommendationRepository, SimulationRepository, StorageError, StrategyRepository,
+};
+
+#[derive(Clone)]
+pub struct Storage {
+    pool: PgPool,
+}
+
+impl Storage {
+    pub fn new(pool: PgPool) -> Self {
+        Self { pool }
+    }
+
+    pub async fn connect(database_url: &str) -> Result<Self, StorageError> {
+        let pool = PgPoolOptions::new()
+            .max_connections(5)
+            .connect(database_url)
+            .await?;
+        Ok(Self::new(pool))
+    }
+
+    pub async fn migrate(&self) -> Result<(), StorageError> {
+        sqlx::migrate!("./migrations").run(&self.pool).await?;
+        Ok(())
+    }
+
+    pub fn pool(&self) -> &PgPool {
+        &self.pool
+    }
+
+    pub fn items(&self) -> ItemRepository {
+        ItemRepository::new(self.pool.clone())
+    }
+
+    pub fn prices(&self) -> PriceRepository {
+        PriceRepository::new(self.pool.clone())
+    }
+
+    pub fn features(&self) -> FeatureRepository {
+        FeatureRepository::new(self.pool.clone())
+    }
+
+    pub fn strategies(&self) -> StrategyRepository {
+        StrategyRepository::new(self.pool.clone())
+    }
+
+    pub fn recommendations(&self) -> RecommendationRepository {
+        RecommendationRepository::new(self.pool.clone())
+    }
+
+    pub fn positions(&self) -> PositionRepository {
+        PositionRepository::new(self.pool.clone())
+    }
+
+    pub fn simulations(&self) -> SimulationRepository {
+        SimulationRepository::new(self.pool.clone())
+    }
+
+    pub fn metrics(&self) -> MetricsRepository {
+        MetricsRepository::new(self.pool.clone())
+    }
+}
