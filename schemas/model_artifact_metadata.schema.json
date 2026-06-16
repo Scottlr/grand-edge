@@ -1,8 +1,61 @@
 {
   "$defs": {
+    "GraphArtifactMetadata": {
+      "properties": {
+        "edge_observation_window_end": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "edge_observation_window_start": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "graph_feature_groups": {
+          "items": {
+            "$ref": "#/$defs/GraphFeatureGroup"
+          },
+          "type": "array"
+        },
+        "graph_feature_set_version": {
+          "type": "string"
+        },
+        "graph_version": {
+          "type": "string"
+        },
+        "relation_corpus_hash": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "graph_feature_set_version",
+        "graph_version",
+        "relation_corpus_hash",
+        "edge_observation_window_start",
+        "edge_observation_window_end",
+        "graph_feature_groups"
+      ],
+      "title": "GraphArtifactMetadata",
+      "type": "object"
+    },
+    "GraphFeatureGroup": {
+      "enum": [
+        "own_item_features",
+        "observed_execution_proxy_features",
+        "neighbor_return_features",
+        "sector_features",
+        "conversion_features",
+        "shock_features",
+        "edge_stability_features",
+        "event_features",
+        "missing_data_flags"
+      ],
+      "type": "string"
+    },
     "ModelArtifactKind": {
       "enum": [
         "gbdt_ranker",
+        "graph_ranker",
+        "graph_neural_network_deferred",
         "contextual_bandit",
         "online_ensemble",
         "meta_label"
@@ -31,6 +84,16 @@
     },
     "feature_set_version": {
       "type": "string"
+    },
+    "graph": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/GraphArtifactMetadata"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "model_version": {
       "type": "string"

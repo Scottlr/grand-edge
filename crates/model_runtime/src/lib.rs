@@ -15,6 +15,7 @@ pub use errors::ModelRuntimeError;
 pub use runtime::{InferenceRequest, ModelRuntime, ModelRuntimePrediction};
 pub use schema::{
     ArtifactFeatureSchemaDocument, CalibrationDocument, CoefficientModelDocument,
-    ModelCardDocument, TrainingTargetLabel, compute_feature_schema_hash,
-    validate_coefficient_model, validate_feature_schema, validate_model_card,
+    GraphArtifactMetadata, GraphFeatureGroup, ModelCardDocument, TrainingTargetLabel,
+    compute_feature_schema_hash, validate_coefficient_model, validate_feature_schema,
+    validate_model_card,
 };

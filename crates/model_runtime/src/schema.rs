@@ -15,11 +15,37 @@ pub enum TrainingTargetLabel {
     FutureActionableReturn6h,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum GraphFeatureGroup {
+    OwnItemFeatures,
+    ObservedExecutionProxyFeatures,
+    NeighborReturnFeatures,
+    SectorFeatures,
+    ConversionFeatures,
+    ShockFeatures,
+    EdgeStabilityFeatures,
+    EventFeatures,
+    MissingDataFlags,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+pub struct GraphArtifactMetadata {
+    pub graph_feature_set_version: String,
+    pub graph_version: String,
+    pub relation_corpus_hash: String,
+    pub edge_observation_window_start: DateTime<Utc>,
+    pub edge_observation_window_end: DateTime<Utc>,
+    pub graph_feature_groups: Vec<GraphFeatureGroup>,
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct ArtifactFeatureSchemaDocument {
     pub feature_set_version: String,
     pub feature_names: Vec<String>,
     pub target_label: TrainingTargetLabel,
+    #[serde(default)]
+    pub graph_feature_groups: Vec<GraphFeatureGroup>,
     pub feature_schema_hash: String,
 }
 
@@ -37,6 +63,8 @@ pub struct ModelCardDocument {
     pub known_limitations: Vec<String>,
     pub target_label: TrainingTargetLabel,
     pub notes: String,
+    #[serde(default)]
+    pub graph: Option<GraphArtifactMetadata>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
@@ -68,6 +96,7 @@ impl TrainingTargetLabel {
 pub fn compute_feature_schema_hash(
     feature_set_version: &str,
     feature_names: &[String],
+    graph_feature_groups: &[GraphFeatureGroup],
     target_label: TrainingTargetLabel,
 ) -> String {
     let quoted_feature_names = feature_names
@@ -75,12 +104,27 @@ pub fn compute_feature_schema_hash(
         .map(|name| format!("'{}'", python_repr_escape(name)))
         .collect::<Vec<_>>()
         .join(", ");
-    let repr = format!(
-        "{{'feature_set_version': '{}', 'feature_names': [{}], 'target_label': '{}'}}",
-        python_repr_escape(feature_set_version),
-        quoted_feature_names,
-        target_label.as_python_str()
-    );
+    let quoted_graph_feature_groups = graph_feature_groups
+        .iter()
+        .map(|group| format!("'{}'", graph_feature_group_as_str(*group)))
+        .collect::<Vec<_>>()
+        .join(", ");
+    let repr = if graph_feature_groups.is_empty() {
+        format!(
+            "{{'feature_set_version': '{}', 'feature_names': [{}], 'target_label': '{}'}}",
+            python_repr_escape(feature_set_version),
+            quoted_feature_names,
+            target_label.as_python_str()
+        )
+    } else {
+        format!(
+            "{{'feature_set_version': '{}', 'feature_names': [{}], 'target_label': '{}', 'graph_feature_groups': [{}]}}",
+            python_repr_escape(feature_set_version),
+            quoted_feature_names,
+            target_label.as_python_str(),
+            quoted_graph_feature_groups
+        )
+    };
 
     let digest = Sha256::digest(repr.as_bytes());
     format!("sha256:{digest:x}")
@@ -99,6 +143,7 @@ pub fn validate_feature_schema(
     let expected_hash = compute_feature_schema_hash(
         &schema.feature_set_version,
         &schema.feature_names,
+        &schema.graph_feature_groups,
         schema.target_label,
     );
     if expected_hash != schema.feature_schema_hash {
@@ -152,6 +197,45 @@ pub fn validate_model_card(
             "artifact evaluation window must not extend past as_of".to_string(),
         ));
     }
+    if let Some(graph) = &card.graph {
+        validate_graph_metadata(graph)?;
+    }
+    let lower_notes = card.notes.to_ascii_lowercase();
+    if lower_notes.contains("causal") && !lower_notes.contains("non-causal") {
+        return Err(ModelRuntimeError::CausalLearnedEdgeClaim);
+    }
+    for limitation in &card.known_limitations {
+        let lower_limitation = limitation.to_ascii_lowercase();
+        if lower_limitation.contains("causal") && !lower_limitation.contains("non-causal") {
+            return Err(ModelRuntimeError::CausalLearnedEdgeClaim);
+        }
+    }
+
+    Ok(())
+}
+
+pub fn validate_graph_metadata(graph: &GraphArtifactMetadata) -> Result<(), ModelRuntimeError> {
+    if graph.graph_feature_set_version.trim().is_empty() {
+        return Err(ModelRuntimeError::Validation(
+            "graph artifacts require graph_feature_set_version".to_string(),
+        ));
+    }
+    if graph.graph_version.trim().is_empty() {
+        return Err(ModelRuntimeError::Validation(
+            "graph artifacts require graph_version".to_string(),
+        ));
+    }
+    if graph.relation_corpus_hash.trim().is_empty() {
+        return Err(ModelRuntimeError::MissingRelationCorpusHash);
+    }
+    if graph.graph_feature_groups.is_empty() {
+        return Err(ModelRuntimeError::MissingGraphFeatureGroups);
+    }
+    if graph.edge_observation_window_end < graph.edge_observation_window_start {
+        return Err(ModelRuntimeError::Validation(
+            "graph edge observation window end must be after start".to_string(),
+        ));
+    }
 
     Ok(())
 }
@@ -180,4 +264,18 @@ pub fn validate_coefficient_model(
 
 fn python_repr_escape(value: &str) -> String {
     value.replace('\\', "\\\\").replace('\'', "\\'")
+}
+
+fn graph_feature_group_as_str(group: GraphFeatureGroup) -> &'static str {
+    match group {
+        GraphFeatureGroup::OwnItemFeatures => "own_item_features",
+        GraphFeatureGroup::ObservedExecutionProxyFeatures => "observed_execution_proxy_features",
+        GraphFeatureGroup::NeighborReturnFeatures => "neighbor_return_features",
+        GraphFeatureGroup::SectorFeatures => "sector_features",
+        GraphFeatureGroup::ConversionFeatures => "conversion_features",
+        GraphFeatureGroup::ShockFeatures => "shock_features",
+        GraphFeatureGroup::EdgeStabilityFeatures => "edge_stability_features",
+        GraphFeatureGroup::EventFeatures => "event_features",
+        GraphFeatureGroup::MissingDataFlags => "missing_data_flags",
+    }
 }
