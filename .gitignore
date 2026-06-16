@@ -9,3 +9,10 @@
 /.env.local
 /.DS_Store
 Thumbs.db
+/ml/.venv
+/ml/.pytest_cache
+/ml/.ruff_cache
+/ml/__pycache__
+/ml/**/__pycache__/
+/ml/**/*.pyc
+/ml/artifacts/*/*
