@@ -7,6 +7,7 @@ repository.workspace = true
 
 [dependencies]
 grand-edge-domain = { path = "../domain" }
+grand-edge-simulator = { path = "../simulator" }
 grand-edge-storage = { path = "../storage" }
 chrono.workspace = true
 serde.workspace = true

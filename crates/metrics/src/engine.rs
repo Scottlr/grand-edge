@@ -8,6 +8,10 @@ use crate::{
     RiskAdjustedMetrics, TradingMetrics,
     calibration::{calibration_buckets, execution_quality},
     forecast::{brier_score, directional_accuracy, mean_absolute_error, root_mean_squared_error},
+    graph::{
+        BlastRadiusMetricSummary, BlastRadiusOutcome, GraphPathMetricSummary, GraphPathOutcome,
+        summarize_blast_radius_outcomes, summarize_graph_path_outcomes,
+    },
     risk::{max_drawdown, sharpe_ratio, sortino_ratio},
     trading::{average_loss, average_win, capital_efficiency, profit_factor, win_rate},
 };
@@ -102,6 +106,64 @@ impl MetricsEngine {
             .metrics()
             .latest_strategy_metric(strategy_id, model_version, window.as_name())
             .await?)
+    }
+
+    pub async fn persist_graph_path_summaries(
+        &self,
+        outcomes: &[GraphPathOutcome],
+        window_start: DateTime<Utc>,
+        window_end: DateTime<Utc>,
+        min_sample_size: i64,
+    ) -> Result<Vec<GraphPathMetricSummary>, MetricsError> {
+        let summaries =
+            summarize_graph_path_outcomes(outcomes, window_start, window_end, min_sample_size);
+        for summary in &summaries {
+            self.storage
+                .metrics()
+                .upsert_metric_payloads(
+                    "__graph_path_metrics__",
+                    &summary.graph_version,
+                    summary.path_length as i64,
+                    &format!(
+                        "graph_path:{}:{}:{}:{}:{}",
+                        serde_json::to_string(&summary.graph_action)
+                            .map_err(MetricsError::from)?
+                            .trim_matches('"'),
+                        summary.edge_type,
+                        summary.source_type,
+                        summary.execution_mode,
+                        summary.confidence_bucket,
+                    ),
+                    summary.window_start,
+                    summary.window_end,
+                    &[serde_json::to_value(summary).map_err(MetricsError::from)?],
+                )
+                .await?;
+        }
+        Ok(summaries)
+    }
+
+    pub async fn persist_blast_radius_summaries(
+        &self,
+        outcomes: &[BlastRadiusOutcome],
+        min_sample_size: i64,
+    ) -> Result<Vec<BlastRadiusMetricSummary>, MetricsError> {
+        let summaries = summarize_blast_radius_outcomes(outcomes, min_sample_size);
+        for summary in &summaries {
+            self.storage
+                .metrics()
+                .upsert_metric_payloads(
+                    "__blast_radius_metrics__",
+                    &summary.graph_version,
+                    summary.horizon_secs,
+                    &format!("blast_radius:{}", summary.scenario_mode),
+                    DateTime::<Utc>::UNIX_EPOCH,
+                    DateTime::<Utc>::UNIX_EPOCH,
+                    &[serde_json::to_value(summary).map_err(MetricsError::from)?],
+                )
+                .await?;
+        }
+        Ok(summaries)
     }
 }
 
