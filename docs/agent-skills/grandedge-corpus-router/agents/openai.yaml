@@ -1,0 +1,4 @@
+interface:
+  display_name: "GrandEdge Corpus Router"
+  short_description: "Route GrandEdge corpus work safely"
+  default_prompt: "Use $grandedge-corpus-router to route GrandEdge corpus research without loading large corpus files."
