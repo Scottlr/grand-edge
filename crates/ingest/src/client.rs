@@ -131,6 +131,10 @@ impl OsrsWikiClient {
         .await
     }
 
+    pub fn config(&self) -> &OsrsWikiConfig {
+        &self.config
+    }
+
     async fn acquire_rate_limit_token(&self) {
         loop {
             let wait_duration = {

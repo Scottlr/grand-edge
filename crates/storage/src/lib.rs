@@ -1,5 +1,6 @@
 //! Storage ownership for Grand Edge persistence.
 
+pub mod checkpoints;
 pub mod errors;
 pub mod features;
 pub mod items;
@@ -11,6 +12,7 @@ pub mod recommendations;
 pub mod simulations;
 pub mod strategies;
 
+pub use checkpoints::{CheckpointRepository, StoredCheckpoint};
 pub use errors::StorageError;
 pub use features::FeatureRepository;
 pub use items::ItemRepository;

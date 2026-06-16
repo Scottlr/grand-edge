@@ -888,14 +888,22 @@ dependencies = [
 name = "grand-edge-ingest"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
+ "async-trait",
  "chrono",
+ "clap",
+ "config",
+ "dotenvy",
  "grand-edge-domain",
+ "grand-edge-storage",
  "percent-encoding",
  "reqwest",
  "serde",
  "serde_json",
  "thiserror",
  "tokio",
+ "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]
