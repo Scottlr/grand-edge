@@ -1,0 +1,24 @@
+[
+  {
+    "examine": "A razor-sharp abyssal whip.",
+    "id": 4151,
+    "members": true,
+    "lowalch": 48000,
+    "limit": 70,
+    "value": 120001,
+    "highalch": 72000,
+    "icon": "Abyssal whip.png",
+    "name": "Abyssal whip"
+  },
+  {
+    "examine": "A chef's hat.",
+    "id": 1949,
+    "members": false,
+    "lowalch": 1,
+    "limit": null,
+    "value": 2,
+    "highalch": 3,
+    "icon": "Chef&#39;s hat.png",
+    "name": "Chef's hat"
+  }
+]
