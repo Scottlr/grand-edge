@@ -137,6 +137,77 @@ impl StrategyRepository {
 
         rows.into_iter().map(TryFrom::try_from).collect()
     }
+
+    pub async fn list_latest_predictions(
+        &self,
+        as_of: DateTime<Utc>,
+    ) -> Result<Vec<StoredPrediction>, StorageError> {
+        let rows = sqlx::query_as::<_, PredictionRow>(
+            r#"
+            SELECT DISTINCT ON (strategy_id, model_version, item_id)
+                strategy_id,
+                model_version,
+                item_id,
+                as_of,
+                horizon_secs,
+                side,
+                expected_return,
+                confidence,
+                expected_net_gp_per_unit,
+                target_entry,
+                target_exit,
+                stop_loss,
+                take_profit,
+                max_quantity,
+                explanation
+            FROM strategy_predictions
+            WHERE as_of <= $1
+            ORDER BY strategy_id, model_version, item_id, as_of DESC
+            "#,
+        )
+        .bind(as_of)
+        .fetch_all(&self.pool)
+        .await?;
+
+        rows.into_iter().map(TryFrom::try_from).collect()
+    }
+
+    pub async fn list_latest_predictions_for_item(
+        &self,
+        item_id: ItemId,
+        as_of: DateTime<Utc>,
+    ) -> Result<Vec<StoredPrediction>, StorageError> {
+        let rows = sqlx::query_as::<_, PredictionRow>(
+            r#"
+            SELECT DISTINCT ON (strategy_id, model_version, item_id)
+                strategy_id,
+                model_version,
+                item_id,
+                as_of,
+                horizon_secs,
+                side,
+                expected_return,
+                confidence,
+                expected_net_gp_per_unit,
+                target_entry,
+                target_exit,
+                stop_loss,
+                take_profit,
+                max_quantity,
+                explanation
+            FROM strategy_predictions
+            WHERE item_id = $1
+              AND as_of <= $2
+            ORDER BY strategy_id, model_version, item_id, as_of DESC
+            "#,
+        )
+        .bind(item_id.0)
+        .bind(as_of)
+        .fetch_all(&self.pool)
+        .await?;
+
+        rows.into_iter().map(TryFrom::try_from).collect()
+    }
 }
 
 fn enum_to_string<T: serde::Serialize>(value: &T) -> Result<String, StorageError> {
