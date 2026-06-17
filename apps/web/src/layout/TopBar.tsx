@@ -36,7 +36,7 @@ export function TopBar({
     <header className="terminal-topbar">
       <div className="terminal-topbar-copy">
         <p className="eyebrow">Grand Edge terminal</p>
-        <h1>Command center</h1>
+        <h1>Dashboard</h1>
         <p className="terminal-topbar-detail">
           Scan backend-owned recommendations, method availability, positions, and{" "}
           <TooltipTerm term="simulation">simulations</TooltipTerm> from one operational surface. Richer

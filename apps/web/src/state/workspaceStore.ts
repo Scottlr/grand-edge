@@ -1,12 +1,14 @@
 import { create } from "zustand";
 
 export type WorkspaceView =
-  | "command"
-  | "item"
-  | "explainer"
-  | "strategies"
+  | "dashboard"
+  | "buy"
+  | "sell"
   | "portfolio"
+  | "items"
+  | "linkedItems"
   | "simulations"
+  | "accuracy"
   | "settings";
 
 export type LiveConnectionState = "idle" | "connecting" | "live" | "closed" | "error";
@@ -27,7 +29,7 @@ type WorkspaceState = {
 };
 
 export const useWorkspaceStore = create<WorkspaceState>((set) => ({
-  activeView: "command",
+  activeView: "dashboard",
   selectedItemId: null,
   selectedRecommendationId: null,
   sidebarCollapsed: false,

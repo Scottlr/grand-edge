@@ -1,15 +1,7 @@
-import { ChevronLeft, ChevronRight, Command, FlaskConical, Package, PanelsTopLeft, Shield } from "lucide-react";
-
 import type { WorkspaceView } from "../state/workspaceStore";
 import type { Item } from "../api/types";
-
-const navItems: Array<{ label: string; view: WorkspaceView; icon: typeof PanelsTopLeft }> = [
-  { label: "Command", view: "command", icon: Command },
-  { label: "Item focus", view: "item", icon: Package },
-  { label: "Strategies", view: "strategies", icon: FlaskConical },
-  { label: "Portfolio", view: "portfolio", icon: Shield },
-  { label: "Simulations", view: "simulations", icon: PanelsTopLeft },
-];
+import { primaryNavItems } from "../navigation/routes";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 type SidebarProps = {
   activeView: WorkspaceView;
@@ -43,15 +35,15 @@ export function Sidebar({
       </div>
 
       <nav className="terminal-sidebar-nav" aria-label="workspace views">
-        {navItems.map((item) => {
+        {primaryNavItems.map((item) => {
           const Icon = item.icon;
           return (
             <button
-              key={item.view}
+              key={item.id}
               className={`terminal-nav-button ${
-                activeView === item.view ? "terminal-nav-button-active" : ""
+                activeView === item.id ? "terminal-nav-button-active" : ""
               }`}
-              onClick={() => onSelectView(item.view)}
+              onClick={() => onSelectView(item.id)}
               type="button"
             >
               <Icon size={18} />
