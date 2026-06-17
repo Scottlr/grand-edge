@@ -2,17 +2,17 @@ use axum::{
     Json,
     extract::{Path, Query, State},
 };
+use axum_extra::extract::CookieJar;
 use grand_edge_domain::{RecommendationAction, RecommendationId};
 use serde::Deserialize;
 use utoipa::IntoParams;
 use uuid::Uuid;
 
 use crate::recommendations::view::{RecommendationActionDto, RecommendationDto};
-use crate::{errors::ApiError, state::AppState};
+use crate::{auth::request_user_id, errors::ApiError, state::AppState};
 
 #[derive(Debug, Deserialize, IntoParams)]
 pub struct RecommendationQuery {
-    pub user_id: Option<Uuid>,
     pub action: Option<RecommendationActionDto>,
     #[serde(default = "default_limit")]
     pub limit: i64,
@@ -32,12 +32,14 @@ fn default_limit() -> i64 {
 )]
 pub async fn list_recommendations(
     State(state): State<AppState>,
+    jar: CookieJar,
     Query(query): Query<RecommendationQuery>,
 ) -> Result<Json<Vec<RecommendationDto>>, ApiError> {
+    let user_id = request_user_id(&state, &jar).await?;
     let recommendations = state
         .services
         .list_recommendations(
-            query.user_id.map(grand_edge_domain::UserId),
+            user_id,
             query.action.map(RecommendationAction::from),
             query.limit,
             query.offset,

@@ -30,6 +30,7 @@ import {
   TerminalPortfolioView,
 } from "../views/DetailedViews";
 import { SimulationReplayView } from "../features/simulations/SimulationReplayView";
+import { AccountSettingsView } from "../features/account/AccountSettingsView";
 
 const EMPTY_ITEMS: Item[] = [];
 const EMPTY_RECOMMENDATIONS: Recommendation[] = [];
@@ -194,7 +195,12 @@ export function AppShell() {
           {activeView === "accuracy" ? (
             <ModelAccuracyView recommendation={selectedRecommendationDetail ?? selectedRecommendation ?? buyRecommendation} />
           ) : null}
-          {activeView === "settings" ? <StrategyLabView strategies={strategies} /> : null}
+          {activeView === "settings" ? (
+            <>
+              <AccountSettingsView />
+              <StrategyLabView strategies={strategies} />
+            </>
+          ) : null}
         </section>
       </div>
     </main>

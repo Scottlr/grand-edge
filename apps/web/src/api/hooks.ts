@@ -9,11 +9,16 @@ import {
 import { createApiClient } from "./client";
 import { queryKeys } from "./queryKeys";
 import type {
+  AuthenticatedUser,
   Interval,
+  LoginRequest,
   Position,
   Recommendation,
+  RegisterRequest,
+  RiskProfile,
   SimulationRun,
   StrategyStatus,
+  UpdateRiskProfileRequest,
   UpsertPositionRequest,
 } from "./types";
 
@@ -27,6 +32,65 @@ export function useRecommendations(params?: {
   return useQuery({
     queryKey: queryKeys.recommendations(params ?? {}),
     queryFn: () => apiClient.getRecommendations(params),
+  });
+}
+
+export function useCurrentUser() {
+  return useQuery({
+    queryKey: ["auth", "me"],
+    queryFn: () => apiClient.getCurrentUser(),
+    retry: false,
+  });
+}
+
+export function useRegister() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: RegisterRequest) => apiClient.register(body),
+    onSuccess: async (user) => {
+      queryClient.setQueryData(["auth", "me"], user);
+      await queryClient.invalidateQueries({ queryKey: ["riskProfile"] });
+    },
+  });
+}
+
+export function useLogin() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: LoginRequest) => apiClient.login(body),
+    onSuccess: async (user) => {
+      queryClient.setQueryData(["auth", "me"], user);
+      await queryClient.invalidateQueries({ queryKey: ["riskProfile"] });
+    },
+  });
+}
+
+export function useLogout() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => apiClient.logout(),
+    onSuccess: async () => {
+      queryClient.removeQueries({ queryKey: ["auth", "me"] });
+      await queryClient.invalidateQueries({ queryKey: ["riskProfile"] });
+    },
+  });
+}
+
+export function useRiskProfile() {
+  return useQuery({
+    queryKey: ["riskProfile"],
+    queryFn: () => apiClient.getRiskProfile(),
+    retry: false,
+  });
+}
+
+export function useUpdateRiskProfile() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: UpdateRiskProfileRequest) => apiClient.patchRiskProfile(body),
+    onSuccess: async (profile) => {
+      queryClient.setQueryData(["riskProfile"], profile);
+    },
   });
 }
 

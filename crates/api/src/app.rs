@@ -34,6 +34,10 @@ pub fn build_router(
 
     let router = Router::new()
         .route("/health", get(crate::health))
+        .route("/api/auth/register", post(routes::auth::register))
+        .route("/api/auth/login", post(routes::auth::login))
+        .route("/api/auth/logout", post(routes::auth::logout))
+        .route("/api/auth/me", get(routes::auth::me))
         .route("/api/items", get(routes::items::list_items))
         .route("/api/items/{id}", get(routes::items::get_item))
         .route(
@@ -68,6 +72,10 @@ pub fn build_router(
         .route(
             "/api/users/me/positions/{id}",
             patch(routes::positions::update_position),
+        )
+        .route(
+            "/api/users/me/risk-profile",
+            get(routes::auth::get_risk_profile).patch(routes::auth::update_risk_profile),
         )
         .route("/api/live/stream", get(routes::live::stream_live_events))
         .route("/api/openapi.json", get(crate::openapi_json))

@@ -12,9 +12,9 @@ pub fn redact_secret(secret: &SecretString) -> &'static str {
 
 pub fn redacted_config_summary(config: &GrandEdgeConfig) -> String {
     format!(
-        "database.url={}\nauth.session_key={}\nosrs_wiki.user_agent={}\napi.bind_addr={}",
+        "database.url={}\nauth.session_secret={}\nosrs_wiki.user_agent={}\napi.bind_addr={}",
         redact_secret(&config.database.url),
-        redact_secret(&config.auth.session_key),
+        redact_secret(&config.auth.session_secret),
         config.osrs_wiki.user_agent,
         config.api.bind_addr
     )

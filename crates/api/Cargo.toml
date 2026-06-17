@@ -11,8 +11,10 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow.workspace = true
+argon2 = "0.5"
 async-trait.workspace = true
 axum.workspace = true
+axum-extra = { version = "0.10", features = ["cookie"] }
 chrono.workspace = true
 grand-edge-configuration = { path = "../configuration" }
 grand-edge-domain = { path = "../domain" }
@@ -24,6 +26,8 @@ grand-edge-simulator = { path = "../simulator" }
 grand-edge-storage = { path = "../storage" }
 grand-edge-strategies = { path = "../strategies" }
 http-body-util = "0.1"
+password-hash = "0.5"
+rand_core = { version = "0.6", features = ["getrandom"] }
 secrecy.workspace = true
 serde.workspace = true
 serde_json.workspace = true

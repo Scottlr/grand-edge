@@ -1,5 +1,6 @@
 //! Storage ownership for Grand Edge persistence.
 
+pub mod auth;
 pub mod checkpoints;
 pub mod corpus_sources;
 pub mod errors;
@@ -19,6 +20,7 @@ pub mod recommendations;
 pub mod simulations;
 pub mod strategies;
 
+pub use auth::{AuthRepository, NewUserIdentity};
 pub use checkpoints::{CheckpointRepository, StoredCheckpoint};
 pub use corpus_sources::{CorpusSourceRepository, StoredCorpusSource};
 pub use errors::StorageError;

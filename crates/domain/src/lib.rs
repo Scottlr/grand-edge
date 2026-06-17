@@ -1,5 +1,6 @@
 //! Shared domain contracts for Grand Edge.
 
+pub mod auth;
 pub mod corpus;
 pub mod evidence;
 pub mod explanation;
@@ -26,6 +27,7 @@ pub mod strategy;
 pub mod time;
 pub mod validation;
 
+pub use auth::*;
 pub use corpus::*;
 pub use evidence::*;
 pub use explanation::*;

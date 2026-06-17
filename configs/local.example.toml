@@ -5,3 +5,9 @@ url = "postgres://grand_edge:grand_edge@localhost:5432/grand_edge"
 bind_addr = "127.0.0.1:3000"
 cors_origin = "http://localhost:5173"
 swagger_ui_enabled = true
+
+[auth]
+mode = "session_cookie"
+session_secret = "replace-me-local-session-secret"
+session_ttl_hours = 720
+local_default_user_enabled = true

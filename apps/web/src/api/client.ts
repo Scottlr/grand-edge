@@ -1,13 +1,18 @@
 import type {
+  AuthenticatedUser,
   CreateSimulationRequest,
   Interval,
   IntervalPrice,
   Item,
+  LoginRequest,
   PatchStrategyRequest,
   Position,
   Recommendation,
+  RegisterRequest,
+  RiskProfile,
   SimulationRun,
   StrategyStatus,
+  UpdateRiskProfileRequest,
   UpsertPositionRequest,
 } from "./types";
 
@@ -27,6 +32,50 @@ export class ApiClient {
   constructor(config: ApiClientConfig) {
     this.baseUrl = config.baseUrl.replace(/\/$/, "");
     this.fetchImpl = config.fetchImpl ?? fetch;
+  }
+
+  async register(body: RegisterRequest): Promise<AuthenticatedUser> {
+    return this.request<AuthenticatedUser>("/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  }
+
+  async login(body: LoginRequest): Promise<AuthenticatedUser> {
+    return this.request<AuthenticatedUser>("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  }
+
+  async logout(): Promise<{ status: string }> {
+    return this.request<{ status: string }>("/api/auth/logout", {
+      method: "POST",
+    });
+  }
+
+  async getCurrentUser(): Promise<AuthenticatedUser> {
+    return this.request<AuthenticatedUser>("/api/auth/me");
+  }
+
+  async getRiskProfile(): Promise<RiskProfile> {
+    return this.request<RiskProfile>("/api/users/me/risk-profile");
+  }
+
+  async patchRiskProfile(body: UpdateRiskProfileRequest): Promise<RiskProfile> {
+    return this.request<RiskProfile>("/api/users/me/risk-profile", {
+      method: "PATCH",
+      body: JSON.stringify(body),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
   }
 
   async getItems(params: { limit: number; offset: number }): Promise<Item[]> {
@@ -131,7 +180,10 @@ export class ApiClient {
       }
     }
 
-    const response = await this.fetchImpl(url.toString(), init);
+    const response = await this.fetchImpl(url.toString(), {
+      credentials: "include",
+      ...init,
+    });
     if (!response.ok) {
       throw new Error(`API request failed: ${response.status} ${response.statusText}`);
     }
