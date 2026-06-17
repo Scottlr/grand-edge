@@ -27,9 +27,9 @@ import { CommandCenterView } from "../features/command-center/CommandCenterView"
 import {
   ItemIntelligenceView,
   RecommendationExplainerView,
-  SimulationReplayView,
   TerminalPortfolioView,
 } from "../views/DetailedViews";
+import { SimulationReplayView } from "../features/simulations/SimulationReplayView";
 
 const EMPTY_ITEMS: Item[] = [];
 const EMPTY_RECOMMENDATIONS: Recommendation[] = [];
