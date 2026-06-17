@@ -856,6 +856,7 @@ summary {
   display: grid;
   align-items: center;
   min-height: 140px;
+  gap: 12px;
 }
 
 .mini-chart {
@@ -877,6 +878,27 @@ summary {
   stroke: var(--ge-accent-warning);
 }
 
+.mini-chart-line-band {
+  stroke: var(--ge-accent-confidence);
+}
+
+.mini-chart-marker {
+  stroke-width: 1.4;
+  stroke-dasharray: 5 3;
+}
+
+.mini-chart-marker-entry {
+  stroke: var(--ge-accent-positive);
+}
+
+.mini-chart-marker-exit {
+  stroke: var(--ge-accent-warning);
+}
+
+.mini-chart-marker-stop {
+  stroke: var(--ge-accent-risk);
+}
+
 .bar-chart {
   display: grid;
   grid-auto-flow: column;
@@ -889,6 +911,22 @@ summary {
 .bar-chart-bar {
   border-radius: 999px 999px 0 0;
   background: linear-gradient(180deg, var(--ge-accent-secondary), var(--ge-accent-primary));
+}
+
+.bar-chart-bar-spread {
+  background: linear-gradient(180deg, var(--ge-accent-model), var(--ge-accent-primary));
+}
+
+.bar-chart-bar-realized {
+  background: linear-gradient(180deg, var(--ge-accent-warning), var(--ge-accent-risk));
+}
+
+.bar-chart-bar-open {
+  background: linear-gradient(180deg, var(--ge-accent-blue), var(--ge-accent-positive));
+}
+
+.bar-chart-bar-skipped {
+  background: linear-gradient(180deg, rgba(99, 115, 131, 0.7), rgba(34, 48, 60, 0.9));
 }
 
 .heatstream {
@@ -910,6 +948,14 @@ summary {
   gap: 10px;
 }
 
+.chart-stack,
+.chart-overlay-controls,
+.chart-calibration-grid,
+.chart-timeline-grid {
+  display: grid;
+  gap: 10px;
+}
+
 .stacked-vote-row {
   display: flex;
   justify-content: space-between;
@@ -918,6 +964,32 @@ summary {
   border: 1px solid color-mix(in srgb, var(--ge-border-subtle) 72%, transparent);
   border-radius: calc(var(--app-card-radius, 8) * 1px);
   background: color-mix(in srgb, var(--ge-surface-secondary) 90%, transparent);
+}
+
+.chart-timeline-row,
+.chart-calibration-row {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--ge-border-subtle) 72%, transparent);
+  border-radius: calc(var(--app-card-radius, 8) * 1px);
+  background: color-mix(in srgb, var(--ge-surface-secondary) 90%, transparent);
+}
+
+.chart-overlay-toggle {
+  justify-self: start;
+  min-height: calc(var(--app-min-touch-target, 40) * 1px);
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--ge-border-subtle) 78%, transparent);
+  background: color-mix(in srgb, var(--ge-accent-blue) 10%, transparent);
+  color: var(--ge-text-primary);
+  cursor: pointer;
+}
+
+.chart-overlay-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .timeline-list {

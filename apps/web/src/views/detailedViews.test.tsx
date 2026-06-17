@@ -14,6 +14,7 @@ import {
   TerminalPortfolioView,
 } from "./DetailedViews";
 import { intervalPricesToTimePoints } from "../charts/scales";
+import { technicalChartTermsHiddenByDefault } from "../charts/chartTypes";
 
 const HISTORY: IntervalPrice[] = [
   {
@@ -130,6 +131,20 @@ describe("detailed views", () => {
     );
 
     expect(markup).toContain("Replay 1");
-    expect(markup).toContain("Bet replay track");
+    expect(markup).toContain("Past test trades");
+  });
+
+  it("keeps technical chart jargon hidden by default in the detailed item view", () => {
+    const markup = renderWithProviders(
+      <ItemIntelligenceView
+        history={HISTORY}
+        item={null}
+        recommendation={recommendationMocks.live}
+      />,
+    ).toLowerCase();
+
+    technicalChartTermsHiddenByDefault.forEach((term) => {
+      expect(markup).not.toContain(`>${term}<`);
+    });
   });
 });

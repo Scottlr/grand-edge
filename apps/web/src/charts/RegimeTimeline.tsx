@@ -8,7 +8,7 @@ export function RegimeTimeline({ recommendation }: { recommendation: Recommendat
   ];
 
   return (
-    <div aria-label="Regime timeline" className="timeline-list">
+    <div aria-label="Market mood timeline" className="timeline-list">
       {labels.map((label) => (
         <span className="timeline-chip" key={label}>
           {label}
