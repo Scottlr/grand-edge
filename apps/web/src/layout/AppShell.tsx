@@ -27,10 +27,10 @@ import { StrategyLabView } from "../features/strategy-lab/StrategyLabView";
 import {
   ItemIntelligenceView,
   RecommendationExplainerView,
-  TerminalPortfolioView,
 } from "../views/DetailedViews";
 import { SimulationReplayView } from "../features/simulations/SimulationReplayView";
 import { AccountSettingsView } from "../features/account/AccountSettingsView";
+import { PortfolioView } from "../features/portfolio/PortfolioView";
 
 const EMPTY_ITEMS: Item[] = [];
 const EMPTY_RECOMMENDATIONS: Recommendation[] = [];
@@ -172,10 +172,7 @@ export function AppShell() {
           {activeView === "buy" ? <RecommendationExplainerView recommendation={buyRecommendation} /> : null}
           {activeView === "sell" ? <RecommendationExplainerView recommendation={sellRecommendation} /> : null}
           {activeView === "portfolio" ? (
-            <TerminalPortfolioView
-              positions={positions}
-              recommendation={sellRecommendation ?? selectedRecommendationDetail}
-            />
+            <PortfolioView positions={positions} recommendations={recommendations} />
           ) : null}
           {activeView === "items" ? (
             <ItemIntelligenceView

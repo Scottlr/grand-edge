@@ -830,6 +830,7 @@ summary {
 }
 
 .position-form input,
+.position-form select,
 .position-form textarea {
   width: 100%;
   min-height: 42px;
@@ -842,6 +843,34 @@ summary {
 .position-form textarea {
   min-height: 108px;
   resize: vertical;
+}
+
+.portfolio-summary-grid,
+.portfolio-holding-grid,
+.portfolio-holding-card,
+.portfolio-holding-head,
+.portfolio-holding-metrics {
+  display: grid;
+  gap: 14px;
+}
+
+.portfolio-summary-grid,
+.portfolio-holding-metrics {
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.portfolio-summary-profit {
+  grid-column: 1 / -1;
+}
+
+.portfolio-holding-head {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+}
+
+.portfolio-holding-reason {
+  color: var(--ge-text-secondary);
+  line-height: 1.55;
 }
 
 .position-form-wide {
