@@ -1068,6 +1068,36 @@ summary {
   margin-top: 12px;
 }
 
+.strategy-lab-table td:first-child strong,
+.strategy-lab-detail h3 {
+  font-size: 1rem;
+}
+
+.strategy-lab-toggle {
+  display: grid;
+  gap: 8px;
+}
+
+.strategy-lab-toggle-label {
+  color: var(--ge-text-secondary);
+}
+
+.strategy-lab-detail,
+.strategy-lab-subpanel,
+.strategy-lab-paper-bets {
+  display: grid;
+  gap: 14px;
+}
+
+.strategy-lab-config-json {
+  margin: 0;
+  padding: 12px;
+  overflow-x: auto;
+  border-radius: calc(var(--app-card-radius, 8) * 1px);
+  background: color-mix(in srgb, var(--ge-surface-secondary) 90%, transparent);
+  color: var(--ge-text-secondary);
+}
+
 .invalidation-rules li,
 .model-vote-row p,
 .evidence-empty {
