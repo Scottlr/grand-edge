@@ -20,7 +20,7 @@ describe("alerts and empty states", () => {
 
   it("teaches the next action in shared empty states", () => {
     expect(emptyStatesTeachNextAction()).toBe(true);
-    expect(emptyStates.noPortfolioItems.title).toBe("Track your first item");
+    expect(emptyStates.noPortfolioItems.title).toBe("Track your first holding");
     expect(emptyStates.noSellRecommendations.title).toBe("No urgent sells");
     expect(emptyStates.missingAccuracy.title).toBe(
       "Past accuracy is still filling in",

@@ -1,8 +1,7 @@
 export const emptyStates = {
   noPortfolioItems: {
-    title: "Track your first item",
-    message:
-      "Add an item, quantity, and buy price. GrandEdge will then tell you whether to hold, sell, or watch it.",
+    title: "Track your first holding",
+    message: "Add an item, quantity, and buy price to receive cashout guidance.",
   },
   noBuyRecommendations: {
     title: "No strong buys right now",

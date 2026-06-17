@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 
 import type { Recommendation } from "../../api/types";
 import { useRecommendationEvidence } from "../../api/hooks";
+import { DataStatePanel } from "../../components/state/DataStatePanel";
 import { ActionPageHeader } from "../../views/ActionPageHeader";
 import { accuracyStatusForModel } from "../../domain/modelAccuracy";
 import { ExpandableAdvancedPanel } from "../../components/disclosure/ExpandableAdvancedPanel";
@@ -71,7 +72,7 @@ export function ModelAccuracyView({
   const selectedModel = selectAccuracyModel(allModels, selectedStrategyId, selectedWindowLabel);
 
   if (!selectedModel) {
-    return null;
+    return <DataStatePanel state="empty" title="Accuracy view" message="No stored model accuracy summaries are available yet." />;
   }
 
   const status = accuracyStatusForModel(selectedModel);
@@ -150,7 +151,15 @@ export function ModelAccuracyView({
               </div>
             </div>
           </article>
-          <ModelCardPanel modelCards={evidenceQuery.data?.modelCards ?? []} />
+          {evidenceQuery.isError ? (
+            <DataStatePanel
+              state="degraded"
+              title="Model card references"
+              message="Model card references are temporarily unavailable, so GrandEdge is keeping the trust summary visible without inventing citation detail."
+            />
+          ) : (
+            <ModelCardPanel modelCards={evidenceQuery.data?.modelCards ?? []} />
+          )}
         </div>
       </div>
     </section>

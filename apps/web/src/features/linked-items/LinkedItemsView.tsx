@@ -3,6 +3,7 @@ import "./linkedItems.css";
 import { useRecommendationEvidence } from "../../api/hooks";
 import type { Recommendation } from "../../api/types";
 import { TooltipTerm } from "../../components/learn/TooltipTerm";
+import { DataStatePanel } from "../../components/state/DataStatePanel";
 import { ActionPageHeader } from "../../views/ActionPageHeader";
 import { EventImpactPanel } from "./EventImpactPanel";
 import { LinkAwareOpportunityFeed } from "./LinkAwareOpportunityFeed";
@@ -49,18 +50,11 @@ export function LinkedItemsView({
   if (!recommendation || !model) {
     return (
       <section className="action-view-stack">
-        <ActionPageHeader
-          action="WATCH CLOSELY"
-          confidence={null}
-          why="Select an item or recommendation first so Linked Items can show focused relationship paths instead of a huge graph."
-          keyNumbers={headerNumbers([
-            { label: "Linked Items", value: "Unavailable" },
-            {
-              label: "What happens if this moves?",
-              value: "Select an item",
-            },
-          ])}
-          actions={headerActions(["Return to dashboard"])}
+        <DataStatePanel
+          state="empty"
+          title="Linked Items"
+          message="Select an item or recommendation first so Linked Items can show focused relationship paths instead of a huge graph."
+          action={<button className="terminal-action-button" type="button">Return to dashboard</button>}
         />
       </section>
     );

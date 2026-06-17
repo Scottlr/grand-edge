@@ -29,7 +29,12 @@ export function Sidebar({
           <p className="eyebrow">Workspace</p>
           {!collapsed ? <p className="terminal-sidebar-title">Terminal shell</p> : null}
         </div>
-        <button className="terminal-icon-button" onClick={onToggleCollapsed} type="button">
+        <button
+          aria-label={collapsed ? "Expand workspace navigation" : "Collapse workspace navigation"}
+          className="terminal-icon-button"
+          onClick={onToggleCollapsed}
+          type="button"
+        >
           {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </button>
       </div>
@@ -45,6 +50,7 @@ export function Sidebar({
               }`}
               onClick={() => onSelectView(item.id)}
               type="button"
+              aria-current={activeView === item.id ? "page" : undefined}
             >
               <Icon size={18} />
               {!collapsed ? <span>{item.label}</span> : null}

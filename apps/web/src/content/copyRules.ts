@@ -18,11 +18,15 @@ export type CopyRuleViolation = {
   index: number;
 };
 
-export function findForbiddenDefaultUiTerms(copy: string): CopyRuleViolation[] {
-  const lowered = copy.toLowerCase();
+function escapeRegex(term: string) {
+  return term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
+export function findForbiddenDefaultUiTerms(copy: string): CopyRuleViolation[] {
   return forbiddenDefaultUiTerms.flatMap((term) => {
-    const index = lowered.indexOf(term);
+    const pattern = new RegExp(`\\b${escapeRegex(term).replaceAll("\\ ", "\\s+")}\\b`, "i");
+    const match = pattern.exec(copy);
+    const index = match?.index ?? -1;
     return index >= 0 ? [{ term, index }] : [];
   });
 }

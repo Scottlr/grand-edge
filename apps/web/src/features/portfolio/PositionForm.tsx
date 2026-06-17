@@ -18,7 +18,7 @@ export function PositionForm({
       <p className="eyebrow">Track a holding</p>
       <h3>Tell GrandEdge what you already own</h3>
       <p className="terminal-panel-copy">
-        Add an item, quantity, and buy price. GrandEdge will then tell you whether to hold, sell, or watch it.
+        Add an item, quantity, and buy price to receive cashout guidance.
       </p>
 
       <form className="position-form" onSubmit={onSubmit}>

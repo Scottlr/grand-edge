@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 
 import { useToggleStrategy } from "../../api/hooks";
+import { DataStatePanel } from "../../components/state/DataStatePanel";
 import { ActionPageHeader } from "../../views/ActionPageHeader";
 import type { DataState } from "../../domain/recommendation";
 import type { StrategyLabViewModel, StrategyStatus } from "../../domain/strategy";
@@ -90,9 +91,13 @@ export function StrategyLabView({
         <p className="terminal-panel-copy">
           This page is intentionally advanced. Dashboard, Buy, Sell, and Portfolio remain the default journey for everyday use.
         </p>
-        {viewModel.staleReason ? <p className="terminal-panel-copy">{viewModel.staleReason}</p> : null}
-        {errorMessage ? <p className="terminal-panel-copy">{errorMessage}</p> : null}
       </article>
+      {viewModel.staleReason ? (
+        <DataStatePanel state="stale" title="Strategy controls are paused" message={viewModel.staleReason} />
+      ) : null}
+      {errorMessage ? (
+        <DataStatePanel state="error" title="Strategy update failed" message={errorMessage} />
+      ) : null}
 
       <div className="terminal-grid">
         <div className="detailed-view-stack">

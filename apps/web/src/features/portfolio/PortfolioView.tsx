@@ -7,6 +7,7 @@ import {
 } from "../../api/hooks";
 import type { Position, Recommendation } from "../../api/types";
 import { ActionPageHeader } from "../../views/ActionPageHeader";
+import { DataStatePanel } from "../../components/state/DataStatePanel";
 import {
   riskPreferenceFromProfile,
   toPositionRequest,
@@ -140,11 +141,11 @@ export function PortfolioView({
       />
 
       {positions.length === 0 ? (
-        <article className="terminal-panel">
-          <p className="eyebrow">Portfolio</p>
-          <h3>{emptyStates.noPortfolioItems.title}</h3>
-          <p className="terminal-panel-copy">{emptyStates.noPortfolioItems.message}</p>
-        </article>
+        <DataStatePanel
+          state="empty"
+          title={emptyStates.noPortfolioItems.title}
+          message={emptyStates.noPortfolioItems.message}
+        />
       ) : (
         <>
           <PortfolioSummary summary={summary} />

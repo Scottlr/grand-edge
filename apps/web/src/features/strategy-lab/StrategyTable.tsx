@@ -56,7 +56,15 @@ export function StrategyTable({
                   aria-selected={selected}
                   className={selected ? "command-center-row-selected" : undefined}
                   key={row.strategyId}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      onSelect(row.strategyId);
+                    }
+                  }}
                   onClick={() => onSelect(row.strategyId)}
+                  role="button"
+                  tabIndex={0}
                 >
                   <td>
                     <strong>{row.displayName}</strong>
