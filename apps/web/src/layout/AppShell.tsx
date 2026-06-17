@@ -20,10 +20,10 @@ import { TopBar } from "./TopBar";
 import { useWorkspaceStore } from "../state/workspaceStore";
 import {
   LinkedItemsView,
-  SettingsView,
 } from "../views/ActionJourneyViews";
 import { CommandCenterView } from "../features/command-center/CommandCenterView";
 import { ModelAccuracyView } from "../features/model-accuracy/ModelAccuracyView";
+import { StrategyLabView } from "../features/strategy-lab/StrategyLabView";
 import {
   ItemIntelligenceView,
   RecommendationExplainerView,
@@ -194,7 +194,7 @@ export function AppShell() {
           {activeView === "accuracy" ? (
             <ModelAccuracyView recommendation={selectedRecommendationDetail ?? selectedRecommendation ?? buyRecommendation} />
           ) : null}
-          {activeView === "settings" ? <SettingsView strategies={strategies} /> : null}
+          {activeView === "settings" ? <StrategyLabView strategies={strategies} /> : null}
         </section>
       </div>
     </main>
