@@ -1,5 +1,6 @@
 import type { Recommendation } from "../../api/types";
 import { TooltipTerm } from "../../components/learn/TooltipTerm";
+import { DataStatePanel } from "../../components/state/DataStatePanel";
 import { emptyStates } from "../../content/emptyStates";
 import { simpleActionLabel } from "../../components/recommendation/recommendationFixtures";
 
@@ -35,11 +36,11 @@ export function OpportunityTable({
 
   if (stateMessage) {
     return (
-      <article className="terminal-panel">
-        <p className="eyebrow">Opportunity table</p>
-        <h3>Current actions</h3>
-        <p className="terminal-panel-copy">{stateMessage}</p>
-      </article>
+      <DataStatePanel
+        state={recommendations[0]?.dataState ?? "empty"}
+        title="Current actions"
+        message={stateMessage}
+      />
     );
   }
 
@@ -82,7 +83,15 @@ export function OpportunityTable({
                   aria-selected={isSelected}
                   className={isSelected ? "command-center-row-selected" : undefined}
                   key={recommendation.recommendationId}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      onSelectRecommendation(recommendation.recommendationId);
+                    }
+                  }}
                   onClick={() => onSelectRecommendation(recommendation.recommendationId)}
+                  role="button"
+                  tabIndex={0}
                 >
                   <td>{index + 1}</td>
                   <td>

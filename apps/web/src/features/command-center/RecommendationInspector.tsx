@@ -11,7 +11,7 @@ export function RecommendationInspector({
 }) {
   if (!recommendation) {
     return (
-      <aside className="terminal-panel command-center-inspector">
+      <aside aria-label="Recommendation inspector" className="terminal-panel command-center-inspector" tabIndex={0}>
         <p className="eyebrow">Inspector</p>
         <h3>Select a recommendation</h3>
         <p className="terminal-panel-copy">
@@ -27,7 +27,7 @@ export function RecommendationInspector({
     recommendation.predictionConfidence - recommendation.executionConfidence >= 0.2;
 
   return (
-    <aside className="terminal-panel command-center-inspector">
+    <aside aria-label="Recommendation inspector" className="terminal-panel command-center-inspector" tabIndex={0}>
       <div className="terminal-panel-header-inline">
         <div>
           <p className="eyebrow">Inspector</p>

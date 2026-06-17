@@ -282,6 +282,33 @@ summary {
   margin-top: 8px;
 }
 
+.data-state-panel {
+  display: grid;
+  gap: 10px;
+}
+
+.data-state-panel-action {
+  margin-top: 4px;
+}
+
+.data-state-panel-live {
+  border-color: color-mix(in srgb, var(--ge-accent-positive) 28%, var(--ge-border-subtle));
+}
+
+.data-state-panel-stale {
+  border-color: color-mix(in srgb, var(--ge-accent-warning) 34%, var(--ge-border-subtle));
+}
+
+.data-state-panel-degraded,
+.data-state-panel-error {
+  border-color: color-mix(in srgb, var(--ge-accent-risk) 32%, var(--ge-border-subtle));
+}
+
+.data-state-panel-loading,
+.data-state-panel-empty {
+  border-color: color-mix(in srgb, var(--ge-accent-blue) 18%, var(--ge-border-subtle));
+}
+
 .terminal-status-inline strong {
   color: var(--ge-text-primary);
 }

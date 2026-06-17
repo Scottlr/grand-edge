@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 
 export function ChartFrame({
   title,
@@ -9,15 +9,18 @@ export function ChartFrame({
   caption: string;
   children: ReactNode;
 }) {
+  const titleId = useId();
+  const captionId = useId();
+
   return (
-    <article className="terminal-panel chart-frame">
+    <article aria-describedby={captionId} aria-labelledby={titleId} className="terminal-panel chart-frame">
       <div className="terminal-panel-header-inline">
         <div>
           <p className="eyebrow">Chart</p>
-          <h3>{title}</h3>
+          <h3 id={titleId}>{title}</h3>
         </div>
       </div>
-      <p className="terminal-panel-copy">{caption}</p>
+      <p className="terminal-panel-copy" id={captionId}>{caption}</p>
       <div className="chart-surface">{children}</div>
     </article>
   );

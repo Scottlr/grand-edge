@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { GlossaryProvider } from "../components/learn/GlossaryProvider";
+import { LearnModal } from "../components/learn/LearnModal";
 import {
   allRecommendationSurfacesPassChecklist,
   recommendationSurfaceChecklists,
@@ -59,15 +60,17 @@ describe("recommendation surfaces", () => {
     ).toEqual([]);
   });
 
-  it("beginner journey can learn confidence and track an item", () => {
+  it("beginner journey can open show why confidence learn modal and track item", () => {
     const markup = render(<BuyView recommendation={recommendationMocks.live} />);
+    const learnMarkup = render(<LearnModal onOpenChange={() => undefined} open term="confidence" />);
 
     expect(markup).toContain("Show why");
     expect(markup).toContain("Learn: Confidence");
     expect(markup).toContain("Track item");
+    expect(learnMarkup).toContain("Confidence learn panel");
   });
 
-  it("intermediate journey can open linked items and simulation", () => {
+  it("intermediate journey can reach linked items and simulation", () => {
     const itemMarkup = render(
       <ItemIntelligenceView
         history={[]}
@@ -106,7 +109,7 @@ describe("recommendation surfaces", () => {
   it("portfolio surface keeps shared empty-state guidance", () => {
     const markup = render(<PortfolioView positions={[]} recommendations={[]} />);
 
-    expect(markup).toContain("Track your first item");
-    expect(markup).toContain("Add an item, quantity, and buy price.");
+    expect(markup).toContain("Track your first holding");
+    expect(markup).toContain("Add an item, quantity, and buy price to receive cashout guidance.");
   });
 });

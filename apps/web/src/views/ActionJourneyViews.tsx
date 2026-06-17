@@ -265,7 +265,7 @@ export function AccuracyView({ recommendation }: { recommendation: Recommendatio
         why={"Can I trust this? Start with confidence honesty and past accuracy before model jargon."}
         keyNumbers={headerNumbers([
           { label: "Past accuracy", value: recommendation?.accuracy?.directionalAccuracy === null || recommendation?.accuracy?.directionalAccuracy === undefined ? "Unavailable" : `${Math.round(recommendation.accuracy.directionalAccuracy * 100)}%` },
-          { label: "Calibration", value: recommendation?.accuracy ? "Available" : "Unavailable" },
+          { label: "Confidence honesty", value: recommendation?.accuracy ? "Available" : "Unavailable" },
         ])}
         actions={headerActions(["Show why", "Review confidence honesty"])}
       />

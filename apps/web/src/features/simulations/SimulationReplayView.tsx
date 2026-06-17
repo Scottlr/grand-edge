@@ -5,6 +5,7 @@ import { AccuracyStrip } from "../../charts/AccuracyStrip";
 import { ChartFrame, ChartUnavailable } from "../../charts/ChartFrame";
 import { DrawdownGraph } from "../../charts/DrawdownGraph";
 import { SimulationReplayGraph } from "../../charts/SimulationReplayGraph";
+import { DataStatePanel } from "../../components/state/DataStatePanel";
 import { chartFixtureDrawdown } from "../../charts/chartFixtures";
 import { recommendationMarkersFromVote, timePointsToPricePoints, intervalPricesToTimePoints } from "../../charts/scales";
 import { simulationModeAdvancedLabels } from "../../domain/simulation";
@@ -103,6 +104,13 @@ export function SimulationReplayView({
       />
 
       <SimulationSummary fixture={fixture} />
+      {simulations.length === 0 ? (
+        <DataStatePanel
+          state="empty"
+          title="Replay history"
+          message="No paper-trade runs are stored yet, so this view stays in setup mode until you run the first safe test."
+        />
+      ) : null}
 
       <div className="terminal-grid">
         <div className="detailed-view-stack">

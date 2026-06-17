@@ -29,12 +29,47 @@ import {
 import { SimulationReplayView } from "../features/simulations/SimulationReplayView";
 import { AccountSettingsView } from "../features/account/AccountSettingsView";
 import { PortfolioView } from "../features/portfolio/PortfolioView";
+import { DataStatePanel } from "../components/state/DataStatePanel";
+import type { DataState } from "../domain/recommendation";
 
 const EMPTY_ITEMS: Item[] = [];
 const EMPTY_RECOMMENDATIONS: Recommendation[] = [];
 const EMPTY_STRATEGIES: StrategyStatus[] = [];
 const EMPTY_POSITIONS: Position[] = [];
 const EMPTY_SIMULATIONS: SimulationRun[] = [];
+
+function deriveShellState({
+  hasData,
+  hasErrors,
+  isLoading,
+  recommendations,
+}: {
+  hasData: boolean;
+  hasErrors: boolean;
+  isLoading: boolean;
+  recommendations: Recommendation[];
+}): DataState {
+  if (isLoading && !hasData) {
+    return "loading";
+  }
+  if (hasErrors) {
+    return "degraded";
+  }
+  if (recommendations[0]?.dataState === "stale") {
+    return "stale";
+  }
+  if (recommendations[0]?.dataState === "error") {
+    return "error";
+  }
+  if (recommendations[0]?.dataState === "degraded") {
+    return "degraded";
+  }
+  if (!hasData) {
+    return "empty";
+  }
+
+  return "live";
+}
 
 export function AppShell() {
   const queryClient = useQueryClient();
@@ -106,6 +141,28 @@ export function AppShell() {
   );
   const selectedRecommendationDetail = selectedRecommendationQuery.data ?? selectedRecommendation ?? buyRecommendation ?? null;
 
+  const shellState = deriveShellState({
+    hasData:
+      items.length > 0 ||
+      recommendations.length > 0 ||
+      strategies.length > 0 ||
+      positions.length > 0 ||
+      simulations.length > 0,
+    hasErrors:
+      itemsQuery.isError ||
+      recommendationsQuery.isError ||
+      strategiesQuery.isError ||
+      positionsQuery.isError ||
+      simulationsQuery.isError,
+    isLoading:
+      itemsQuery.isLoading ||
+      recommendationsQuery.isLoading ||
+      strategiesQuery.isLoading ||
+      positionsQuery.isLoading ||
+      simulationsQuery.isLoading,
+    recommendations,
+  });
+
   const shellStateMessage =
     itemsQuery.isError ||
     recommendationsQuery.isError ||
@@ -140,16 +197,19 @@ export function AppShell() {
         />
 
         <section className="terminal-workspace">
-          <article className="terminal-panel terminal-status-banner">
-            <p className="eyebrow">Shell status</p>
-            <p>{shellStateMessage}</p>
-            {selectedRecommendation ? (
-              <p className="terminal-status-inline">
-                Selected recommendation:{" "}
-                <strong>{itemsById.get(selectedRecommendation.itemId)?.name ?? selectedRecommendation.itemId}</strong>
-              </p>
-            ) : null}
-          </article>
+          <DataStatePanel
+            state={shellState}
+            title="Shell status"
+            message={shellStateMessage}
+            action={
+              selectedRecommendation ? (
+                <p className="terminal-status-inline">
+                  Selected recommendation:{" "}
+                  <strong>{itemsById.get(selectedRecommendation.itemId)?.name ?? selectedRecommendation.itemId}</strong>
+                </p>
+              ) : undefined
+            }
+          />
 
           {activeView === "dashboard" ? (
             <CommandCenterView
