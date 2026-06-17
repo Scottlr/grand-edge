@@ -992,6 +992,30 @@ summary {
   gap: 10px;
 }
 
+.simulation-summary,
+.simulation-detail,
+.simulation-bet-list,
+.simulation-summary-grid,
+.simulation-distribution-grid,
+.simulation-mode-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.simulation-summary-grid,
+.simulation-distribution-grid,
+.simulation-mode-grid {
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.simulation-bet-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid color-mix(in srgb, var(--ge-border-subtle) 72%, transparent);
+}
+
 .timeline-list {
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
 }
@@ -1267,6 +1291,10 @@ summary {
   .detailed-item-identity,
   .position-form,
   .timeline-list {
+    grid-template-columns: 1fr;
+  }
+
+  .simulation-bet-row {
     grid-template-columns: 1fr;
   }
 }
