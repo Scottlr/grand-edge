@@ -38,7 +38,7 @@ describe("portfolio feature", () => {
   it("renders the first-holding empty state", () => {
     const markup = render(<PortfolioView positions={[]} recommendations={[]} />);
 
-    expect(markup).toContain("Track your first holding");
+    expect(markup).toContain("Track your first item");
     expect(markup).toContain(
       "Add an item, quantity, and buy price. GrandEdge will then tell you whether to hold, sell, or watch it.",
     );

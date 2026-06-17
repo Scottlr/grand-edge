@@ -1,3 +1,5 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
@@ -10,6 +12,15 @@ import { modelAccuracyFixtures, trustSummaryFixture } from "./modelAccuracyFixtu
 import { ModelAccuracyView } from "./ModelAccuracyView";
 import { selectAccuracyModel } from "./modelAccuracySelectors";
 import { TrustSummary } from "./TrustSummary";
+
+function render(node: ReactNode) {
+  const queryClient = new QueryClient();
+  return renderToStaticMarkup(
+    <QueryClientProvider client={queryClient}>
+      <GlossaryProvider>{node}</GlossaryProvider>
+    </QueryClientProvider>,
+  );
+}
 
 describe("model accuracy view", () => {
   it("uses trust language in the summary section", () => {
@@ -40,15 +51,14 @@ describe("model accuracy view", () => {
   });
 
   it("keeps Brier score hidden until advanced detail is opened", () => {
-    const closedMarkup = renderToStaticMarkup(
-      <GlossaryProvider>
-        <ModelAccuracyView recommendation={recommendationMocks.live} />
-      </GlossaryProvider>,
+    const closedMarkup = render(
+      <ModelAccuracyView recommendation={recommendationMocks.live} />,
     );
-    const openMarkup = renderToStaticMarkup(
-      <GlossaryProvider>
-        <ModelAccuracyView initialAdvancedOpen recommendation={recommendationMocks.live} />
-      </GlossaryProvider>,
+    const openMarkup = render(
+      <ModelAccuracyView
+        initialAdvancedOpen
+        recommendation={recommendationMocks.live}
+      />,
     );
 
     expect(closedMarkup).not.toContain("Brier score");
