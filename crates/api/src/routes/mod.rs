@@ -1,3 +1,4 @@
+pub mod auth;
 pub mod items;
 pub mod live;
 pub mod positions;

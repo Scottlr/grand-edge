@@ -1,10 +1,10 @@
 use chrono::Utc;
 use grand_edge_domain::{
-    Gp, Item, ItemIcon, ItemId, LatestPrice, PositionId, Probability, Quantity, Rate,
+    EmailAddress, Gp, Item, ItemIcon, ItemId, LatestPrice, PositionId, Probability, Quantity, Rate,
     Recommendation, RecommendationAction, RecommendationExplanation, RecommendationId, UserId,
     UserPosition, WikiImageSource,
 };
-use grand_edge_storage::Storage;
+use grand_edge_storage::{NewUserIdentity, Storage};
 use serde_json::json;
 use testcontainers::{GenericImage, ImageExt, core::WaitFor, runners::AsyncRunner};
 use uuid::Uuid;
@@ -154,4 +154,35 @@ async fn migrations_and_key_repositories_round_trip_under_testcontainers() {
     assert_eq!(positions_round_trip.len(), 1);
     assert_eq!(recommendations_round_trip.len(), 1);
     assert_eq!(runs_round_trip.len(), 1);
+}
+
+#[tokio::test]
+#[ignore]
+async fn auth_identity_round_trip_keeps_password_hash_only() {
+    let Some(storage) = storage_from_container().await else {
+        return;
+    };
+
+    let created = storage
+        .auth()
+        .create_user_identity(&NewUserIdentity {
+            user_id: UserId(Uuid::new_v4()),
+            email: EmailAddress::new("auth@example.com").unwrap(),
+            password_hash: "$argon2id$v=19$m=19456,t=2,p=1$fixture$fixture".to_string(),
+            display_name: Some("Auth Fixture".to_string()),
+            created_at: Utc::now(),
+        })
+        .await
+        .unwrap();
+
+    let stored = storage
+        .auth()
+        .get_user_by_email(&EmailAddress::new("auth@example.com").unwrap())
+        .await
+        .unwrap()
+        .unwrap();
+
+    assert_eq!(stored.0.user_id, created.user_id);
+    assert_ne!(stored.1, "password123");
+    assert!(stored.1.starts_with("$argon2id$"));
 }

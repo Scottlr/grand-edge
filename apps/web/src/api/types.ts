@@ -1,3 +1,11 @@
+export type {
+  AuthenticatedUser,
+  ExecutionMode,
+  LoginRequest,
+  RegisterRequest,
+  RiskProfile,
+  UpdateRiskProfileRequest,
+} from "../domain/auth";
 export type { Item, ItemIcon } from "../domain/item";
 export type {
   DataState,

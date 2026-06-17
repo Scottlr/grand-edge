@@ -4,6 +4,12 @@ use utoipa::OpenApi;
 #[openapi(
     paths(
         crate::health,
+        crate::routes::auth::register,
+        crate::routes::auth::login,
+        crate::routes::auth::logout,
+        crate::routes::auth::me,
+        crate::routes::auth::get_risk_profile,
+        crate::routes::auth::update_risk_profile,
         crate::routes::items::list_items,
         crate::routes::items::get_item,
         crate::routes::items::get_item_history,
@@ -21,6 +27,11 @@ use utoipa::OpenApi;
     ),
     components(schemas(
         crate::HealthResponse,
+        crate::routes::auth::RegisterRequestDto,
+        crate::routes::auth::LoginRequestDto,
+        crate::routes::auth::AuthenticatedUserDto,
+        crate::routes::auth::RiskProfileDto,
+        crate::routes::auth::UpdateRiskProfileRequest,
         crate::routes::items::ItemDto,
         crate::routes::items::ItemIconDto,
         crate::routes::items::IntervalDto,

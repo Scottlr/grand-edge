@@ -2,6 +2,7 @@ use axum::{
     Json,
     extract::{Path, State},
 };
+use axum_extra::extract::CookieJar;
 use chrono::{DateTime, Utc};
 use grand_edge_domain::{PositionId, UserPosition};
 use serde::{Deserialize, Serialize};
@@ -9,6 +10,7 @@ use utoipa::ToSchema;
 use uuid::Uuid;
 
 use crate::{
+    auth::require_user_id,
     errors::ApiError,
     state::{AppState, PositionUpsert},
 };
@@ -42,8 +44,10 @@ pub struct PositionDto {
 )]
 pub async fn list_positions(
     State(state): State<AppState>,
+    jar: CookieJar,
 ) -> Result<Json<Vec<PositionDto>>, ApiError> {
-    let positions = state.services.list_positions().await?;
+    let user_id = require_user_id(&state, &jar).await?;
+    let positions = state.services.list_positions(user_id).await?;
     Ok(Json(positions.into_iter().map(PositionDto::from).collect()))
 }
 
@@ -55,9 +59,14 @@ pub async fn list_positions(
 )]
 pub async fn create_position(
     State(state): State<AppState>,
+    jar: CookieJar,
     Json(request): Json<UpsertPositionRequest>,
 ) -> Result<Json<PositionDto>, ApiError> {
-    let position = state.services.create_position(request.into()).await?;
+    let user_id = require_user_id(&state, &jar).await?;
+    let position = state
+        .services
+        .create_position(user_id, request.into())
+        .await?;
     Ok(Json(PositionDto::from(position)))
 }
 
@@ -70,12 +79,14 @@ pub async fn create_position(
 )]
 pub async fn update_position(
     State(state): State<AppState>,
+    jar: CookieJar,
     Path(position_id): Path<Uuid>,
     Json(request): Json<UpsertPositionRequest>,
 ) -> Result<Json<PositionDto>, ApiError> {
+    let user_id = require_user_id(&state, &jar).await?;
     let position = state
         .services
-        .update_position(PositionId(position_id), request.into())
+        .update_position(user_id, PositionId(position_id), request.into())
         .await?
         .ok_or_else(|| ApiError::NotFound(format!("position {} was not found", position_id)))?;
     Ok(Json(PositionDto::from(position)))

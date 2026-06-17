@@ -38,5 +38,7 @@ root_dir = "ml/artifacts"
 registry_token = ""
 
 [auth]
-session_key = "local-dev-session-key"
-jwt_issuer = "grand-edge-local"
+mode = "session_cookie"
+session_secret = "local-dev-session-secret"
+session_ttl_hours = 720
+local_default_user_enabled = true

@@ -12,4 +12,6 @@ pub enum DomainValidationError {
     ProbabilityOutOfRange { field: &'static str },
     #[error("{field} must not be empty")]
     EmptyValue { field: &'static str },
+    #[error("{field} has invalid format")]
+    InvalidFormat { field: &'static str },
 }

@@ -12,6 +12,8 @@ pub enum ApiError {
     #[error("{0}")]
     NotFound(String),
     #[error("{0}")]
+    Unauthorized(String),
+    #[error("{0}")]
     Config(String),
     #[error("storage error")]
     Storage(#[from] grand_edge_storage::StorageError),
@@ -42,6 +44,7 @@ impl IntoResponse for ApiError {
         let status = match self {
             Self::BadRequest(_) | Self::Domain(_) | Self::Config(_) => StatusCode::BAD_REQUEST,
             Self::NotFound(_) => StatusCode::NOT_FOUND,
+            Self::Unauthorized(_) => StatusCode::UNAUTHORIZED,
             Self::Storage(_)
             | Self::Strategy(_)
             | Self::Simulator(_)

@@ -10,6 +10,7 @@ chrono.workspace = true
 derive_more = { version = "1", features = ["display", "from"] }
 percent-encoding = "2"
 schemars.workspace = true
+secrecy.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true

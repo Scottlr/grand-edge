@@ -1,6 +1,6 @@
 use std::{fmt, net::SocketAddr, time::Duration};
 
-use secrecy::SecretString;
+use secrecy::{ExposeSecret, SecretString};
 use serde::Deserialize;
 
 use crate::ConfigurationError;
@@ -77,8 +77,19 @@ pub struct ArtifactRuntimeConfig {
 
 #[derive(Clone, Deserialize)]
 pub struct AuthRuntimeConfig {
-    pub session_key: SecretString,
-    pub jwt_issuer: String,
+    #[serde(default = "default_auth_mode")]
+    pub mode: AuthMode,
+    pub session_secret: SecretString,
+    #[serde(default = "default_session_ttl_hours")]
+    pub session_ttl_hours: u64,
+    #[serde(default)]
+    pub local_default_user_enabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum AuthMode {
+    SessionCookie,
 }
 
 impl GrandEdgeConfig {
@@ -106,13 +117,23 @@ impl GrandEdgeConfig {
 
         validate_ingest_defaults(&self.ingest)?;
 
-        if matches!(profile, crate::loader::ConfigProfile::Production)
-            && (self.osrs_wiki.user_agent.contains("replace-me")
-                || self.auth.jwt_issuer.contains("replace-me"))
-        {
-            return Err(ConfigurationError::Invalid(
-                "production config must not use replace-me placeholders".to_string(),
-            ));
+        if matches!(profile, crate::loader::ConfigProfile::Production) {
+            if self.osrs_wiki.user_agent.contains("replace-me")
+                || self
+                    .auth
+                    .session_secret
+                    .expose_secret()
+                    .contains("replace-me")
+            {
+                return Err(ConfigurationError::Invalid(
+                    "production config must not use replace-me placeholders".to_string(),
+                ));
+            }
+            if self.auth.local_default_user_enabled || self.api.default_user_id.is_some() {
+                return Err(ConfigurationError::Invalid(
+                    "production config must not enable local default-user auth".to_string(),
+                ));
+            }
         }
 
         Ok(())
@@ -125,6 +146,14 @@ impl GrandEdgeConfig {
 
 fn default_swagger_ui_enabled() -> bool {
     true
+}
+
+fn default_auth_mode() -> AuthMode {
+    AuthMode::SessionCookie
+}
+
+fn default_session_ttl_hours() -> u64 {
+    24 * 30
 }
 
 impl OsrsWikiRuntimeConfig {
@@ -176,8 +205,13 @@ impl fmt::Debug for ArtifactRuntimeConfig {
 impl fmt::Debug for AuthRuntimeConfig {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("AuthRuntimeConfig")
-            .field("session_key", &"<redacted>")
-            .field("jwt_issuer", &self.jwt_issuer)
+            .field("mode", &self.mode)
+            .field("session_secret", &"<redacted>")
+            .field("session_ttl_hours", &self.session_ttl_hours)
+            .field(
+                "local_default_user_enabled",
+                &self.local_default_user_enabled,
+            )
             .finish()
     }
 }

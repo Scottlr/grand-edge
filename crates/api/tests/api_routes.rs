@@ -8,16 +8,17 @@ use grand_edge_api::{
     recommendations::view::{RecommendationActionDto, RecommendationDto},
     routes::{items::ItemDto, live::LiveEvent},
     state::{
-        ApiServices, AppState, LiveEventBus, PositionUpsert, SimulationRunDraft,
+        ApiServices, AppState, AuthSessionCookie, LiveEventBus, PositionUpsert, SimulationRunDraft,
         StrategyStatusRecord,
     },
 };
 use grand_edge_domain::{
-    ConfidenceBreakdown, Gp, InvalidationRule, Item, ItemIcon, ItemId, MarketRules,
-    ModelAccuracySnapshot, ModelVersion, PositionId, PriceInterval, Probability, Quantity, Rate,
-    ReasonAtom, ReasonDirection, ReasonType, Recommendation, RecommendationAction,
-    RecommendationExplanation, RecommendationId, SignalSide, StrategyId, StrategySignal,
-    StructuredRecommendationExplanation, UserId, UserPosition, WikiImageSource,
+    AuthenticatedUser, ConfidenceBreakdown, Gp, InvalidationRule, Item, ItemIcon, ItemId,
+    LoginRequest, MarketRules, ModelAccuracySnapshot, ModelVersion, PositionId, PriceInterval,
+    Probability, Quantity, Rate, ReasonAtom, ReasonDirection, ReasonType, Recommendation,
+    RecommendationAction, RecommendationExplanation, RecommendationId, RegisterRequest, SessionId,
+    SignalSide, StrategyId, StrategySignal, StructuredRecommendationExplanation, UpdateRiskProfile,
+    UserId, UserPosition, UserRiskProfile, WikiImageSource,
 };
 use grand_edge_storage::StoredSimulationRun;
 use http_body_util::BodyExt;
@@ -32,6 +33,8 @@ struct TestServices {
     strategies: Vec<StrategyStatusRecord>,
     positions: Vec<UserPosition>,
     runs: Vec<StoredSimulationRun>,
+    current_user: Option<AuthenticatedUser>,
+    risk_profile: Option<UserRiskProfile>,
 }
 
 #[async_trait]
@@ -129,17 +132,81 @@ impl ApiServices for TestServices {
         })
     }
 
-    async fn list_positions(&self) -> Result<Vec<UserPosition>, grand_edge_api::errors::ApiError> {
+    async fn register(
+        &self,
+        request: RegisterRequest,
+    ) -> Result<AuthenticatedUser, grand_edge_api::errors::ApiError> {
+        Ok(AuthenticatedUser {
+            user_id: UserId(Uuid::new_v4()),
+            email: request.email,
+            display_name: request.display_name,
+        })
+    }
+
+    async fn login(
+        &self,
+        request: LoginRequest,
+    ) -> Result<(AuthenticatedUser, AuthSessionCookie), grand_edge_api::errors::ApiError> {
+        Ok((
+            AuthenticatedUser {
+                user_id: UserId(Uuid::new_v4()),
+                email: request.email,
+                display_name: Some("Fixture".to_string()),
+            },
+            AuthSessionCookie {
+                session_id: SessionId(Uuid::new_v4()),
+            },
+        ))
+    }
+
+    async fn logout(&self, _session_id: SessionId) -> Result<(), grand_edge_api::errors::ApiError> {
+        Ok(())
+    }
+
+    async fn current_user(
+        &self,
+        _session_id: SessionId,
+    ) -> Result<Option<AuthenticatedUser>, grand_edge_api::errors::ApiError> {
+        Ok(self.current_user.clone())
+    }
+
+    async fn local_default_user(&self) -> Result<Option<UserId>, grand_edge_api::errors::ApiError> {
+        Ok(Some(UserId(Uuid::nil())))
+    }
+
+    async fn get_risk_profile(
+        &self,
+        user_id: UserId,
+    ) -> Result<UserRiskProfile, grand_edge_api::errors::ApiError> {
+        Ok(self
+            .risk_profile
+            .clone()
+            .unwrap_or_else(|| UserRiskProfile::default_for_user(user_id, Utc::now())))
+    }
+
+    async fn update_risk_profile(
+        &self,
+        user_id: UserId,
+        update: UpdateRiskProfile,
+    ) -> Result<UserRiskProfile, grand_edge_api::errors::ApiError> {
+        Ok(UserRiskProfile::from_update(user_id, update, Utc::now()).unwrap())
+    }
+
+    async fn list_positions(
+        &self,
+        _user_id: UserId,
+    ) -> Result<Vec<UserPosition>, grand_edge_api::errors::ApiError> {
         Ok(self.positions.clone())
     }
 
     async fn create_position(
         &self,
+        user_id: UserId,
         input: PositionUpsert,
     ) -> Result<UserPosition, grand_edge_api::errors::ApiError> {
         Ok(UserPosition {
             position_id: PositionId(Uuid::new_v4()),
-            user_id: UserId(Uuid::new_v4()),
+            user_id,
             item_id: ItemId(input.item_id),
             quantity: Quantity(input.quantity),
             avg_buy_price: Gp(input.avg_buy_price),
@@ -150,12 +217,13 @@ impl ApiServices for TestServices {
 
     async fn update_position(
         &self,
+        user_id: UserId,
         position_id: PositionId,
         input: PositionUpsert,
     ) -> Result<Option<UserPosition>, grand_edge_api::errors::ApiError> {
         Ok(Some(UserPosition {
             position_id,
-            user_id: UserId(Uuid::new_v4()),
+            user_id,
             item_id: ItemId(input.item_id),
             quantity: Quantity(input.quantity),
             avg_buy_price: Gp(input.avg_buy_price),
@@ -470,4 +538,80 @@ async fn live_stream_serializes_event() {
     let text = String::from_utf8(bytes.to_vec()).unwrap();
     assert!(text.contains("recommendation_updated"));
     assert!(text.contains("\"item_id\":4151"));
+}
+
+#[tokio::test]
+async fn auth_me_requires_session_cookie() {
+    let response = router(TestServices::default(), LiveEventBus::default())
+        .oneshot(
+            Request::builder()
+                .uri("/api/auth/me")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), 401);
+}
+
+#[tokio::test]
+async fn register_auth_route_returns_user_and_cookie() {
+    let response = router(TestServices::default(), LiveEventBus::default())
+        .oneshot(
+            Request::builder()
+                .method("POST")
+                .uri("/api/auth/register")
+                .header("content-type", "application/json")
+                .body(Body::from(
+                    r#"{"email":"test@example.com","password":"password123","displayName":"Tester"}"#,
+                ))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), 200);
+    assert!(response.headers().contains_key("set-cookie"));
+}
+
+#[tokio::test]
+async fn positions_me_uses_authenticated_user() {
+    let response = router(TestServices::default(), LiveEventBus::default())
+        .oneshot(
+            Request::builder()
+                .method("POST")
+                .uri("/api/users/me/positions")
+                .header("content-type", "application/json")
+                .body(Body::from(
+                    r#"{"itemId":4151,"quantity":2,"avgBuyPrice":100000,"boughtAt":null,"notes":null}"#,
+                ))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    let body = response.into_body().collect().await.unwrap().to_bytes();
+    let payload: grand_edge_api::routes::positions::PositionDto =
+        serde_json::from_slice(&body).unwrap();
+    assert_eq!(payload.user_id, Uuid::nil());
+}
+
+#[tokio::test]
+async fn risk_profile_rejects_invalid_probability_values() {
+    let response = router(TestServices::default(), LiveEventBus::default())
+        .oneshot(
+            Request::builder()
+                .method("PATCH")
+                .uri("/api/users/me/risk-profile")
+                .header("content-type", "application/json")
+                .body(Body::from(
+                    r#"{"maxGpPerItem":5000000,"maxPortfolioDrawdown":1.1,"minExpectedRoi":0.01,"minConfidence":0.5,"participationRate":0.1,"preferredExecutionMode":"conservative_instant"}"#,
+                ))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), 400);
 }
