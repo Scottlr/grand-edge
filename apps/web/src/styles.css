@@ -438,6 +438,153 @@ summary {
   gap: 18px;
 }
 
+.command-center-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.75fr) minmax(320px, 0.95fr);
+  gap: 18px;
+}
+
+.command-center-main {
+  display: grid;
+  gap: 18px;
+}
+
+.command-center-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.command-center-topcard,
+.command-center-inspector {
+  display: grid;
+  gap: 14px;
+}
+
+.command-center-topcard {
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--ge-border-subtle) 78%, transparent);
+  border-radius: calc(var(--app-card-radius, 8) * 1px);
+  background:
+    linear-gradient(180deg, rgba(22, 34, 45, 0.94), rgba(12, 19, 26, 0.98)),
+    var(--ge-surface-primary);
+  box-shadow: var(--ge-shadow-raised);
+}
+
+.command-center-topcard-head,
+.command-center-topcard-body,
+.command-center-topcard-metrics,
+.command-center-health-grid,
+.command-center-confidence-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.command-center-topcard-head {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.command-center-topcard-body {
+  grid-template-columns: 40px minmax(0, 1fr);
+  align-items: start;
+}
+
+.command-center-topcard-metrics,
+.command-center-health-grid,
+.command-center-confidence-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.command-center-item-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.command-center-item-icon,
+.command-center-item-fallback {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  border-radius: 8px;
+}
+
+.command-center-item-icon {
+  object-fit: cover;
+  border: 1px solid color-mix(in srgb, var(--ge-border-subtle) 70%, transparent);
+}
+
+.command-center-item-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--ge-accent-primary) 16%, transparent);
+  font-family: var(--app-mono-font, "IBM Plex Mono", monospace);
+  font-size: 0.78rem;
+  color: var(--ge-text-primary);
+}
+
+.command-center-table-wrap {
+  margin-top: 16px;
+  overflow-x: auto;
+}
+
+.command-center-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 860px;
+}
+
+.command-center-table th,
+.command-center-table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--ge-border-subtle) 72%, transparent);
+  text-align: left;
+  vertical-align: top;
+}
+
+.command-center-table th {
+  color: var(--ge-text-secondary);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.command-center-table tbody tr {
+  cursor: pointer;
+}
+
+.command-center-row-selected {
+  background: color-mix(in srgb, var(--ge-accent-primary) 10%, transparent);
+}
+
+.command-center-inspector {
+  position: sticky;
+  top: 24px;
+}
+
+.command-center-simulation-history,
+.command-center-simulation-list {
+  display: grid;
+  gap: 10px;
+}
+
+.command-center-simulation-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.command-center-simulation-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid color-mix(in srgb, var(--ge-border-subtle) 72%, transparent);
+}
+
 .action-hero-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -772,11 +919,16 @@ summary {
 
 @media (max-width: 1180px) {
   .terminal-shell-body,
-  .terminal-grid {
+  .terminal-grid,
+  .command-center-layout {
     grid-template-columns: 1fr;
   }
 
   .terminal-sidebar {
+    position: static;
+  }
+
+  .command-center-inspector {
     position: static;
   }
 }
@@ -799,7 +951,8 @@ summary {
   }
 
   .action-hero-grid,
-  .dashboard-card-grid {
+  .dashboard-card-grid,
+  .command-center-strip {
     grid-template-columns: 1fr;
   }
 }
@@ -830,7 +983,10 @@ summary {
   .recommendation-card-metrics,
   .confidence-meter-details,
   .advanced-definition-list,
-  .learn-reason-list {
+  .learn-reason-list,
+  .command-center-topcard-metrics,
+  .command-center-health-grid,
+  .command-center-confidence-grid {
     grid-template-columns: 1fr;
   }
 

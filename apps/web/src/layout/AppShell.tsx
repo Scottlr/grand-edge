@@ -5,13 +5,11 @@ import { getApiClient, useItems, usePositions, useRecommendations, useStrategies
 import type { Item, Position, Recommendation, SimulationRun, StrategyStatus } from "../api/types";
 import { createLiveConnection } from "../api/live";
 import { Sidebar } from "./Sidebar";
-import { TerminalGrid } from "./TerminalGrid";
 import { TopBar } from "./TopBar";
 import { useWorkspaceStore } from "../state/workspaceStore";
 import {
   AccuracyView,
   BuyView,
-  DashboardView,
   ItemsView,
   LinkedItemsView,
   PortfolioView,
@@ -19,36 +17,13 @@ import {
   SettingsView,
   SimulationsView,
 } from "../views/ActionJourneyViews";
+import { CommandCenterView } from "../features/command-center/CommandCenterView";
 
 const EMPTY_ITEMS: Item[] = [];
 const EMPTY_RECOMMENDATIONS: Recommendation[] = [];
 const EMPTY_STRATEGIES: StrategyStatus[] = [];
 const EMPTY_POSITIONS: Position[] = [];
 const EMPTY_SIMULATIONS: SimulationRun[] = [];
-
-function activeViewLabel(activeView: ReturnType<typeof useWorkspaceStore.getState>["activeView"]) {
-  switch (activeView) {
-    case "buy":
-      return "Buy";
-    case "sell":
-      return "Sell";
-    case "portfolio":
-      return "Portfolio";
-    case "items":
-      return "Items";
-    case "linkedItems":
-      return "Linked Items";
-    case "simulations":
-      return "Simulations";
-    case "accuracy":
-      return "Accuracy";
-    case "settings":
-      return "Settings";
-    case "dashboard":
-    default:
-      return "Dashboard";
-  }
-}
 
 export function AppShell() {
   const queryClient = useQueryClient();
@@ -70,7 +45,7 @@ export function AppShell() {
   const strategiesQuery = useStrategies();
   const positionsQuery = usePositions();
   const simulationsQuery = useSimulations({ limit: 10, offset: 0 });
-  const toggleStrategy = useToggleStrategy();
+  useToggleStrategy();
 
   useEffect(() => {
     const connection = createLiveConnection(queryClient, getApiClient().liveUrl(), {
@@ -159,26 +134,20 @@ export function AppShell() {
           </article>
 
           {activeView === "dashboard" ? (
-            <>
-              <DashboardView positions={positions} recommendations={recommendations} />
-              <TerminalGrid
-                activeViewLabel={activeViewLabel(activeView)}
-                itemsById={itemsById}
-                onSelectRecommendation={(recommendationId, itemId) => {
-                  selectRecommendation(recommendationId);
-                  selectItem(itemId);
-                  setActiveView("items");
-                }}
-                onToggleStrategy={(strategyId, enabled) => {
-                  void toggleStrategy.mutateAsync({ strategyId, enabled });
-                }}
-                positions={positions}
-                recommendations={recommendations}
-                simulations={simulations}
-                strategies={strategies}
-                strategyMutationPendingId={toggleStrategy.variables?.strategyId ?? null}
-              />
-            </>
+            <CommandCenterView
+              onSelectRecommendation={(recommendationId) => {
+                const selected = recommendations.find((entry) => entry.recommendationId === recommendationId);
+                selectRecommendation(recommendationId);
+                if (selected) {
+                  selectItem(selected.itemId);
+                }
+              }}
+              positions={positions}
+              recommendations={recommendations}
+              selectedRecommendationId={selectedRecommendationId}
+              simulations={simulations}
+              strategies={strategies}
+            />
           ) : null}
           {activeView === "buy" ? <BuyView recommendation={buyRecommendation} /> : null}
           {activeView === "sell" ? <SellView recommendation={sellRecommendation} /> : null}
