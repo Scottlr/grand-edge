@@ -140,11 +140,16 @@ pub enum AnalyticsCommand {
 #[derive(Debug, Clone, Subcommand)]
 pub enum ModelCommand {
     Validate {
+        #[arg(long)]
         artifact: String,
     },
     Evaluate {
+        #[arg(long)]
         strategy: String,
+        #[arg(long)]
         version: String,
+        #[arg(long)]
+        artifact: Option<String>,
     },
     Compare {
         #[arg(long = "strategy", required = true)]

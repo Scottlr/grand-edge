@@ -129,7 +129,11 @@ async fn main() -> miette::Result<()> {
                     unavailable_message("model_runtime", cli.profile, "model validate").message
                 ));
             }
-            cli::ModelCommand::Evaluate { .. } => {
+            cli::ModelCommand::Evaluate {
+                strategy: _,
+                version: _,
+                artifact: _,
+            } => {
                 return Err(miette::miette!(
                     "{}",
                     unavailable_message("model_runtime", cli.profile, "model evaluate").message

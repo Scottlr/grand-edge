@@ -4,6 +4,35 @@ Grand Edge is a Rust-backed OSRS Grand Exchange recommendation and paper-trading
 terminal. This repository currently contains the buildable foundation for the
 workspace, local development commands, and the initial frontend shell.
 
+## Run Locally
+
+No Docker:
+
+- `pwsh ./scripts/dev/grandedge-dev.ps1 doctor`
+- `pwsh ./scripts/dev/grandedge-dev.ps1 no-docker`
+
+Docker:
+
+- `pwsh ./scripts/dev/grandedge-dev.ps1 docker-up`
+
+ML artifact loop:
+
+- `pwsh ./scripts/dev/grandedge-dev.ps1 ml-export-fixture`
+- `pwsh ./scripts/dev/grandedge-dev.ps1 ml-validate-artifact`
+
+Runbooks:
+
+- [No-Docker local setup](/C:/Users/scott/OneDrive/Documents/grand-edge/docs/running/no-docker.md:1)
+- [Docker setup](/C:/Users/scott/OneDrive/Documents/grand-edge/docs/running/docker.md:1)
+- [ML workflow](/C:/Users/scott/OneDrive/Documents/grand-edge/docs/running/ml-workflow.md:1)
+- [Troubleshooting](/C:/Users/scott/OneDrive/Documents/grand-edge/docs/running/troubleshooting.md:1)
+
+Expected URLs:
+
+- API health: `http://localhost:3000/health`
+- OpenAPI: `http://localhost:3000/api/openapi.json`
+- Frontend: `http://localhost:5173`
+
 ## Architecture
 
 - `crates/domain`: shared cross-crate contracts and future newtypes.
@@ -19,34 +48,14 @@ workspace, local development commands, and the initial frontend shell.
 
 ## Run Modes
 
-Two local development paths are supported in this scaffold:
+Two local development paths are supported:
 
 1. No-Docker local setup: Rust, Node.js, and a reachable Postgres instance run
    on the host or on infrastructure you can access directly.
-2. Docker-assisted local setup: Docker Compose starts only Postgres for local
-   development convenience. Application containers are intentionally deferred to
-   T045.
+2. Docker-assisted local setup: Docker Compose can run Postgres, the Rust API,
+   and the Vite frontend together for local verification.
 
-Docker is optional in this task. It is not the only supported workflow.
-
-## No-Docker Local Setup
-
-1. Install Rust with `rustup`, Node.js 20+, npm, and ensure a Postgres 16+
-   instance is reachable.
-2. Copy `configs/local.example.toml` to `configs/local.toml` for file-based local
-   overrides, then copy `.env.example` to `.env` only if you need environment
-   overrides such as `DATABASE_URL`.
-3. Run `cargo check --workspace` from the repository root.
-4. Run `npm --prefix apps/web install`.
-5. Run `npm --prefix apps/web run dev` to start the frontend shell.
-
-## Docker-Assisted Local Setup
-
-1. Install Docker Desktop or another Docker engine with Compose support.
-2. Start Postgres with `docker compose -f docker-compose.dev.yml up -d`.
-3. Copy `.env.example` to `.env` and keep `DATABASE_URL` pointed at
-   `localhost:5432` unless you changed the Compose ports.
-4. Run backend and frontend commands on the host using the sections below.
+See the detailed runbooks under `docs/running/` for exact steps.
 
 ## Backend Commands
 
@@ -57,10 +66,16 @@ Docker is optional in this task. It is not the only supported workflow.
 - `cargo bench --workspace --no-run`
 - `cargo run -p grand-edge-api`
 - `cargo run -p grand-edge-xtask -- --help`
+- `cargo run -p grand-edge-xtask -- doctor`
+- `cargo run -p grand-edge-xtask -- db migrate`
+- `cargo run -p grand-edge-xtask -- server run --profile local`
+- `cargo run -p grand-edge-xtask -- ingest latest --profile local`
 - `cargo run -p grand-edge-xtask -- config print --profile local`
 - `cargo run -p grand-edge-xtask -- schema export --out schemas`
 - `cargo run -p grand-edge-xtask -- analytics export-features --from 2026-01-01 --to 2026-02-01 --out reports/datasets/jan --include-raw-interval-candles`
 - `cargo run -p grand-edge-xtask -- backtest report --run-id <uuid> --out reports/backtests/<id>`
+- `cargo run -p grand-edge-xtask -- model validate --artifact ml/artifacts/fixture`
+- `cargo run -p grand-edge-xtask -- model evaluate --strategy gbm_ranker_v1 --version 2026-06-16.1 --artifact ml/artifacts/gbm_ranker_v1/2026-06-16.1`
 
 The API binary is a placeholder today and will be expanded in later tasks.
 
@@ -89,9 +104,10 @@ The shared runtime configuration now layers `configs/default.toml`, optional
 overrides from `.env.example`:
 
 - `DATABASE_URL`
+- `GRAND_EDGE_PROFILE`
 - `GRAND_EDGE_USER_AGENT`
 - `OSRS_WIKI_BASE_URL`
-- `INGEST_POLL_SECONDS`
+- `GRAND_EDGE__API__BIND_ADDR`
 - `VITE_API_BASE_URL`
 
 `GRAND_EDGE_USER_AGENT` must remain descriptive and include the project name and
