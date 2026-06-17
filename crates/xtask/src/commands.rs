@@ -328,10 +328,10 @@ fn tool_available(name: &str) -> &'static str {
 mod tests {
     use std::sync::{Mutex, OnceLock};
 
-    use clap::CommandFactory;
+    use clap::{CommandFactory, Parser};
     use grand_edge_configuration::{ConfigProfile, load_config};
 
-    use crate::cli::Cli;
+    use crate::cli::{Cli, Command, ModelCommand};
 
     use super::{config_print, doctor_summary};
 
@@ -359,6 +359,59 @@ mod tests {
             "server",
         ] {
             assert!(help.contains(expected), "{expected} missing from help");
+        }
+    }
+
+    #[test]
+    fn cli_accepts_model_artifact_flags() {
+        let cli = Cli::try_parse_from([
+            "grandedge",
+            "model",
+            "validate",
+            "--artifact",
+            "ml/artifacts/fixture",
+        ])
+        .expect("validate should parse");
+
+        match cli.command {
+            Command::Model {
+                command: ModelCommand::Validate { artifact },
+            } => {
+                assert_eq!(artifact, "ml/artifacts/fixture");
+            }
+            other => panic!("unexpected command: {other:?}"),
+        }
+
+        let cli = Cli::try_parse_from([
+            "grandedge",
+            "model",
+            "evaluate",
+            "--strategy",
+            "gbm_ranker_v1",
+            "--version",
+            "2026-06-16.1",
+            "--artifact",
+            "ml/artifacts/gbm_ranker_v1/2026-06-16.1",
+        ])
+        .expect("evaluate should parse");
+
+        match cli.command {
+            Command::Model {
+                command:
+                    ModelCommand::Evaluate {
+                        strategy,
+                        version,
+                        artifact,
+                    },
+            } => {
+                assert_eq!(strategy, "gbm_ranker_v1");
+                assert_eq!(version, "2026-06-16.1");
+                assert_eq!(
+                    artifact.as_deref(),
+                    Some("ml/artifacts/gbm_ranker_v1/2026-06-16.1")
+                );
+            }
+            other => panic!("unexpected command: {other:?}"),
         }
     }
 

@@ -7,3 +7,39 @@ services:
       POSTGRES_PASSWORD: grand_edge
     ports:
       - "5432:5432"
+    volumes:
+      - grandedge-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U grand_edge -d grand_edge"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      GRAND_EDGE_PROFILE: local
+      DATABASE_URL: postgres://grand_edge:grand_edge@postgres:5432/grand_edge
+      GRAND_EDGE__API__BIND_ADDR: 0.0.0.0:3000
+      GRAND_EDGE_USER_AGENT: GrandEdge/0.1 (OSRS Grand Exchange recommendation terminal; contact: scott.rangeley@outlook.com)
+    ports:
+      - "3000:3000"
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+    environment:
+      VITE_API_BASE_URL: http://localhost:3000
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
+
+volumes:
+  grandedge-postgres:

@@ -1,35 +1,53 @@
 # ML Workflow
 
-Grand Edge keeps Python on the research side of the boundary.
+## Boundary: Rust production, Python research
 
-The intended handoff is:
+Grand Edge keeps Python on the research side of the boundary. Python may export
+artifacts and run offline experiments, but the live API, recommender, simulator,
+strategy registry, ingestion jobs, and dashboard stream stay Rust-only.
 
-1. Rust ingestion, storage, and feature jobs produce normalized market data and
-   `features_v1` exports.
-2. Python loads those exported datasets, computes documented research labels such
-   as `future_tax_adjusted_return_6h` and `future_actionable_return_6h`, and
-   trains offline experiments.
-3. Python exports an artifact bundle with `model.onnx`, `model_card.json`,
-   `feature_schema.json`, and `calibration.json`.
-4. Rust validates artifact metadata and feature-schema compatibility before any
-   runtime model serving work. The current Rust-side source of truth is
-   [crates/strategies/src/artifacts.rs](/C:/Users/scott/OneDrive/Documents/grand-edge/crates/strategies/src/artifacts.rs:1).
+## Export a Rust dataset
 
-Use the research workspace with `uv`:
+```powershell
+cargo run -p grand-edge-xtask -- analytics export-features --from 2026-01-01 --to 2026-02-01 --out reports/datasets/jan --include-raw-interval-candles
+```
+
+If Windows App Control blocks `grandedge.exe` on your machine, run the doctor
+script first and fix the policy before relying on local runtime commands:
+
+```powershell
+pwsh ./scripts/dev/grandedge-dev.ps1 doctor
+```
+
+## Train or export a fixture artifact in Python
 
 ```powershell
 uv sync --project ml
-uv run --project ml ruff check .
-uv run --project ml pytest
-uv run --project ml python -m grandedge_ml.export --help
-uv run --project ml python -m grandedge_ml.export --output-root ml/artifacts
+uv run --project ml python -m grandedge_ml.export --fixture --out ml/artifacts/fixture
+uv run --project ml python -m grandedge_ml.export --dataset reports/datasets/jan --out ml/artifacts/gbm_ranker_v1/2026-06-16.1
 ```
 
-Optional training libraries remain opt-in:
+## Validate the artifact in Rust
 
 ```powershell
-uv sync --project ml --extra training
+cargo run -p grand-edge-xtask -- model validate --artifact ml/artifacts/gbm_ranker_v1/2026-06-16.1
 ```
 
-This document is the interim workflow for T021. The broader local/Docker/ML
-runbook remains owned by T045.
+## Evaluate/backtest the artifact in Rust
+
+```powershell
+cargo run -p grand-edge-xtask -- model evaluate --strategy gbm_ranker_v1 --version 2026-06-16.1 --artifact ml/artifacts/gbm_ranker_v1/2026-06-16.1
+```
+
+## Load artifact-backed strategies
+
+Artifact-backed strategies stay disabled by default until the exported contract
+validates and the runtime accepts the artifact. The frontend Strategy Lab makes
+that lock state visible instead of implying the model is live.
+
+## What not to do
+
+- Do not start Python from the API server.
+- Do not make the recommender or simulator import Python code.
+- Do not treat research notebooks as production runtime entrypoints.
+- Do not bypass Rust artifact validation just because Python export succeeded.
