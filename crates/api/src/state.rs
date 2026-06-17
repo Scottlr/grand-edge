@@ -53,6 +53,13 @@ pub struct AuthSessionCookie {
     pub session_id: SessionId,
 }
 
+#[derive(Debug, Clone)]
+pub struct RecommendationEvidenceBundle {
+    pub record: grand_edge_storage::RecommendationEvidenceRecord,
+    pub item: Option<Item>,
+    pub reason_performance: Vec<grand_edge_domain::ReasonOutcomeSummary>,
+}
+
 #[async_trait]
 pub trait ApiServices: Send + Sync {
     async fn list_items(&self, limit: i64, offset: i64) -> Result<Vec<Item>, ApiError>;
@@ -75,6 +82,10 @@ pub trait ApiServices: Send + Sync {
         &self,
         recommendation_id: grand_edge_domain::RecommendationId,
     ) -> Result<Option<Recommendation>, ApiError>;
+    async fn get_recommendation_evidence(
+        &self,
+        recommendation_id: grand_edge_domain::RecommendationId,
+    ) -> Result<Option<RecommendationEvidenceBundle>, ApiError>;
     async fn list_strategies(&self) -> Result<Vec<StrategyStatusRecord>, ApiError>;
     async fn patch_strategy(
         &self,
@@ -303,6 +314,65 @@ impl ApiServices for RuntimeServices {
             .recommendations()
             .get_recommendation(recommendation_id)
             .await?)
+    }
+
+    async fn get_recommendation_evidence(
+        &self,
+        recommendation_id: grand_edge_domain::RecommendationId,
+    ) -> Result<Option<RecommendationEvidenceBundle>, ApiError> {
+        let Some(record) = self
+            .storage
+            .evidence()
+            .evidence_for_recommendation(recommendation_id)
+            .await?
+        else {
+            return Ok(None);
+        };
+
+        let item = self
+            .storage
+            .items()
+            .get_item(record.recommendation.item_id)
+            .await?;
+        let model_version = record
+            .recommendation
+            .explanation
+            .accuracy_snapshot
+            .as_ref()
+            .map(|snapshot| snapshot.model_version.0.clone())
+            .or_else(|| {
+                record
+                    .recommendation
+                    .explanation
+                    .strategy_votes
+                    .first()
+                    .map(|vote| vote.model_version.0.clone())
+            });
+
+        let mut reason_performance = Vec::new();
+        if let Some(model_version) = model_version {
+            for atom in &record
+                .recommendation
+                .explanation
+                .structured_explanation
+                .reason_atoms
+            {
+                let mut summaries = self
+                    .storage
+                    .reason_outcomes()
+                    .list_reason_outcomes(atom.reason_type, &atom.reason_key, &model_version)
+                    .await?;
+                if let Some(summary) = summaries.drain(..).find(|summary| summary.publishable) {
+                    reason_performance.push(summary);
+                }
+            }
+        }
+
+        Ok(Some(RecommendationEvidenceBundle {
+            record,
+            item,
+            reason_performance,
+        }))
     }
 
     async fn list_strategies(&self) -> Result<Vec<StrategyStatusRecord>, ApiError> {

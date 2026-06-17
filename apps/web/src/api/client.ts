@@ -8,6 +8,7 @@ import type {
   PatchStrategyRequest,
   Position,
   Recommendation,
+  RecommendationEvidence,
   RegisterRequest,
   RiskProfile,
   SimulationRun,
@@ -109,6 +110,10 @@ export class ApiClient {
 
   async getRecommendationExplanation(id: string): Promise<Recommendation> {
     return this.request<Recommendation>(`/api/recommendations/${id}/explanation`);
+  }
+
+  async getRecommendationEvidence(id: string): Promise<RecommendationEvidence> {
+    return this.request<RecommendationEvidence>(`/api/recommendations/${id}/evidence`);
   }
 
   async getStrategies(): Promise<StrategyStatus[]> {

@@ -34,7 +34,10 @@ pub struct RecommendationGraphLinkSummary {
     pub relation_type: String,
     pub source_item_id: i64,
     pub target_item_id: i64,
+    pub edge_id: Option<Uuid>,
+    pub event_id: Option<Uuid>,
     pub weight: Option<f64>,
+    pub explanation: serde_json::Value,
 }
 
 #[derive(Clone)]
@@ -191,8 +194,24 @@ impl EvidenceRepository {
         .fetch_optional(&self.pool)
         .await?;
 
+        let graph_links = sqlx::query(
+            r#"
+            SELECT
+                edge_id,
+                event_id,
+                contribution_weight,
+                explanation
+            FROM recommendation_graph_links
+            WHERE recommendation_id = $1
+            ORDER BY graph_version ASC, link_id ASC
+            "#,
+        )
+        .bind(recommendation_id.0)
+        .fetch_all(&self.pool)
+        .await?;
+
         Ok(Some(RecommendationEvidenceRecord {
-            graph: graph_from_explanation(&recommendation.explanation),
+            graph: graph_from_explanation(&recommendation.explanation, graph_links),
             recommendation,
             linked_predictions,
             outcome: outcome
@@ -305,14 +324,43 @@ fn row_to_linked_prediction(
 
 fn graph_from_explanation(
     explanation: &RecommendationExplanation,
+    rows: Vec<sqlx::postgres::PgRow>,
 ) -> Option<RecommendationGraphEvidence> {
     let structured: &StructuredRecommendationExplanation = &explanation.structured_explanation;
 
-    let graph_version = structured.graph_version.clone()?;
+    let graph_version = structured
+        .graph_version
+        .clone()
+        .or_else(|| explanation.graph_version.clone())?;
+    let graph_links = rows
+        .into_iter()
+        .map(|row| RecommendationGraphLinkSummary {
+            relation_type: explanation_value(&row, "edge_type")
+                .unwrap_or_else(|| "linked".to_string()),
+            source_item_id: explanation_i64(&row, "source_item_id").unwrap_or_default(),
+            target_item_id: explanation_i64(&row, "target_item_id").unwrap_or_default(),
+            edge_id: row.try_get("edge_id").ok(),
+            event_id: row.try_get("event_id").ok(),
+            weight: row.try_get("contribution_weight").ok(),
+            explanation: row
+                .try_get::<serde_json::Value, _>("explanation")
+                .unwrap_or(serde_json::Value::Null),
+        })
+        .collect();
     Some(RecommendationGraphEvidence {
         graph_version,
-        graph_links: Vec::new(),
+        graph_links,
     })
+}
+
+fn explanation_value(row: &sqlx::postgres::PgRow, key: &str) -> Option<String> {
+    let explanation = row.try_get::<serde_json::Value, _>("explanation").ok()?;
+    explanation.get(key)?.as_str().map(str::to_string)
+}
+
+fn explanation_i64(row: &sqlx::postgres::PgRow, key: &str) -> Option<i64> {
+    let explanation = row.try_get::<serde_json::Value, _>("explanation").ok()?;
+    explanation.get(key)?.as_i64()
 }
 
 fn prediction_interval_from_row(

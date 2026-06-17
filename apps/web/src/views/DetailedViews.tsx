@@ -15,6 +15,7 @@ import { PriceEdgeRibbon } from "../charts/PriceEdgeRibbon";
 import { RegimeTimeline } from "../charts/RegimeTimeline";
 import { SimulationReplayGraph } from "../charts/SimulationReplayGraph";
 import { SpreadRiver } from "../charts/SpreadRiver";
+import { EvidenceTrailView } from "../features/evidence/EvidenceTrailView";
 import { chartFixtureDrawdown } from "../charts/chartFixtures";
 import { intervalPricesToTimePoints, recommendationMarkersFromVote, timePointsToPricePoints } from "../charts/scales";
 import { ActionPageHeader } from "./ActionPageHeader";
@@ -230,6 +231,7 @@ export function RecommendationExplainerView({ recommendation }: { recommendation
             riskLabel={recommendationRiskLabel(recommendation)}
             strategyVotes={recommendation.strategyVotes}
           />
+          <EvidenceTrailView compact recommendationId={recommendation.recommendationId} />
         </>
       ) : (
         <article className="terminal-panel">

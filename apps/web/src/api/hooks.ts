@@ -14,6 +14,7 @@ import type {
   LoginRequest,
   Position,
   Recommendation,
+  RecommendationEvidence,
   RegisterRequest,
   RiskProfile,
   SimulationRun,
@@ -102,6 +103,18 @@ export function useRecommendationExplanation(
       ? queryKeys.recommendationExplanation(recommendationId)
       : ["recommendationExplanation", "idle"],
     queryFn: () => apiClient.getRecommendationExplanation(recommendationId ?? ""),
+    enabled: recommendationId !== null,
+  });
+}
+
+export function useRecommendationEvidence(
+  recommendationId: string | null,
+): UseQueryResult<RecommendationEvidence> {
+  return useQuery({
+    queryKey: recommendationId
+      ? queryKeys.recommendationEvidence(recommendationId)
+      : ["recommendationEvidence", "idle"],
+    queryFn: () => apiClient.getRecommendationEvidence(recommendationId ?? ""),
     enabled: recommendationId !== null,
   });
 }
