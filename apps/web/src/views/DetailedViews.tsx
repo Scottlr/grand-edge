@@ -7,12 +7,16 @@ import { glossaryTermsForRecommendation, simpleActionLabel } from "../components
 import { AccuracyStrip } from "../charts/AccuracyStrip";
 import { BetReplayTrack } from "../charts/BetReplayTrack";
 import { ChartFrame, ChartUnavailable } from "../charts/ChartFrame";
+import { DrawdownGraph } from "../charts/DrawdownGraph";
 import { LiquidityHeatstream } from "../charts/LiquidityHeatstream";
 import { ModelVoteStackChart } from "../charts/ModelVoteStackChart";
+import { OverlayControls } from "../charts/OverlayControls";
 import { PriceEdgeRibbon } from "../charts/PriceEdgeRibbon";
 import { RegimeTimeline } from "../charts/RegimeTimeline";
+import { SimulationReplayGraph } from "../charts/SimulationReplayGraph";
 import { SpreadRiver } from "../charts/SpreadRiver";
-import { intervalPricesToTimePoints } from "../charts/scales";
+import { chartFixtureDrawdown } from "../charts/chartFixtures";
+import { intervalPricesToTimePoints, recommendationMarkersFromVote, timePointsToPricePoints } from "../charts/scales";
 import { ActionPageHeader } from "./ActionPageHeader";
 
 function recommendationRiskLabel(recommendation: Recommendation) {
@@ -86,6 +90,7 @@ export function ItemIntelligenceView({
   history: IntervalPrice[];
 }) {
   const points = intervalPricesToTimePoints(history);
+  const pricePoints = timePointsToPricePoints(points);
   const itemName = item?.name ?? recommendation?.itemName;
 
   return (
@@ -117,23 +122,33 @@ export function ItemIntelligenceView({
       </article>
 
       <div className="terminal-grid">
-        <ChartFrame caption="High, mid, and low price lanes from stored interval history." title="Price edge ribbon">
-          {points.length > 0 ? <PriceEdgeRibbon points={points} /> : <ChartUnavailable message="No interval history yet." />}
+        <ChartFrame caption="Current price, likely price range, and suggested action levels from stored interval history." title="Current price path">
+          {pricePoints.length > 0 ? (
+            <>
+              <PriceEdgeRibbon markers={recommendation?.strategyVotes[0] ?? null} points={pricePoints} />
+              <OverlayControls />
+            </>
+          ) : (
+            <ChartUnavailable message="No interval history yet." />
+          )}
         </ChartFrame>
-        <ChartFrame caption="Observed spread widens and tightens over time." title="Spread river">
-          {points.length > 0 ? <SpreadRiver points={points} /> : <ChartUnavailable message="Spread history is unavailable." />}
+        <ChartFrame caption="Spread tightens and widens over time without faking missing values." title="Spread">
+          {pricePoints.length > 0 ? <SpreadRiver points={pricePoints} /> : <ChartUnavailable message="Spread history is unavailable." />}
         </ChartFrame>
-        <ChartFrame caption="Higher opacity means more observed liquidity in the stored snapshots." title="Liquidity heatstream">
-          {points.length > 0 ? <LiquidityHeatstream points={points} /> : <ChartUnavailable message="Volume snapshots are unavailable." />}
+        <ChartFrame caption="Higher opacity means more observed activity in the stored snapshots." title="Trading ease">
+          {pricePoints.length > 0 ? <LiquidityHeatstream points={pricePoints} /> : <ChartUnavailable message="Volume snapshots are unavailable." />}
         </ChartFrame>
-        <ChartFrame caption="Each strategy vote stays visible instead of collapsing into one opaque score." title="Model vote stack">
+        <ChartFrame caption="Each method view stays visible instead of collapsing into one opaque score." title="Advanced method views">
           {recommendation ? <ModelVoteStackChart votes={recommendation.strategyVotes} /> : <ChartUnavailable message="No strategy votes yet." />}
         </ChartFrame>
-        <ChartFrame caption="Data quality, trade realism, and agreement labels set the current regime." title="Regime timeline">
+        <ChartFrame caption="Data quality, trade realism, and agreement labels set the current market mood." title="Market mood">
           <RegimeTimeline recommendation={recommendation} />
         </ChartFrame>
-        <ChartFrame caption="Recent directional accuracy stays visible beside the current recommendation." title="Accuracy strip">
+        <ChartFrame caption="Recent directional accuracy stays visible beside the current recommendation." title="Recent hit rate">
           <AccuracyStrip accuracy={recommendation?.accuracy?.directionalAccuracy} />
+        </ChartFrame>
+        <ChartFrame caption="The likely price range stays honest about uncertainty instead of pretending one exact target." title="Likely price range">
+          <ChartUnavailable message="No likely price range is available yet." />
         </ChartFrame>
       </div>
     </section>
@@ -351,11 +366,22 @@ export function SimulationReplayView({
       />
 
       <div className="terminal-grid">
-        <ChartFrame caption="The underlying item path stays visible beside replay outcomes." title="Replay market path">
-          {points.length > 0 ? <PriceEdgeRibbon points={points} /> : <ChartUnavailable message="No price path is available for this replay yet." />}
+        <ChartFrame caption="The underlying item path stays visible beside replay outcomes." title="Current price path">
+          {points.length > 0 ? (
+            <SimulationReplayGraph
+              markers={recommendationMarkersFromVote(recommendation?.strategyVotes[0])}
+              points={timePointsToPricePoints(points)}
+              replayLabels={simulations.map((run, index) => `Replay ${index + 1}: ${run.status}`)}
+            />
+          ) : (
+            <ChartUnavailable message="No price path is available for this replay yet." />
+          )}
         </ChartFrame>
-        <ChartFrame caption="Replay outcomes stay readable as distinct runs instead of one hidden average." title="Bet replay track">
+        <ChartFrame caption="Replay outcomes stay readable as distinct runs instead of one hidden average." title="Past test trades">
           <BetReplayTrack recommendation={recommendation} simulations={simulations} />
+        </ChartFrame>
+        <ChartFrame caption="Worst temporary drop stays visible even when a replay later recovers." title="Worst temporary drop">
+          <DrawdownGraph points={chartFixtureDrawdown} />
         </ChartFrame>
       </div>
     </section>

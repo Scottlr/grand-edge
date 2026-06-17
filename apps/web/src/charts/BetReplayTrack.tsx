@@ -8,7 +8,7 @@ export function BetReplayTrack({
   simulations: SimulationRun[];
 }) {
   return (
-    <div aria-label="Bet replay track" className="timeline-list">
+    <div aria-label="Past test trades" className="timeline-list">
       {simulations.length === 0 ? (
         <span className="timeline-chip">No replay runs yet</span>
       ) : (
@@ -19,7 +19,7 @@ export function BetReplayTrack({
         ))
       )}
       {recommendation?.strategyVotes[0]?.targetExit !== null && recommendation?.strategyVotes[0]?.targetExit !== undefined ? (
-        <span className="timeline-chip">Target exit {recommendation.strategyVotes[0].targetExit} gp</span>
+        <span className="timeline-chip">Suggested sell {recommendation.strategyVotes[0].targetExit} gp</span>
       ) : null}
     </div>
   );
