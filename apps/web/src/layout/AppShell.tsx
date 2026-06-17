@@ -1,7 +1,18 @@
 import { useEffect, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { getApiClient, useItems, usePositions, useRecommendations, useStrategies, useToggleStrategy, useSimulations } from "../api/hooks";
+import {
+  getApiClient,
+  useItem,
+  useItemHistory,
+  useItems,
+  usePositions,
+  useRecommendationExplanation,
+  useRecommendations,
+  useStrategies,
+  useToggleStrategy,
+  useSimulations,
+} from "../api/hooks";
 import type { Item, Position, Recommendation, SimulationRun, StrategyStatus } from "../api/types";
 import { createLiveConnection } from "../api/live";
 import { Sidebar } from "./Sidebar";
@@ -9,15 +20,16 @@ import { TopBar } from "./TopBar";
 import { useWorkspaceStore } from "../state/workspaceStore";
 import {
   AccuracyView,
-  BuyView,
-  ItemsView,
   LinkedItemsView,
-  PortfolioView,
-  SellView,
   SettingsView,
-  SimulationsView,
 } from "../views/ActionJourneyViews";
 import { CommandCenterView } from "../features/command-center/CommandCenterView";
+import {
+  ItemIntelligenceView,
+  RecommendationExplainerView,
+  SimulationReplayView,
+  TerminalPortfolioView,
+} from "../views/DetailedViews";
 
 const EMPTY_ITEMS: Item[] = [];
 const EMPTY_RECOMMENDATIONS: Recommendation[] = [];
@@ -45,6 +57,9 @@ export function AppShell() {
   const strategiesQuery = useStrategies();
   const positionsQuery = usePositions();
   const simulationsQuery = useSimulations({ limit: 10, offset: 0 });
+  const selectedItemQuery = useItem(selectedItemId);
+  const selectedItemHistoryQuery = useItemHistory(selectedItemId, { interval: "1h", limit: 48 });
+  const selectedRecommendationQuery = useRecommendationExplanation(selectedRecommendationId);
   useToggleStrategy();
 
   useEffect(() => {
@@ -61,6 +76,8 @@ export function AppShell() {
   const strategies = strategiesQuery.data ?? EMPTY_STRATEGIES;
   const positions = positionsQuery.data ?? EMPTY_POSITIONS;
   const simulations = simulationsQuery.data ?? EMPTY_SIMULATIONS;
+  const selectedItem = selectedItemQuery.data ?? null;
+  const selectedItemHistory = selectedItemHistoryQuery.data ?? [];
 
   const itemsById = useMemo(
     () =>
@@ -88,6 +105,7 @@ export function AppShell() {
     () => recommendations.find((entry) => entry.action === "cashout") ?? null,
     [recommendations],
   );
+  const selectedRecommendationDetail = selectedRecommendationQuery.data ?? selectedRecommendation ?? buyRecommendation ?? null;
 
   const shellStateMessage =
     itemsQuery.isError ||
@@ -101,6 +119,7 @@ export function AppShell() {
   return (
     <main className="terminal-shell">
       <TopBar
+        activeView={activeView}
         liveConnectionState={liveConnectionState}
         recommendationCount={recommendations.length}
         simulationCount={simulations.length}
@@ -149,14 +168,29 @@ export function AppShell() {
               strategies={strategies}
             />
           ) : null}
-          {activeView === "buy" ? <BuyView recommendation={buyRecommendation} /> : null}
-          {activeView === "sell" ? <SellView recommendation={sellRecommendation} /> : null}
+          {activeView === "buy" ? <RecommendationExplainerView recommendation={buyRecommendation} /> : null}
+          {activeView === "sell" ? <RecommendationExplainerView recommendation={sellRecommendation} /> : null}
           {activeView === "portfolio" ? (
-            <PortfolioView positions={positions} recommendation={sellRecommendation ?? selectedRecommendation} />
+            <TerminalPortfolioView
+              positions={positions}
+              recommendation={sellRecommendation ?? selectedRecommendationDetail}
+            />
           ) : null}
-          {activeView === "items" ? <ItemsView recommendation={selectedRecommendation ?? buyRecommendation} /> : null}
+          {activeView === "items" ? (
+            <ItemIntelligenceView
+              history={selectedItemHistory}
+              item={selectedItem}
+              recommendation={selectedRecommendationDetail}
+            />
+          ) : null}
           {activeView === "linkedItems" ? <LinkedItemsView /> : null}
-          {activeView === "simulations" ? <SimulationsView simulations={simulations} /> : null}
+          {activeView === "simulations" ? (
+            <SimulationReplayView
+              history={selectedItemHistory}
+              recommendation={selectedRecommendationDetail}
+              simulations={simulations}
+            />
+          ) : null}
           {activeView === "accuracy" ? <AccuracyView recommendation={selectedRecommendation ?? buyRecommendation} /> : null}
           {activeView === "settings" ? <SettingsView strategies={strategies} /> : null}
         </section>
