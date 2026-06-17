@@ -1,5 +1,6 @@
 import type { Recommendation } from "../../api/types";
 import { TooltipTerm } from "../../components/learn/TooltipTerm";
+import { emptyStates } from "../../content/emptyStates";
 import { simpleActionLabel } from "../../components/recommendation/recommendationFixtures";
 
 export type OpportunityTableProps = {
@@ -11,7 +12,7 @@ export type OpportunityTableProps = {
 function dataStateMessage(recommendations: Recommendation[]) {
   const first = recommendations[0];
   if (!first) {
-    return "No strong buys right now. GrandEdge is waiting because current opportunities do not look good enough after tax, spread, and trade realism checks.";
+    return `${emptyStates.noBuyRecommendations.title}. ${emptyStates.noBuyRecommendations.message}`;
   }
   if (first.dataState === "stale") {
     return "Data is stale. Recommendations are paused until fresh prices arrive.";

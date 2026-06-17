@@ -18,6 +18,7 @@ import {
   firstPortfolioRecommendation,
   recommendationToHoldingAction,
 } from "./portfolioFixtures";
+import { emptyStates } from "../../content/emptyStates";
 import { HoldingActionCard } from "./HoldingActionCard";
 import { PortfolioSummary } from "./PortfolioSummary";
 import { PositionForm } from "./PositionForm";
@@ -141,10 +142,8 @@ export function PortfolioView({
       {positions.length === 0 ? (
         <article className="terminal-panel">
           <p className="eyebrow">Portfolio</p>
-          <h3>Track your first holding</h3>
-          <p className="terminal-panel-copy">
-            Add an item, quantity, and buy price. GrandEdge will then tell you whether to hold, sell, or watch it.
-          </p>
+          <h3>{emptyStates.noPortfolioItems.title}</h3>
+          <p className="terminal-panel-copy">{emptyStates.noPortfolioItems.message}</p>
         </article>
       ) : (
         <>
