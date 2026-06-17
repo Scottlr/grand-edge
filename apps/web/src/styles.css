@@ -432,6 +432,170 @@ summary {
   color: var(--ge-text-secondary);
 }
 
+.recommendation-card,
+.confidence-meter,
+.evidence-stack,
+.advanced-panel,
+.model-vote-row,
+.learn-reason-button {
+  border: 1px solid color-mix(in srgb, var(--ge-border-subtle) 78%, transparent);
+  border-radius: calc(var(--app-card-radius, 8) * 1px);
+}
+
+.recommendation-card {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+  background: color-mix(in srgb, var(--ge-surface-secondary) 90%, transparent);
+}
+
+.recommendation-card-header,
+.confidence-meter-header,
+.model-vote-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.recommendation-card-action,
+.confidence-state {
+  display: inline-flex;
+  align-items: center;
+  min-height: calc(var(--app-min-touch-target, 40) * 1px);
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: color-mix(in srgb, var(--ge-accent-blue) 16%, transparent);
+}
+
+.recommendation-card-metrics,
+.confidence-meter-details,
+.advanced-definition-list {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.recommendation-card-metrics strong,
+.advanced-definition-list dd {
+  display: block;
+  margin-top: 6px;
+}
+
+.evidence-stack,
+.confidence-meter,
+.advanced-panel,
+.model-vote-row {
+  padding: 12px;
+  background: color-mix(in srgb, var(--ge-surface-primary) 88%, transparent);
+}
+
+.evidence-primary,
+.evidence-reason-list li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.evidence-reasons summary,
+.advanced-panel-summary {
+  cursor: pointer;
+  color: var(--ge-accent-blue);
+}
+
+.evidence-reason-list,
+.learn-reason-list,
+.invalidation-rules,
+.model-vote-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.evidence-reason-list,
+.invalidation-rules,
+.learn-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.learn-reason-list {
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.learn-reason-button {
+  min-height: calc(var(--app-min-touch-target, 40) * 1px);
+  padding: 10px 12px;
+  appearance: none;
+  background: color-mix(in srgb, var(--ge-accent-blue) 10%, transparent);
+  color: var(--ge-text-primary);
+  cursor: pointer;
+  text-align: left;
+}
+
+.confidence-meter-bar {
+  height: 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ge-border-subtle) 70%, transparent);
+  overflow: hidden;
+}
+
+.confidence-meter-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--ge-accent-warning), var(--ge-accent-positive));
+}
+
+.confidence-meter-details,
+.advanced-definition-list {
+  margin: 0;
+}
+
+.confidence-meter-details dt,
+.advanced-definition-list dt {
+  color: var(--ge-text-secondary);
+}
+
+.confidence-meter-details dd,
+.advanced-definition-list dd {
+  margin: 6px 0 0;
+  color: var(--ge-text-primary);
+}
+
+.confidence-state-weak {
+  background: color-mix(in srgb, var(--ge-accent-risk) 20%, transparent);
+}
+
+.confidence-state-uncertain {
+  background: color-mix(in srgb, var(--ge-accent-warning) 20%, transparent);
+}
+
+.confidence-state-usable,
+.confidence-state-strong,
+.confidence-state-rare {
+  background: color-mix(in srgb, var(--ge-accent-positive) 18%, transparent);
+}
+
+.advanced-panel-body {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.invalidation-rules li,
+.model-vote-row p,
+.evidence-empty {
+  color: var(--ge-text-secondary);
+}
+
+.invalidation-rules li span {
+  display: block;
+  margin-top: 4px;
+}
+
 .learn-term {
   position: relative;
   display: inline-flex;
@@ -596,6 +760,13 @@ summary {
   }
 
   .terminal-command-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .recommendation-card-metrics,
+  .confidence-meter-details,
+  .advanced-definition-list,
+  .learn-reason-list {
     grid-template-columns: 1fr;
   }
 

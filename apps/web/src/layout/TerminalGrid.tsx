@@ -1,5 +1,11 @@
 import { AlertTriangle, ArrowDownToLine, ArrowUpToLine, CircleOff, Gauge, Layers3, ShieldAlert } from "lucide-react";
 
+import { RecommendationCard } from "../components/cards/RecommendationCard";
+import {
+  actionToneForRecommendation,
+  glossaryTermsForRecommendation,
+  simpleActionLabel,
+} from "../components/recommendation/recommendationFixtures";
 import { TooltipTerm } from "../components/learn/TooltipTerm";
 import type {
   Position,
@@ -31,20 +37,7 @@ type CommandCard = {
 };
 
 function recommendationTone(action: RecommendationAction) {
-  switch (action) {
-    case "buy":
-    case "add":
-      return "buy";
-    case "cashout":
-      return "sell";
-    case "watch":
-      return "wait";
-    case "avoid":
-      return "avoid";
-    case "hold":
-    default:
-      return "hold";
-  }
+  return actionToneForRecommendation(action);
 }
 
 function formatNumber(value: number | null) {
@@ -197,16 +190,36 @@ export function TerminalGrid({
                   </div>
                   <h3>{recommendation ? itemsById.get(recommendation.itemId)?.name ?? "Unknown item" : "No matching recommendation"}</h3>
                   <p>{card.summary}</p>
-                  <div className="terminal-command-metrics">
-                    <div>
-                      <span className="eyebrow">Net GP</span>
-                      <strong>{recommendation ? formatNumber(recommendation.expectedNetGp) : "Unavailable"}</strong>
+                  {recommendation ? (
+                    <RecommendationCard
+                      action={simpleActionLabel(recommendation)}
+                      confidence={recommendation.recommendationConfidence}
+                      confidenceBreakdown={recommendation.confidenceBreakdown}
+                      dataState={recommendation.dataState}
+                      expectedNetGp={recommendation.expectedNetGp}
+                      expectedRoi={recommendation.expectedRoi}
+                      horizonLabel={`${Math.round(recommendation.horizonSeconds / 3600)}h window`}
+                      invalidationRules={recommendation.invalidationRules}
+                      itemName={itemsById.get(recommendation.itemId)?.name ?? "Unknown item"}
+                      learnTermIds={glossaryTermsForRecommendation(recommendation)}
+                      modelAgreement={recommendation.modelAgreement}
+                      primaryReason={recommendation.primaryReason}
+                      reasons={recommendation.reasons}
+                      riskLabel={recommendation.riskLabel === "low" || recommendation.riskLabel === "medium" || recommendation.riskLabel === "high" ? recommendation.riskLabel : "unknown"}
+                      strategyVotes={recommendation.strategyVotes}
+                    />
+                  ) : (
+                    <div className="terminal-command-metrics">
+                      <div>
+                        <span className="eyebrow">Net GP</span>
+                        <strong>{formatNumber(null)}</strong>
+                      </div>
+                      <div>
+                        <span className="eyebrow">Action</span>
+                        <strong>NONE</strong>
+                      </div>
                     </div>
-                    <div>
-                      <span className="eyebrow">Action</span>
-                      <strong>{recommendation ? recommendation.action.toUpperCase() : "NONE"}</strong>
-                    </div>
-                  </div>
+                  )}
                   <button
                     className="terminal-action-button"
                     disabled={!recommendation}
