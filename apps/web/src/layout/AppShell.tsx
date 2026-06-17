@@ -19,11 +19,11 @@ import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
 import { useWorkspaceStore } from "../state/workspaceStore";
 import {
-  AccuracyView,
   LinkedItemsView,
   SettingsView,
 } from "../views/ActionJourneyViews";
 import { CommandCenterView } from "../features/command-center/CommandCenterView";
+import { ModelAccuracyView } from "../features/model-accuracy/ModelAccuracyView";
 import {
   ItemIntelligenceView,
   RecommendationExplainerView,
@@ -191,7 +191,9 @@ export function AppShell() {
               simulations={simulations}
             />
           ) : null}
-          {activeView === "accuracy" ? <AccuracyView recommendation={selectedRecommendation ?? buyRecommendation} /> : null}
+          {activeView === "accuracy" ? (
+            <ModelAccuracyView recommendation={selectedRecommendationDetail ?? selectedRecommendation ?? buyRecommendation} />
+          ) : null}
           {activeView === "settings" ? <SettingsView strategies={strategies} /> : null}
         </section>
       </div>
