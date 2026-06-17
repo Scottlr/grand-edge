@@ -1,5 +1,6 @@
 import { AlertTriangle, ArrowDownToLine, ArrowUpToLine, CircleOff, Gauge, Layers3, ShieldAlert } from "lucide-react";
 
+import { TooltipTerm } from "../components/learn/TooltipTerm";
 import type {
   Position,
   Recommendation,
@@ -171,7 +172,9 @@ export function TerminalGrid({
             </div>
             <p className="terminal-panel-copy">
               Command-center tiles stay backend-led. This shell derives ordering from existing recommendation
-              fields and marks unavailable views honestly until later trust and explainer contracts land.
+              fields and marks unavailable views honestly until later trust and explainer contracts land. Low{" "}
+              <TooltipTerm term="executionConfidence">trade realism</TooltipTerm> should keep users in
+              wait-and-watch mode instead of sounding certain.
             </p>
           </div>
 

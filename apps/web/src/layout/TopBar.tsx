@@ -1,6 +1,7 @@
 import { Activity, Bell, Database, RefreshCcw, Wifi, WifiOff } from "lucide-react";
 
 import type { LiveConnectionState } from "../state/workspaceStore";
+import { TooltipTerm } from "../components/learn/TooltipTerm";
 
 type TopBarProps = {
   liveConnectionState: LiveConnectionState;
@@ -37,9 +38,9 @@ export function TopBar({
         <p className="eyebrow">Grand Edge terminal</p>
         <h1>Command center</h1>
         <p className="terminal-topbar-detail">
-          Scan backend-owned recommendations, strategy availability, positions, and
-          simulations from one operational surface. Richer trust DTOs and deeper
-          analytical views land in later slices.
+          Scan backend-owned recommendations, method availability, positions, and{" "}
+          <TooltipTerm term="simulation">simulations</TooltipTerm> from one operational surface. Richer
+          trust details and deeper analytical views land in later slices.
         </p>
       </div>
 
