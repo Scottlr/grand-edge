@@ -9,14 +9,12 @@ import {
 import { createApiClient } from "./client";
 import { queryKeys } from "./queryKeys";
 import type {
-  AuthenticatedUser,
   Interval,
   LoginRequest,
   Position,
   Recommendation,
   RecommendationEvidence,
   RegisterRequest,
-  RiskProfile,
   SimulationRun,
   StrategyStatus,
   UpdateRiskProfileRequest,

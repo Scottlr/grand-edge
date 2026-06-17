@@ -18,10 +18,8 @@ import { createLiveConnection } from "../api/live";
 import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
 import { useWorkspaceStore } from "../state/workspaceStore";
-import {
-  LinkedItemsView,
-} from "../views/ActionJourneyViews";
 import { CommandCenterView } from "../features/command-center/CommandCenterView";
+import { LinkedItemsView } from "../features/linked-items/LinkedItemsView";
 import { ModelAccuracyView } from "../features/model-accuracy/ModelAccuracyView";
 import { StrategyLabView } from "../features/strategy-lab/StrategyLabView";
 import {
@@ -181,7 +179,9 @@ export function AppShell() {
               recommendation={selectedRecommendationDetail}
             />
           ) : null}
-          {activeView === "linkedItems" ? <LinkedItemsView /> : null}
+          {activeView === "linkedItems" ? (
+            <LinkedItemsView recommendation={selectedRecommendationDetail ?? selectedRecommendation ?? buyRecommendation} />
+          ) : null}
           {activeView === "simulations" ? (
             <SimulationReplayView
               history={selectedItemHistory}
