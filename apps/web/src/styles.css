@@ -432,6 +432,65 @@ summary {
   color: var(--ge-text-secondary);
 }
 
+.action-view-stack,
+.action-hero-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.action-hero-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.action-page-header {
+  display: grid;
+  gap: 14px;
+}
+
+.action-page-heading,
+.action-page-actions,
+.action-page-keynumbers {
+  display: flex;
+  gap: 12px;
+}
+
+.action-page-heading {
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.action-page-confidence {
+  display: grid;
+  gap: 6px;
+  justify-items: end;
+}
+
+.action-page-keynumbers {
+  flex-wrap: wrap;
+}
+
+.action-keynumber,
+.dashboard-mini-card {
+  min-width: 140px;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--ge-border-subtle) 78%, transparent);
+  border-radius: calc(var(--app-card-radius, 8) * 1px);
+  background: color-mix(in srgb, var(--ge-surface-secondary) 90%, transparent);
+}
+
+.action-keynumber strong,
+.dashboard-mini-card strong {
+  display: block;
+  margin-top: 6px;
+}
+
+.dashboard-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
 .recommendation-card,
 .confidence-meter,
 .evidence-stack,
@@ -738,6 +797,11 @@ summary {
   .terminal-card-grid {
     grid-template-columns: 1fr;
   }
+
+  .action-hero-grid,
+  .dashboard-card-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 640px) {
@@ -768,6 +832,17 @@ summary {
   .advanced-definition-list,
   .learn-reason-list {
     grid-template-columns: 1fr;
+  }
+
+  .action-page-heading,
+  .action-page-actions,
+  .action-page-keynumbers {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .action-page-confidence {
+    justify-items: start;
   }
 
   .learn-modal-backdrop {

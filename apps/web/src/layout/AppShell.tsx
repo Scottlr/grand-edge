@@ -8,6 +8,17 @@ import { Sidebar } from "./Sidebar";
 import { TerminalGrid } from "./TerminalGrid";
 import { TopBar } from "./TopBar";
 import { useWorkspaceStore } from "../state/workspaceStore";
+import {
+  AccuracyView,
+  BuyView,
+  DashboardView,
+  ItemsView,
+  LinkedItemsView,
+  PortfolioView,
+  SellView,
+  SettingsView,
+  SimulationsView,
+} from "../views/ActionJourneyViews";
 
 const EMPTY_ITEMS: Item[] = [];
 const EMPTY_RECOMMENDATIONS: Recommendation[] = [];
@@ -17,21 +28,25 @@ const EMPTY_SIMULATIONS: SimulationRun[] = [];
 
 function activeViewLabel(activeView: ReturnType<typeof useWorkspaceStore.getState>["activeView"]) {
   switch (activeView) {
-    case "item":
-      return "Item focus";
-    case "strategies":
-      return "Strategies";
+    case "buy":
+      return "Buy";
+    case "sell":
+      return "Sell";
     case "portfolio":
       return "Portfolio";
+    case "items":
+      return "Items";
+    case "linkedItems":
+      return "Linked Items";
     case "simulations":
       return "Simulations";
-    case "explainer":
-      return "Explainer";
+    case "accuracy":
+      return "Accuracy";
     case "settings":
       return "Settings";
-    case "command":
+    case "dashboard":
     default:
-      return "Command center";
+      return "Dashboard";
   }
 }
 
@@ -90,6 +105,14 @@ export function AppShell() {
     () => recommendations.find((entry) => entry.recommendationId === selectedRecommendationId) ?? null,
     [recommendations, selectedRecommendationId],
   );
+  const buyRecommendation = useMemo(
+    () => recommendations.find((entry) => entry.action === "buy" || entry.action === "add") ?? null,
+    [recommendations],
+  );
+  const sellRecommendation = useMemo(
+    () => recommendations.find((entry) => entry.action === "cashout") ?? null,
+    [recommendations],
+  );
 
   const shellStateMessage =
     itemsQuery.isError ||
@@ -117,7 +140,7 @@ export function AppShell() {
           selectedItemId={selectedItemId}
           onSelectItem={(itemId) => {
             selectItem(itemId);
-            setActiveView("item");
+            setActiveView("items");
           }}
           onSelectView={setActiveView}
           onToggleCollapsed={toggleSidebar}
@@ -135,23 +158,38 @@ export function AppShell() {
             ) : null}
           </article>
 
-          <TerminalGrid
-            activeViewLabel={activeViewLabel(activeView)}
-            itemsById={itemsById}
-            onSelectRecommendation={(recommendationId, itemId) => {
-              selectRecommendation(recommendationId);
-              selectItem(itemId);
-              setActiveView("explainer");
-            }}
-            onToggleStrategy={(strategyId, enabled) => {
-              void toggleStrategy.mutateAsync({ strategyId, enabled });
-            }}
-            positions={positions}
-            recommendations={recommendations}
-            simulations={simulations}
-            strategies={strategies}
-            strategyMutationPendingId={toggleStrategy.variables?.strategyId ?? null}
-          />
+          {activeView === "dashboard" ? (
+            <>
+              <DashboardView positions={positions} recommendations={recommendations} />
+              <TerminalGrid
+                activeViewLabel={activeViewLabel(activeView)}
+                itemsById={itemsById}
+                onSelectRecommendation={(recommendationId, itemId) => {
+                  selectRecommendation(recommendationId);
+                  selectItem(itemId);
+                  setActiveView("items");
+                }}
+                onToggleStrategy={(strategyId, enabled) => {
+                  void toggleStrategy.mutateAsync({ strategyId, enabled });
+                }}
+                positions={positions}
+                recommendations={recommendations}
+                simulations={simulations}
+                strategies={strategies}
+                strategyMutationPendingId={toggleStrategy.variables?.strategyId ?? null}
+              />
+            </>
+          ) : null}
+          {activeView === "buy" ? <BuyView recommendation={buyRecommendation} /> : null}
+          {activeView === "sell" ? <SellView recommendation={sellRecommendation} /> : null}
+          {activeView === "portfolio" ? (
+            <PortfolioView positions={positions} recommendation={sellRecommendation ?? selectedRecommendation} />
+          ) : null}
+          {activeView === "items" ? <ItemsView recommendation={selectedRecommendation ?? buyRecommendation} /> : null}
+          {activeView === "linkedItems" ? <LinkedItemsView /> : null}
+          {activeView === "simulations" ? <SimulationsView simulations={simulations} /> : null}
+          {activeView === "accuracy" ? <AccuracyView recommendation={selectedRecommendation ?? buyRecommendation} /> : null}
+          {activeView === "settings" ? <SettingsView strategies={strategies} /> : null}
         </section>
       </div>
     </main>
