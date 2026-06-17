@@ -6,6 +6,7 @@ export const queryKeys = {
   recommendationsPrefix: () => ["recommendations"] as const,
   recommendations: (params: unknown) => ["recommendations", params] as const,
   recommendationExplanation: (id: string) => ["recommendationExplanation", id] as const,
+  recommendationEvidence: (id: string) => ["recommendationEvidence", id] as const,
   strategies: () => ["strategies"] as const,
   positions: () => ["positions"] as const,
   simulationsPrefix: () => ["simulations"] as const,

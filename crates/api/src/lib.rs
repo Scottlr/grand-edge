@@ -2,6 +2,7 @@ pub mod app;
 pub mod auth;
 pub mod config;
 pub mod errors;
+pub mod evidence;
 pub mod market;
 pub mod model_accuracy;
 pub mod openapi;

@@ -52,6 +52,10 @@ pub fn build_router(
             "/api/recommendations/{id}/explanation",
             get(routes::recommendations::get_recommendation_explanation),
         )
+        .route(
+            "/api/recommendations/{id}/evidence",
+            get(routes::evidence::get_recommendation_evidence),
+        )
         .route("/api/strategies", get(routes::strategies::list_strategies))
         .route(
             "/api/strategies/{id}",

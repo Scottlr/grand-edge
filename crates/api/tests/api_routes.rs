@@ -89,6 +89,107 @@ impl ApiServices for TestServices {
             .cloned())
     }
 
+    async fn get_recommendation_evidence(
+        &self,
+        recommendation_id: RecommendationId,
+    ) -> Result<
+        Option<grand_edge_api::state::RecommendationEvidenceBundle>,
+        grand_edge_api::errors::ApiError,
+    > {
+        let Some(recommendation) = self
+            .recommendations
+            .iter()
+            .find(|recommendation| recommendation.recommendation_id == recommendation_id)
+            .cloned()
+        else {
+            return Ok(None);
+        };
+
+        let snapshot = grand_edge_domain::FeatureSnapshot {
+            feature_snapshot_id: Uuid::new_v4(),
+            item_id: recommendation.item_id,
+            as_of: recommendation.as_of,
+            feature_set_version: "features_v1".to_string(),
+            graph_version: recommendation.explanation.graph_version.clone(),
+            source_window_start: recommendation.as_of,
+            source_window_end: recommendation.as_of,
+            features: serde_json::Map::from_iter([(
+                "spread_pct".to_string(),
+                serde_json::json!(0.02),
+            )]),
+            created_at: recommendation.as_of,
+        };
+        let prediction = grand_edge_domain::Prediction {
+            prediction_id: grand_edge_domain::PredictionId(Uuid::new_v4()),
+            feature_snapshot_id: snapshot.feature_snapshot_id,
+            item_id: recommendation.item_id,
+            as_of: recommendation.as_of,
+            horizon_secs: grand_edge_domain::HorizonSecs(3600),
+            model_id: StrategyId("spread_edge_v1".to_string()),
+            model_version: ModelVersion("v1".to_string()),
+            predicted_direction: grand_edge_domain::PredictionDirection::Up,
+            predicted_return: Some(Rate::new(0.03).unwrap()),
+            confidence: Probability::new(0.8).unwrap(),
+            prediction_interval: None,
+            explanation: serde_json::json!({
+                "artifact_hash": "artifact://spread_edge_v1/v1",
+                "feature_schema_hash": "sha256:test"
+            }),
+            created_at: recommendation.as_of,
+        };
+
+        Ok(Some(grand_edge_api::state::RecommendationEvidenceBundle {
+            record: grand_edge_storage::RecommendationEvidenceRecord {
+                recommendation: recommendation.clone(),
+                linked_predictions: vec![grand_edge_storage::LinkedPredictionRecord {
+                    prediction,
+                    feature_snapshot: snapshot,
+                    contribution_weight: 1.0,
+                }],
+                outcome: None,
+                graph: recommendation
+                    .explanation
+                    .graph_version
+                    .as_ref()
+                    .map(
+                        |graph_version| grand_edge_storage::RecommendationGraphEvidence {
+                            graph_version: graph_version.clone(),
+                            graph_links: vec![grand_edge_storage::RecommendationGraphLinkSummary {
+                                relation_type: "ingredient_of".to_string(),
+                                source_item_id: 11840,
+                                target_item_id: recommendation.item_id.0,
+                                edge_id: Some(Uuid::new_v4()),
+                                event_id: None,
+                                weight: Some(0.8),
+                                explanation: serde_json::json!({"edge_type": "ingredient_of"}),
+                            }],
+                        },
+                    ),
+            },
+            item: self
+                .items
+                .iter()
+                .find(|item| item.item_id == recommendation.item_id)
+                .cloned(),
+            reason_performance: vec![grand_edge_domain::ReasonOutcomeSummary {
+                reason_type: ReasonType::DataQualityCheck,
+                reason_key: "data_quality:freshness_completeness".to_string(),
+                model_version: ModelVersion("v1".to_string()),
+                recommendation_action: RecommendationAction::Buy,
+                execution_mode: None,
+                confidence_bucket: None,
+                window_start: recommendation.as_of,
+                window_end: recommendation.as_of,
+                sample_size: 12,
+                publishable: true,
+                win_rate: Some(Probability::new(0.66).unwrap()),
+                avg_actual_return: Some(Rate::new(0.02).unwrap()),
+                avg_net_gp: Some(Gp(1200)),
+                calibration_error: Some(0.08),
+            }],
+        }))
+    }
+
     async fn list_strategies(
         &self,
     ) -> Result<Vec<StrategyStatusRecord>, grand_edge_api::errors::ApiError> {
@@ -437,6 +538,60 @@ async fn items_route_preserves_apostrophe_icon_encoding() {
         item.icon.unwrap().cdn_url,
         "https://oldschool.runescape.wiki/images/Chef%27s_hat.png"
     );
+}
+
+#[tokio::test]
+async fn get_recommendation_evidence_returns_full_chain() {
+    let recommendation = recommendation_fixture();
+    let item = item_fixture(
+        "Chef's hat.png",
+        "https://oldschool.runescape.wiki/images/Chef%27s_hat.png",
+    );
+    let response = router(
+        TestServices {
+            items: vec![item],
+            recommendations: vec![recommendation.clone()],
+            ..Default::default()
+        },
+        LiveEventBus::default(),
+    )
+    .oneshot(
+        Request::builder()
+            .uri(format!(
+                "/api/recommendations/{}/evidence",
+                recommendation.recommendation_id.0
+            ))
+            .body(Body::empty())
+            .unwrap(),
+    )
+    .await
+    .unwrap();
+
+    assert_eq!(response.status(), 200);
+    let body = response.into_body().collect().await.unwrap().to_bytes();
+    let payload: serde_json::Value = serde_json::from_slice(&body).unwrap();
+    assert_eq!(
+        payload["recommendationId"],
+        recommendation.recommendation_id.0.to_string()
+    );
+    assert_eq!(payload["stages"][0]["label"], "Market data");
+    assert_eq!(payload["predictions"][0]["modelId"], "spread_edge_v1");
+    assert_eq!(payload["reasonPerformance"][0]["sampleSize"], 12);
+}
+
+#[tokio::test]
+async fn get_recommendation_evidence_404s_for_unknown_id() {
+    let response = router(TestServices::default(), LiveEventBus::default())
+        .oneshot(
+            Request::builder()
+                .uri(format!("/api/recommendations/{}/evidence", Uuid::new_v4()))
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), 404);
 }
 
 #[tokio::test]

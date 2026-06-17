@@ -31,6 +31,11 @@ export type {
   StrategyStatus,
   StrategyVoteDto as StrategySignal,
 } from "../domain/strategy";
+export type {
+  RecommendationEvidence,
+  EvidenceStage,
+  ModelCardRef,
+} from "../domain/evidence";
 
 export type Interval = "5m" | "1h" | "6h" | "24h";
 

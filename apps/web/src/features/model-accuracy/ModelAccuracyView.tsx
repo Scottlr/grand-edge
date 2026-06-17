@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 
 import type { Recommendation } from "../../api/types";
+import { useRecommendationEvidence } from "../../api/hooks";
 import { ActionPageHeader } from "../../views/ActionPageHeader";
 import { accuracyStatusForModel } from "../../domain/modelAccuracy";
 import { ExpandableAdvancedPanel } from "../../components/disclosure/ExpandableAdvancedPanel";
@@ -8,6 +9,7 @@ import { AccuracyStatus } from "./AccuracyStatus";
 import { AccuracyFilters } from "./AccuracyFilters";
 import { CalibrationPanel } from "./CalibrationPanel";
 import { MetricSummaryGrid } from "./MetricSummaryGrid";
+import { ModelCardPanel } from "./ModelCardPanel";
 import { modelAccuracyFixtures, trustSummaryFixture } from "./modelAccuracyFixtures";
 import { selectAccuracyModel } from "./modelAccuracySelectors";
 import { TrustSummary } from "./TrustSummary";
@@ -61,6 +63,7 @@ export function ModelAccuracyView({
   initialAdvancedOpen?: boolean;
 }) {
   const allModels = useMemo(() => modelAccuracyFixtures, []);
+  const evidenceQuery = useRecommendationEvidence(recommendation?.recommendationId ?? null);
   const [selectedStrategyId, setSelectedStrategyId] = useState(allModels[0]?.strategyId ?? "");
   const [selectedWindowLabel, setSelectedWindowLabel] = useState<"7d" | "30d" | "all">("7d");
   const [advancedOpen, setAdvancedOpen] = useState(initialAdvancedOpen);
@@ -147,6 +150,7 @@ export function ModelAccuracyView({
               </div>
             </div>
           </article>
+          <ModelCardPanel modelCards={evidenceQuery.data?.modelCards ?? []} />
         </div>
       </div>
     </section>
